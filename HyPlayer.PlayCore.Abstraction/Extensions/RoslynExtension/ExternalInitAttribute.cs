@@ -15,7 +15,7 @@ namespace System.Runtime.CompilerServices
     /// </summary>
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    internal static class IsExternalInit
+    public static class IsExternalInit
     {
     }
 }

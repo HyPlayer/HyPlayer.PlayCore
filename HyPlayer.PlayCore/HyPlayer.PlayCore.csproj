@@ -8,11 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\HyPlayer.PlayCore.Abstraction\HyPlayer.PlayCore.Abstraction.csproj"/>
+        <ProjectReference Include="..\HyPlayer.PlayCore.Abstraction\HyPlayer.PlayCore.Abstraction.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Depository.Abstraction" Version="1.1.0"/>
+        <PackageReference Include="AsyncAwaitBestPractices" Version="6.0.6" />
+        <PackageReference Include="Depository.Abstraction" Version="1.1.0" />
     </ItemGroup>
 
 </Project>

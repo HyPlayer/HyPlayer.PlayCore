@@ -2,8 +2,8 @@
 
 namespace HyPlayer.PlayCore.Abstraction.Models.Notifications;
 
-public class SongAppendNotification : NotificationBase
+public class SongRangeAppendedNotification : NotificationBase
 {
-    public required SingleSongBase AppendedSong { get; set; }
     public required int Index { get; set; }
+    public required List<SingleSongBase> AppendedSongs { get; set; }
 }

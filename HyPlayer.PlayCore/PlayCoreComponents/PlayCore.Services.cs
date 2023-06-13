@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.ObjectModel;
+using AsyncAwaitBestPractices;
 using Depository.Abstraction.Enums;
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models;
@@ -70,6 +71,7 @@ public partial class Chopin :
         IEnumerable<PlayListControllerBase> playListControllers,
         IDepository depository)
     {
+        SafeFireAndForgetExtensions.Initialize(false);
         _depository = depository;
         AudioServices =
             new(
