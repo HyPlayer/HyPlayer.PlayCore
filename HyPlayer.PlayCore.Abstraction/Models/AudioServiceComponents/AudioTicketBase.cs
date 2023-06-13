@@ -16,5 +16,5 @@ public enum AudioTicketStatus
     Playing,
     Paused,
     Stopped,
-    Failed
+    Failed,
 }

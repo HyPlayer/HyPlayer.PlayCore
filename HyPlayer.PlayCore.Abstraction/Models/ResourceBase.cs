@@ -20,5 +20,5 @@ public enum ResourceType
     Text,
     Video,
     Audio,
-    Binary
+    Binary,
 }

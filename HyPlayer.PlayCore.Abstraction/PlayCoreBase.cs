@@ -6,8 +6,10 @@ using HyPlayer.PlayCore.Abstraction.Models.Songs;
 
 namespace HyPlayer.PlayCore.Abstraction;
 
-public abstract class PlayCoreBase : IPlayCoreService, IPlayCorePlaylistModification,
-    IPlayCorePlayerModification, IPlayCorePlayPositionModification
+public abstract class PlayCoreBase : IPlayCoreService,
+                                     IPlayCorePlaylistModification,
+                                     IPlayCorePlayerModification,
+                                     IPlayCorePlayPositionModification
 
 {
     public ReadOnlyCollection<AudioServiceBase>? AudioServices { get; private set; }
@@ -15,7 +17,7 @@ public abstract class PlayCoreBase : IPlayCoreService, IPlayCorePlaylistModifica
     public ReadOnlyCollection<PlayListControllerBase>? PlayListControllers { get; private set; }
     public AudioServiceBase? CurrentAudioService { get; private set; }
     public PlayListControllerBase? CurrentPlayListController { get; private set; }
-    
+
     public SingleSongBase? CurrentSong { get; private set; }
     public SongContainerBase? CurrentSongContainer { get; private set; }
     public ObservableCollection<SingleSongBase>? SongList { get; private set; }

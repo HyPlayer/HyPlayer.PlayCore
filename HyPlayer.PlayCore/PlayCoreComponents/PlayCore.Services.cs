@@ -55,14 +55,14 @@ public partial class Chopin :
     private AudioServiceBase? _currentAudioService;
     private PlayListControllerBase? _currentPlayListController;
 
-    private static readonly DependencyDescription AudioServiceDescription =
-        new DependencyDescription(typeof(AudioServiceBase), DependencyLifetime.Singleton);
+    private static readonly DependencyDescription _audioServiceDescription =
+        new(typeof(AudioServiceBase), DependencyLifetime.Singleton);
 
-    private static readonly DependencyDescription ProviderDescription =
-        new DependencyDescription(typeof(ProviderBase), DependencyLifetime.Singleton);
+    private static readonly DependencyDescription _providerDescription =
+        new(typeof(ProviderBase), DependencyLifetime.Singleton);
 
-    private static readonly DependencyDescription PlayListControllerDescription =
-        new DependencyDescription(typeof(PlayListControllerBase), DependencyLifetime.Singleton);
+    private static readonly DependencyDescription _playListControllerDescription =
+        new(typeof(PlayListControllerBase), DependencyLifetime.Singleton);
 
     public Chopin(
         IEnumerable<AudioServiceBase> audioServices,
@@ -72,97 +72,102 @@ public partial class Chopin :
     {
         _depository = depository;
         AudioServices =
-            new ReadOnlyCollection<AudioServiceBase>(
+            new(
                 new ObservableCollection<AudioServiceBase>(audioServices.ToList()));
         MusicProviders =
-            new ReadOnlyCollection<ProviderBase>(
+            new(
                 new ObservableCollection<ProviderBase>(providers.ToList()));
         PlayListControllers =
-            new ReadOnlyCollection<PlayListControllerBase>(
+            new(
                 new ObservableCollection<PlayListControllerBase>(playListControllers.ToList()));
     }
 
     public override async Task RegisterAudioService(Type serviceType)
     {
         if (await _depository.GetDependencyAsync(typeof(AudioServiceBase)) is null)
-            await _depository.AddDependencyAsync(AudioServiceDescription);
-        await _depository.AddRelationAsync(AudioServiceDescription, new DependencyRelation(serviceType));
+            await _depository.AddDependencyAsync(_audioServiceDescription);
+        await _depository.AddRelationAsync(_audioServiceDescription, new(serviceType));
     }
 
     public override async Task RegisterMusicProvider(Type serviceType)
     {
         if (await _depository.GetDependencyAsync(typeof(ProviderBase)) is null)
-            await _depository.AddDependencyAsync(ProviderDescription);
-        await _depository.AddRelationAsync(ProviderDescription, new DependencyRelation(serviceType));
+            await _depository.AddDependencyAsync(_providerDescription);
+        await _depository.AddRelationAsync(_providerDescription, new(serviceType));
     }
 
     public override async Task RegisterPlayListController(Type serviceType)
     {
         if (await _depository.GetDependencyAsync(typeof(PlayListControllerBase)) is null)
-            await _depository.AddDependencyAsync(PlayListControllerDescription);
-        await _depository.AddRelationAsync(PlayListControllerDescription, new DependencyRelation(serviceType));
+            await _depository.AddDependencyAsync(_playListControllerDescription);
+        await _depository.AddRelationAsync(_playListControllerDescription, new(serviceType));
     }
 
     public override async Task UnregisterAudioService(Type serviceType)
     {
         await _depository.DeleteRelationAsync(
-            AudioServiceDescription,
-            new DependencyRelation(serviceType));
+            _audioServiceDescription,
+            new(serviceType));
     }
 
     public override async Task UnregisterMusicProvider(Type serviceType)
     {
         await _depository.DeleteRelationAsync(
-            ProviderDescription,
-            new DependencyRelation(serviceType));
+            _providerDescription,
+            new(serviceType));
     }
 
     public override async Task UnregisterPlayListController(Type serviceType)
     {
         await _depository.DeleteRelationAsync(
-            ProviderDescription,
-            new DependencyRelation(serviceType));
+            _providerDescription,
+            new(serviceType));
     }
 
     public override async Task FocusAudioService(Type serviceType)
     {
-        await _depository.ChangeFocusingRelationAsync(AudioServiceDescription, new DependencyRelation(serviceType));
+        await _depository.ChangeFocusingRelationAsync(_audioServiceDescription, new(serviceType));
     }
 
     public override async Task FocusPlayListController(Type serviceType)
     {
-        await _depository.ChangeFocusingRelationAsync(PlayListControllerDescription,
-            new DependencyRelation(serviceType));
+        await _depository.ChangeFocusingRelationAsync(_playListControllerDescription,
+                                                      new(serviceType));
     }
 
     public async Task OnDependencyChanged(IEnumerable<AudioServiceBase>? marker)
     {
-        AudioServices = new ReadOnlyCollection<AudioServiceBase>(
+        AudioServices = new(
             (await _depository.ResolveDependenciesAsync(typeof(IEnumerable<AudioServiceBase>)))
-            .Select(o => (AudioServiceBase)o).ToList());
+            .Select(o => (AudioServiceBase)o)
+            .ToList());
     }
 
     public async Task OnDependencyChanged(IEnumerable<ProviderBase>? marker)
     {
-        MusicProviders = new ReadOnlyCollection<ProviderBase>(
+        MusicProviders = new(
             (await _depository.ResolveDependenciesAsync(typeof(IEnumerable<ProviderBase>)))
-            .Select(o => (ProviderBase)o).ToList());
+            .Select(o => (ProviderBase)o)
+            .ToList());
     }
 
     public async Task OnDependencyChanged(IEnumerable<PlayListControllerBase>? marker)
     {
-        PlayListControllers = new ReadOnlyCollection<PlayListControllerBase>(
+        PlayListControllers = new(
             (await _depository.ResolveDependenciesAsync(typeof(IEnumerable<PlayListControllerBase>)))
-            .Select(o => (PlayListControllerBase)o).ToList());
+            .Select(o => (PlayListControllerBase)o)
+            .ToList());
     }
 
     public async Task OnDependencyChanged(AudioServiceBase? marker)
     {
-        CurrentAudioService = (AudioServiceBase)await _depository.ResolveDependencyAsync(typeof(AudioServiceBase));
+        CurrentAudioService
+            = (AudioServiceBase)await _depository.ResolveDependencyAsync(typeof(AudioServiceBase));
     }
 
     public async Task OnDependencyChanged(PlayListControllerBase? marker)
     {
-        CurrentPlayListController = (PlayListControllerBase)await _depository.ResolveDependencyAsync(typeof(PlayListControllerBase));
+        CurrentPlayListController
+            = (PlayListControllerBase)await _depository.ResolveDependencyAsync(typeof(PlayListControllerBase));
     }
 }

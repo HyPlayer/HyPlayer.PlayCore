@@ -1,6 +1,3 @@
 ﻿namespace HyPlayer.PlayCore.Abstraction.Models.Containers;
 
-public abstract class AlbumBase : SongContainerBase
-{
-    
-}
+public abstract class AlbumBase : SongContainerBase { }

@@ -17,51 +17,35 @@ public partial class Chopin
     {
         if (CurrentPlayingTicket is null) return;
         if (CurrentPlayingTicket?.AudioServiceId == CurrentAudioService?.Id)
-        {
             // ReSharper disable once SuspiciousTypeConversion.Global
             if (CurrentAudioService is IAudioTicketSeekableService seekableService)
-            {
                 await seekableService.SeekAudioTicket(CurrentPlayingTicket!, position);
-            }
-        }
     }
 
     public override async Task Play()
     {
         if (CurrentPlayingTicket is null) return;
         if (CurrentPlayingTicket?.AudioServiceId == CurrentAudioService?.Id)
-        {
             // ReSharper disable once SuspiciousTypeConversion.Global
             if (CurrentAudioService is IPlayAudioTicketService playableService)
-            {
                 await playableService.PlayAudioTicket(CurrentPlayingTicket!);
-            }
-        }
     }
 
     public override async Task Pause()
     {
         if (CurrentPlayingTicket is null) return;
         if (CurrentPlayingTicket?.AudioServiceId == CurrentAudioService?.Id)
-        {
             // ReSharper disable once SuspiciousTypeConversion.Global
             if (CurrentAudioService is IPauseAudioTicketService pauseService)
-            {
                 await pauseService.PauseAudioTicket(CurrentPlayingTicket!);
-            }
-        }
     }
 
     public override async Task Stop()
     {
         if (CurrentPlayingTicket is null) return;
         if (CurrentPlayingTicket?.AudioServiceId == CurrentAudioService?.Id)
-        {
             // ReSharper disable once SuspiciousTypeConversion.Global
             if (CurrentAudioService is IStopAudioTicketService stopService)
-            {
                 await stopService.StopTicket(CurrentPlayingTicket!);
-            }
-        }
     }
 }

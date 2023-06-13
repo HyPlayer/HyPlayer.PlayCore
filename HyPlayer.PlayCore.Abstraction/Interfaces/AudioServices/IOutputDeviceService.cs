@@ -10,7 +10,7 @@ public interface IOutputDeviceChangeableService
     /// </summary>
     /// <returns></returns>
     public Task<List<OutputDeviceBase>> GetOutputDevices();
-    
+
     /// <summary>
     /// 设置输出设备
     /// </summary>
