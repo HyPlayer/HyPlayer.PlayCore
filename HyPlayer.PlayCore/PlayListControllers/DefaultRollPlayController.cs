@@ -17,11 +17,14 @@ public class DefaultRollPlayController : PlayListControllerBase,
                                          INavigateSongPlayListController,
                                          IIndexedPlayListController,
                                          IInsertablePlaylistController,
-                                         IPlayListGettablePlaylistContainer
+                                         IPlayListGettablePlaylistContainer,
+                                         IRandomizablePlayListController
 {
     private List<SingleSongBase> _list { get; } = new();
-    private SongContainerBase? _currentSongListContainer;
+    private List<SongContainerBase> _currentSongListContainers = new();
     private int _index = -1;
+    private List<SingleSongBase> _randomedList { get; } = new();
+    private bool _isRandomList = false;
 
     private readonly IDepository _depository;
 
@@ -35,7 +38,25 @@ public class DefaultRollPlayController : PlayListControllerBase,
         return Task.FromResult(new ReadOnlyCollection<SingleSongBase>(_list));
     }
 
-    public override async Task AppendSongContainer(SongContainerBase container)
+    public override Task AddSongContainer(SongContainerBase container)
+    {
+        _currentSongListContainers.Add(container);
+        return Task.CompletedTask;
+    }
+
+    public override Task RemoveSongContainer(SongContainerBase container)
+    {
+        _currentSongListContainers.Remove(container);
+        return Task.CompletedTask;
+    }
+
+    public override Task ClearSongContainers()
+    {
+        _currentSongListContainers.Clear();
+        return Task.CompletedTask;
+    }
+
+    public override async Task LoadSongContainer(SongContainerBase container)
     {
         List<SingleSongBase> songsToBeAdd = new();
         if (container is IProgressiveLoadingContainer progressiveContainer)
@@ -54,40 +75,49 @@ public class DefaultRollPlayController : PlayListControllerBase,
         else if (container is LinerSongContainerBase linerContainer)
         {
             songsToBeAdd.AddRange(await linerContainer.GetAllSongs());
-            _currentSongListContainer = linerContainer;
         }
         else if (container is UndeterminedSongContainerBase undSongContainer)
         {
             songsToBeAdd.AddRange(await undSongContainer.GetNextSongRange());
         }
-        
+
         _list.AddRange(songsToBeAdd);
-        _depository.PublishNotificationAsync(
-                       new SongRangeAppendedNotification
-                       {
-                           Index = _list.Count - songsToBeAdd.Count,
-                           AppendedSongs = songsToBeAdd,
-                       })
-                   .SafeFireAndForget();
+        if (_isRandomList)
+        {
+            await Randomize(DateTime.Now.Millisecond);
+        }
+        else
+        {
+            _depository.PublishNotificationAsync(
+                           new SongRangeAppendedNotification
+                           {
+                               Index = _list.Count - songsToBeAdd.Count,
+                               AppendedSongs = songsToBeAdd,
+                           })
+                       .SafeFireAndForget();
+        }
     }
+
 
     public override Task ClearSongs()
     {
         _list.Clear();
+        _randomedList.Clear();
         _depository.PublishNotificationAsync(new PlayListClearedNotification()).SafeFireAndForget();
         return Task.CompletedTask;
     }
 
     public override Task<SingleSongBase?> MoveNext()
     {
+        var targetList = _isRandomList ? _randomedList : _list;
         if (_index == -1) _index = 0;
-        if (_index >= _list.Count) _index = 0;
-        if (_list.Count == 0)
+        if (_index >= targetList.Count) _index = 0;
+        if (targetList.Count == 0)
         {
             _depository.PublishNotificationAsync(
                            new CurrentSongChangedNotification
                            {
-                               CurrentPlayingSong = _list[_index]
+                               CurrentPlayingSong = targetList[_index],
                            })
                        .SafeFireAndForget();
             return Task.FromResult<SingleSongBase?>(null);
@@ -97,17 +127,18 @@ public class DefaultRollPlayController : PlayListControllerBase,
         _depository.PublishNotificationAsync(
                        new CurrentSongChangedNotification
                        {
-                           CurrentPlayingSong = _list[_index]
+                           CurrentPlayingSong = targetList[_index]
                        })
                    .SafeFireAndForget();
-        return Task.FromResult<SingleSongBase?>(_list[_index]);
+        return Task.FromResult<SingleSongBase?>(targetList[_index]);
     }
 
     public override Task<SingleSongBase?> MovePrevious()
     {
-        if (_index == -1) _index = _list.Count - 1;
-        if (_index >= _list.Count) _index = _list.Count - 1;
-        if (_list.Count == 0)
+        var targetList = _isRandomList ? _randomedList : _list;
+        if (_index == -1) _index = targetList.Count - 1;
+        if (_index >= targetList.Count) _index = targetList.Count - 1;
+        if (targetList.Count == 0)
         {
             _depository.PublishNotificationAsync(
                            new CurrentSongChangedNotification
@@ -118,29 +149,37 @@ public class DefaultRollPlayController : PlayListControllerBase,
             return Task.FromResult<SingleSongBase?>(null);
         }
 
-        if (_index - 1 < 0) _index = _list.Count - 1;
+        if (_index - 1 < 0) _index = targetList.Count - 1;
         _index--;
         _depository.PublishNotificationAsync(
                        new CurrentSongChangedNotification
                        {
-                           CurrentPlayingSong = _list[_index]
+                           CurrentPlayingSong = targetList[_index]
                        })
                    .SafeFireAndForget();
-        return Task.FromResult<SingleSongBase?>(_list[_index]);
+        return Task.FromResult<SingleSongBase?>(targetList[_index]);
     }
 
     public Task Reverse()
     {
+        if (_isRandomList) return Randomize(DateTime.Now.Millisecond);
         if (_list.Count == 0) return Task.CompletedTask;
         _list.Reverse();
         _index = _list.Count - _index - 1;
-        _depository.PublishNotificationAsync(new PlayListChangedNotification()).SafeFireAndForget();
+        _depository.PublishNotificationAsync(
+                       new PlayListChangedNotification()
+                       {
+                           NewList = new(_list),
+                           IsRandom = _isRandomList,
+                       })
+                   .SafeFireAndForget();
         return Task.CompletedTask;
     }
 
     public Task InsertSongRange(ReadOnlyCollection<SingleSongBase> song, int index)
     {
         _list.InsertRange(index, song);
+        if (_isRandomList) return Randomize(DateTime.Now.Millisecond);
         _depository.PublishNotificationAsync(
                        new SongRangeAppendedNotification
                        {
@@ -158,6 +197,7 @@ public class DefaultRollPlayController : PlayListControllerBase,
             _list.Remove(singleSongBase);
         }
 
+        if (_isRandomList) return Randomize(DateTime.Now.Millisecond);
         _depository.PublishNotificationAsync(
                        new SongRangeRemovedNotification
                        {
@@ -169,14 +209,15 @@ public class DefaultRollPlayController : PlayListControllerBase,
 
     public Task NavigateSongTo(SingleSongBase song)
     {
-        var newIndex = _list.IndexOf(song);
+        var targetList = _isRandomList ? _randomedList : _list;
+        var newIndex = targetList.IndexOf(song);
         if (newIndex != -1 && newIndex != _index)
         {
             _index = newIndex;
             _depository.PublishNotificationAsync(
                            new CurrentSongChangedNotification
                            {
-                               CurrentPlayingSong = _list[_index],
+                               CurrentPlayingSong = targetList[_index],
                            })
                        .SafeFireAndForget();
             return Task.CompletedTask;
@@ -192,9 +233,10 @@ public class DefaultRollPlayController : PlayListControllerBase,
 
     public Task<SingleSongBase?> GetSongAt(int index)
     {
-        if (_index >= 0 && _index < _list.Count)
+        var targetList = _isRandomList ? _randomedList : _list;
+        if (_index >= 0 && _index < targetList.Count)
         {
-            return Task.FromResult<SingleSongBase?>(_list[_index]);
+            return Task.FromResult<SingleSongBase?>(targetList[_index]);
         }
 
         return Task.FromResult<SingleSongBase?>(null);
@@ -203,6 +245,7 @@ public class DefaultRollPlayController : PlayListControllerBase,
     public Task InsertSong(SingleSongBase song, int index)
     {
         _list.Insert(index, song);
+        if (_isRandomList) return Randomize(DateTime.Now.Millisecond);
         _depository.PublishNotificationAsync(
                        new SongAppendNotification
                        {
@@ -216,6 +259,7 @@ public class DefaultRollPlayController : PlayListControllerBase,
     public Task RemoveSong(SingleSongBase song)
     {
         _list.Remove(song);
+        if (_isRandomList) return Randomize(DateTime.Now.Millisecond);
         _depository.PublishNotificationAsync(
                        new SongRemoveNotification
                        {
@@ -223,5 +267,41 @@ public class DefaultRollPlayController : PlayListControllerBase,
                        })
                    .SafeFireAndForget();
         return Task.CompletedTask;
+    }
+
+    public Task Randomize(int randomId)
+    {
+        _randomedList.Clear();
+        if (randomId == -1)
+        {
+            if (_isRandomList == false) return Task.CompletedTask;
+            var targetSong = _randomedList[_index];
+            _index = _list.IndexOf(targetSong);
+            _isRandomList = false;
+            _depository.PublishNotificationAsync(
+                new PlayListChangedNotification
+                {
+                    NewList = new(_list),
+                    IsRandom = _isRandomList,
+                });
+        }
+
+        _isRandomList = true;
+        var oldTargetSong = _list[_index];
+        var random = new Random(randomId);
+        _randomedList.AddRange(_list.OrderBy(x => random.Next()).ToList());
+        _index = _randomedList.IndexOf(oldTargetSong);
+        _depository.PublishNotificationAsync(
+            new PlayListChangedNotification
+            {
+                NewList = new(_randomedList),
+                IsRandom = _isRandomList,
+            });
+        return Task.CompletedTask;
+    }
+
+    public Task<ReadOnlyCollection<SingleSongBase>> GetOriginalList()
+    {
+        return Task.FromResult(new ReadOnlyCollection<SingleSongBase>(_list));
     }
 }
