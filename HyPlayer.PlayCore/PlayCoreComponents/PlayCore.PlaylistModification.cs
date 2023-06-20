@@ -9,6 +9,13 @@ public partial class Chopin
 {
     private SongContainerBase? _currentSongContainer;
     private ObservableCollection<SingleSongBase>? _songList;
+    private bool _isRandom;
+
+    public new bool IsRandom
+    {
+        get => _isRandom;
+        set => SetField(ref _isRandom, value);
+    }
 
     public new SongContainerBase? CurrentSongContainer
     {
@@ -55,5 +62,17 @@ public partial class Chopin
     {
         if (_currentPlayListController is not null)
             await _currentPlayListController.ClearSongs();
+    }
+
+    public override async Task SetRandom(bool isRandom)
+    {
+        if (_currentSongContainer is IRandomizablePlayListController randomizablePlayListController)
+            await randomizablePlayListController.Randomize(isRandom ? -1 : DateTime.Now.Millisecond);
+    }
+
+    public override async Task ReRandom()
+    {
+        if (_currentSongContainer is IRandomizablePlayListController randomizablePlayListController)
+            await randomizablePlayListController.Randomize(DateTime.Now.Millisecond);
     }
 }

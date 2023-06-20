@@ -12,4 +12,6 @@ public interface IPlayCorePlaylistModification
     public Task RemoveSong(SingleSongBase item);
     public Task RemoveSongRange(ReadOnlyCollection<SingleSongBase> item);
     public Task RemoveAllSong();
+    public Task SetRandom(bool isRandom);
+    public Task ReRandom();
 }
