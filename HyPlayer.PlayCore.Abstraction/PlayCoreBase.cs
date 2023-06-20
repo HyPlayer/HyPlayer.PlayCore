@@ -19,7 +19,7 @@ public abstract class PlayCoreBase : IPlayCoreService,
     public PlayListControllerBase? CurrentPlayListController { get; private set; }
 
     public SingleSongBase? CurrentSong { get; protected set; }
-    public SongContainerBase? CurrentSongContainer { get; private set; }
+    public ContainerBase? CurrentSongContainer { get; private set; }
     public ObservableCollection<SingleSongBase>? SongList { get; private set; }
     public AudioTicketBase? CurrentPlayingTicket { get; private set; }
     public bool IsRandom { get; private set; }
@@ -32,7 +32,7 @@ public abstract class PlayCoreBase : IPlayCoreService,
     public abstract Task UnregisterPlayListController(Type serviceType);
     public abstract Task FocusAudioService(Type serviceType);
     public abstract Task FocusPlayListController(Type serviceType);
-    public abstract Task ChangeSongContainer(SongContainerBase? container);
+    public abstract Task ChangeSongContainer(ContainerBase? container);
     public abstract Task InsertSong(SingleSongBase item, int index = -1);
     public abstract Task InsertSongRange(ReadOnlyCollection<SingleSongBase> items, int index = -1);
     public abstract Task RemoveSong(SingleSongBase item);

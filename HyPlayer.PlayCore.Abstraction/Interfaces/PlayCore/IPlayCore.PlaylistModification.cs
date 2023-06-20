@@ -6,7 +6,7 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.PlayCore;
 
 public interface IPlayCorePlaylistModification
 {
-    public Task ChangeSongContainer(SongContainerBase? container);
+    public Task ChangeSongContainer(ContainerBase? container);
     public Task InsertSong(SingleSongBase item, int index = -1);
     public Task InsertSongRange(ReadOnlyCollection<SingleSongBase> items, int index = -1);
     public Task RemoveSong(SingleSongBase item);

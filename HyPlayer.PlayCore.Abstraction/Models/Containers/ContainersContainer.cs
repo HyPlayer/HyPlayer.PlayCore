@@ -2,7 +2,7 @@
 
 namespace HyPlayer.PlayCore.Abstraction.Models.Containers;
 
-public abstract class ContainersContainer : SongContainerBase
+public abstract class ContainersContainer : ContainerBase
 {
-    public abstract Task<ReadOnlyCollection<SongContainerBase>> GetSubContainer();
+    public abstract Task<ReadOnlyCollection<ContainerBase>> GetSubContainer();
 }

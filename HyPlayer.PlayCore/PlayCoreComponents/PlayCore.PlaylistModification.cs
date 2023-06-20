@@ -7,7 +7,7 @@ namespace HyPlayer.PlayCore;
 
 public partial class Chopin
 {
-    private SongContainerBase? _currentSongContainer;
+    private ContainerBase? _currentSongContainer;
     private ObservableCollection<SingleSongBase>? _songList;
     private bool _isRandom;
 
@@ -17,7 +17,7 @@ public partial class Chopin
         set => SetField(ref _isRandom, value);
     }
 
-    public new SongContainerBase? CurrentSongContainer
+    public new ContainerBase? CurrentSongContainer
     {
         get => _currentSongContainer;
         private set => SetField(ref _currentSongContainer, value);
@@ -29,7 +29,7 @@ public partial class Chopin
         private set => SetField(ref _songList, value);
     }
 
-    public override async Task ChangeSongContainer(SongContainerBase? container)
+    public override async Task ChangeSongContainer(ContainerBase? container)
     {
         CurrentSongContainer = container;
     }

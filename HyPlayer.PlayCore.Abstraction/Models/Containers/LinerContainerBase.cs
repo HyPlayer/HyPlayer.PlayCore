@@ -3,7 +3,7 @@ using HyPlayer.PlayCore.Abstraction.Models.Songs;
 
 namespace HyPlayer.PlayCore.Abstraction.Models.Containers;
 
-public abstract class LinerSongContainerBase : SongContainerBase
+public abstract class LinerContainerBase : ContainerBase
 {
-    public abstract Task<ReadOnlyCollection<SingleSongBase>> GetAllSongs();
+    public abstract Task<ReadOnlyCollection<ProvidableItemBase>> GetAllItems();
 }

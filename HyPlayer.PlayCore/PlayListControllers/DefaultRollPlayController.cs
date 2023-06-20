@@ -21,7 +21,7 @@ public class DefaultRollPlayController : PlayListControllerBase,
                                          IRandomizablePlayListController
 {
     private readonly List<SingleSongBase> _list = new();
-    private readonly List<SongContainerBase> _currentSongListContainers = new();
+    private readonly List<ContainerBase> _currentSongListContainers = new();
     private readonly List<SingleSongBase> _randomedList = new();
 
     private int _index = -1;
@@ -39,10 +39,10 @@ public class DefaultRollPlayController : PlayListControllerBase,
         return Task.FromResult(new ReadOnlyCollection<SingleSongBase>(_list));
     }
 
-    public override Task AddSongContainer(SongContainerBase container)
+    public override Task AddSongContainer(ContainerBase container)
     {
-        _currentSongListContainers.RemoveAll(t => t is UndeterminedSongContainerBase);
-        if (container is UndeterminedSongContainerBase)
+        _currentSongListContainers.RemoveAll(t => t is UndeterminedContainerBase);
+        if (container is UndeterminedContainerBase)
         {
             _currentSongListContainers.Clear();
         }
@@ -51,7 +51,7 @@ public class DefaultRollPlayController : PlayListControllerBase,
         return Task.CompletedTask;
     }
 
-    public override Task RemoveSongContainer(SongContainerBase container)
+    public override Task RemoveSongContainer(ContainerBase container)
     {
         _currentSongListContainers.Remove(container);
         return Task.CompletedTask;
@@ -63,7 +63,7 @@ public class DefaultRollPlayController : PlayListControllerBase,
         return Task.CompletedTask;
     }
 
-    public override async Task LoadSongContainer(SongContainerBase container)
+    public override async Task LoadSongContainer(ContainerBase container)
     {
         List<SingleSongBase> songsToBeAdd = new();
         if (container is IProgressiveLoadingContainer progressiveContainer)
@@ -72,22 +72,22 @@ public class DefaultRollPlayController : PlayListControllerBase,
             int startPosition = 0;
             while (isNotEnded)
             {
-                var res = await progressiveContainer.GetProgressiveSongList(
+                var res = await progressiveContainer.GetProgressiveItemsList(
                     startPosition, progressiveContainer.MaxProgressiveCount);
                 isNotEnded = res.Item1;
-                songsToBeAdd.AddRange(res.Item2);
+                songsToBeAdd.AddRange(res.Item2.Cast<SingleSongBase>().ToList());
                 startPosition += progressiveContainer.MaxProgressiveCount;
             }
         }
-        else if (container is LinerSongContainerBase linerContainer)
+        else if (container is LinerContainerBase linerContainer)
         {
-            songsToBeAdd.AddRange(await linerContainer.GetAllSongs());
+            songsToBeAdd.AddRange((await linerContainer.GetAllItems()).Cast<SingleSongBase>());
         }
-        else if (container is UndeterminedSongContainerBase undSongContainer)
+        else if (container is UndeterminedContainerBase undSongContainer)
         {
             _randomedList.Clear();
             _list.Clear();
-            songsToBeAdd.AddRange(await undSongContainer.GetNextSongRange());
+            songsToBeAdd.AddRange((await undSongContainer.GetNextItemsRange()).Cast<SingleSongBase>());
             if (_isRandomList)
             {
                 await Randomize(-1);
@@ -122,10 +122,10 @@ public class DefaultRollPlayController : PlayListControllerBase,
 
     public override async Task<SingleSongBase?> MoveNext()
     {
-        if (_currentSongListContainers.FirstOrDefault() is UndeterminedSongContainerBase undc)
+        if (_currentSongListContainers.FirstOrDefault() is UndeterminedContainerBase undc)
         {
             if (_index >= _list.Count - 2)
-                _list.AddRange(await undc.GetNextSongRange());
+                _list.AddRange((await undc.GetNextItemsRange()).Cast<SingleSongBase>());
         }
 
         var targetList = _isRandomList ? _randomedList : _list;
@@ -305,7 +305,7 @@ public class DefaultRollPlayController : PlayListControllerBase,
                 });
         }
 
-        if (_currentSongListContainers.FirstOrDefault() is UndeterminedSongContainerBase) return Task.CompletedTask;
+        if (_currentSongListContainers.FirstOrDefault() is UndeterminedContainerBase) return Task.CompletedTask;
         _isRandomList = true;
         var oldTargetSong = _list[_index];
         var random = new Random(randomId);
