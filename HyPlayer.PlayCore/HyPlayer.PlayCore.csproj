@@ -5,6 +5,10 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
+        <Version>0.0.1</Version>
+        <Title>HyPlayer.PlayCore</Title>
+        <Authors>HyPlayer Team</Authors>
+        <Description>PlayCore of HyPlayer</Description>
     </PropertyGroup>
 
     <ItemGroup>
