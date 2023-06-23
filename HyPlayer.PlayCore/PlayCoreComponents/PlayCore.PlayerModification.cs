@@ -7,10 +7,10 @@ public partial class Chopin
 {
     private AudioTicketBase? _currentPlayingTicket;
 
-    public new AudioTicketBase? CurrentPlayingTicket
+    public override AudioTicketBase? CurrentPlayingTicket
     {
         get => _currentPlayingTicket;
-        private set => SetField(ref _currentPlayingTicket, value);
+        protected set => SetField(ref _currentPlayingTicket, value);
     }
 
     public override async Task Seek(long position)

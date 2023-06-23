@@ -18,34 +18,34 @@ public partial class Chopin :
     INotifyDependencyChanged<AudioServiceBase>,
     INotifyDependencyChanged<PlayListControllerBase>
 {
-    public new ReadOnlyCollection<AudioServiceBase>? AudioServices
+    public override ReadOnlyCollection<AudioServiceBase>? AudioServices
     {
         get => _audioServices;
-        set => SetField(ref _audioServices, value);
+        protected set => SetField(ref _audioServices, value);
     }
 
-    public new ReadOnlyCollection<ProviderBase>? MusicProviders
+    public override ReadOnlyCollection<ProviderBase>? MusicProviders
     {
         get => _musicProviders;
-        set => SetField(ref _musicProviders, value);
+        protected set => SetField(ref _musicProviders, value);
     }
 
-    public new ReadOnlyCollection<PlayListControllerBase>? PlayListControllers
+    public override ReadOnlyCollection<PlayListControllerBase>? PlayListControllers
     {
         get => _playListControllers;
-        set => SetField(ref _playListControllers, value);
+        protected set => SetField(ref _playListControllers, value);
     }
 
-    public new AudioServiceBase? CurrentAudioService
+    public override AudioServiceBase? CurrentAudioService
     {
         get => _currentAudioService;
-        private set => SetField(ref _currentAudioService, value);
+        protected set => SetField(ref _currentAudioService, value);
     }
 
-    public new PlayListControllerBase? CurrentPlayListController
+    public override PlayListControllerBase? CurrentPlayListController
     {
         get => _currentPlayListController;
-        private set => SetField(ref _currentPlayListController, value);
+        protected set => SetField(ref _currentPlayListController, value);
     }
 
 

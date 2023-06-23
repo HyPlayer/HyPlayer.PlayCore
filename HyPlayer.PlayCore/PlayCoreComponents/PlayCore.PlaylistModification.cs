@@ -11,22 +11,22 @@ public partial class Chopin
     private ObservableCollection<SingleSongBase>? _songList;
     private bool _isRandom;
 
-    public new bool IsRandom
+    public override bool IsRandom
     {
         get => _isRandom;
-        set => SetField(ref _isRandom, value);
+        protected set => SetField(ref _isRandom, value);
     }
 
-    public new ContainerBase? CurrentSongContainer
+    public override ContainerBase? CurrentSongContainer
     {
         get => _currentSongContainer;
-        private set => SetField(ref _currentSongContainer, value);
+        protected set => SetField(ref _currentSongContainer, value);
     }
 
-    public new ObservableCollection<SingleSongBase>? SongList
+    public override ObservableCollection<SingleSongBase>? SongList
     {
         get => _songList;
-        private set => SetField(ref _songList, value);
+        protected set => SetField(ref _songList, value);
     }
 
     public override async Task ChangeSongContainer(ContainerBase? container)

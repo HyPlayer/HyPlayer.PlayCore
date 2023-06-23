@@ -6,8 +6,8 @@ namespace HyPlayer.PlayCore.Abstraction;
 
 public abstract class AudioServiceBase
 {
-    public required string Id { get; set; }
-    public required string Name { get; set; }
+    public abstract string Id { get; }
+    public abstract string Name { get; }
     public abstract Task<AudioTicketBase> GetAudioTicket(MusicResourceBase musicResource);
     public abstract Task DisposeAudioTicket(MusicResourceBase musicResource);
     public abstract Task<ReadOnlyCollection<AudioTicketBase>> GetCreatedAudioTickets();

@@ -12,18 +12,18 @@ public abstract class PlayCoreBase : IPlayCoreService,
                                      IPlayCorePlayPositionModification
 
 {
-    public ReadOnlyCollection<AudioServiceBase>? AudioServices { get; private set; }
-    public ReadOnlyCollection<ProviderBase>? MusicProviders { get; private set; }
-    public ReadOnlyCollection<PlayListControllerBase>? PlayListControllers { get; private set; }
-    public AudioServiceBase? CurrentAudioService { get; private set; }
-    public PlayListControllerBase? CurrentPlayListController { get; private set; }
+    public virtual ReadOnlyCollection<AudioServiceBase>? AudioServices { get; protected set; } = null;
+    public virtual ReadOnlyCollection<ProviderBase>? MusicProviders { get; protected set; } = null;
+    public virtual ReadOnlyCollection<PlayListControllerBase>? PlayListControllers { get; protected set; } = null;
+    public virtual AudioServiceBase? CurrentAudioService { get; protected set; } = null;
+    public virtual PlayListControllerBase? CurrentPlayListController { get; protected set; } = null;
 
-    public SingleSongBase? CurrentSong { get; protected set; }
-    public ContainerBase? CurrentSongContainer { get; private set; }
-    public ObservableCollection<SingleSongBase>? SongList { get; private set; }
-    public AudioTicketBase? CurrentPlayingTicket { get; private set; }
-    public bool IsRandom { get; private set; }
-    
+    public virtual SingleSongBase? CurrentSong { get; protected set; }
+    public virtual ContainerBase? CurrentSongContainer { get; protected set; }
+    public virtual ObservableCollection<SingleSongBase>? SongList { get; protected set; }
+    public virtual AudioTicketBase? CurrentPlayingTicket { get; protected set; }
+    public virtual bool IsRandom { get; protected set; }
+
     public abstract Task RegisterAudioService(Type serviceType);
     public abstract Task RegisterMusicProvider(Type serviceType);
     public abstract Task RegisterPlayListController(Type serviceType);
