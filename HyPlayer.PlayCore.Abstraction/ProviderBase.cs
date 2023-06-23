@@ -2,6 +2,6 @@
 
 public abstract class ProviderBase
 {
-    public required string Name { get; init; }
-    public required string Id { get; init; }
+    public abstract string Name { get; }
+    public abstract string Id { get; }
 }
