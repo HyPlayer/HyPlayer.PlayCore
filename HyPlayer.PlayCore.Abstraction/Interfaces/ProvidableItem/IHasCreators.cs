@@ -5,6 +5,6 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.ProvidableItem;
 
 public interface IHasCreators
 {
-    public ReadOnlyCollection<string>? CreatorList { get; }
+    public ReadOnlyCollection<string>? CreatorList { get; init; }
     public Task<ReadOnlyCollection<PersonBase>?> GetCreators();
 }

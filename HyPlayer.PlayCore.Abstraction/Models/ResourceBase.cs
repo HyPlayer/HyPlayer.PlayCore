@@ -4,10 +4,10 @@ namespace HyPlayer.PlayCore.Abstraction.Models;
 
 public abstract class ResourceBase
 {
-    public string? Url { get; }
-    public string? ResourceName { get; }
-    public bool HasContent { get; }
-    public string? ExtensionName { get; }
+    public string? Url { get; init; }
+    public string? ResourceName { get; init; }
+    public bool HasContent { get; init; }
+    public string? ExtensionName { get; init; }
     public abstract ResourceType Type { get; }
     public abstract Type ReturnType { get; }
     public abstract Task<object?> GetResource(ResourceQualityTag? qualityTag = null);
