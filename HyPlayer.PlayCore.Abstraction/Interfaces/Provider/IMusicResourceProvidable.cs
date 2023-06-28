@@ -5,5 +5,5 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.Provider;
 
 public interface IMusicResourceProvidable
 {
-    public Task<MusicResourceBase?> GetMusicResource(SingleSongBase song);
+    public Task<MusicResourceBase?> GetMusicResource(SingleSongBase song, ResourceQualityTag qualityTag);
 }

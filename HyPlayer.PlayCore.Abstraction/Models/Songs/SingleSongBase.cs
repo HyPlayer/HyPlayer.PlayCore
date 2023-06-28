@@ -4,7 +4,7 @@ using HyPlayer.PlayCore.Abstraction.Models.Containers;
 
 namespace HyPlayer.PlayCore.Abstraction.Models.Songs;
 
-public abstract class SingleSongBase : ProvidableItemBase, IHasCreator
+public abstract class SingleSongBase : ProvidableItemBase, IHasCreators
 {
     public AlbumBase? Album { get; set; }
     public ReadOnlyCollection<string>? CreatorList { get; set; }
