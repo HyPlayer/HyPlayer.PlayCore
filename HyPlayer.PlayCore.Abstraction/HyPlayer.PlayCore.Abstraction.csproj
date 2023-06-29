@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
-        <Version>0.0.3</Version>
+        <Version>0.0.4</Version>
         <Title>HyPlayer.PlayCore.Abstraction</Title>
         <Authors>HyPlayer Team</Authors>
         <Description>The Abstraction of HyPlayer.PlayCore</Description>
