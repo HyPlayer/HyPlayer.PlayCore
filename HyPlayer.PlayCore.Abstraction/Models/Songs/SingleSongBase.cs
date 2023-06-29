@@ -9,6 +9,6 @@ public abstract class SingleSongBase : ProvidableItemBase, IHasCreators
     public AlbumBase? Album { get; set; }
     public ReadOnlyCollection<string>? CreatorList { get; init; }
     public abstract Task<ReadOnlyCollection<PersonBase>?> GetCreators();
-    public TimeSpan Duration { get; set; }
+    public long Duration { get; set; }
     public bool Available { get; set; }
 }
