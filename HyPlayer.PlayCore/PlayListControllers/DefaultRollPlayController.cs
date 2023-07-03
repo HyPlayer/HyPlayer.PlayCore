@@ -34,9 +34,9 @@ public class DefaultRollPlayController : PlayListControllerBase,
         _depository = depository;
     }
 
-    public Task<ReadOnlyCollection<SingleSongBase>> GetPlayList()
+    public Task<List<SingleSongBase>> GetPlayList()
     {
-        return Task.FromResult(new ReadOnlyCollection<SingleSongBase>(_list));
+        return Task.FromResult(_list);
     }
 
     public override Task AddSongContainer(ContainerBase container)
@@ -195,7 +195,7 @@ public class DefaultRollPlayController : PlayListControllerBase,
         return Task.CompletedTask;
     }
 
-    public Task InsertSongRange(ReadOnlyCollection<SingleSongBase> song, int index)
+    public Task InsertSongRange(List<SingleSongBase> song, int index)
     {
         _list.InsertRange(index, song);
         if (_isRandomList) return Randomize(DateTime.Now.Millisecond);
@@ -209,7 +209,7 @@ public class DefaultRollPlayController : PlayListControllerBase,
         return Task.CompletedTask;
     }
 
-    public Task RemoveSongRange(ReadOnlyCollection<SingleSongBase> song)
+    public Task RemoveSongRange(List<SingleSongBase> song)
     {
         foreach (var singleSongBase in song)
         {
@@ -320,8 +320,8 @@ public class DefaultRollPlayController : PlayListControllerBase,
         return Task.CompletedTask;
     }
 
-    public Task<ReadOnlyCollection<SingleSongBase>> GetOriginalList()
+    public Task<List<SingleSongBase>> GetOriginalList()
     {
-        return Task.FromResult(new ReadOnlyCollection<SingleSongBase>(_list));
+        return Task.FromResult(_list);
     }
 }

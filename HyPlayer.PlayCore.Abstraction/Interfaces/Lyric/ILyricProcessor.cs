@@ -5,5 +5,5 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.Lyric;
 
 public interface ILyricProcessor
 {
-    public Task<ReadOnlyCollection<PreProcessedLyricLine>> ProcessLyric(string lrcText);
+    public Task<List<PreProcessedLyricLine>> ProcessLyric(string lrcText);
 }

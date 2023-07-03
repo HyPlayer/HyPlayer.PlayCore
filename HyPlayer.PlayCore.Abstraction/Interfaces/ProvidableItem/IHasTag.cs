@@ -4,5 +4,5 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.ProvidableItem;
 
 public interface IHasTag
 {
-    public ReadOnlyCollection<string> Tags { get; set; }
+    public List<string> Tags { get; set; }
 }

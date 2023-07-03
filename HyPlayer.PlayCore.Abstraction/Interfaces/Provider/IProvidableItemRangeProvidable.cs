@@ -5,5 +5,5 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.Provider;
 
 public interface IProvidableItemRangeProvidable
 {
-    public Task<ReadOnlyCollection<ProvidableItemBase>> GetProvidableItemsRange(List<string> inProviderIds);
+    public Task<List<ProvidableItemBase>> GetProvidableItemsRange(List<string> inProviderIds);
 }

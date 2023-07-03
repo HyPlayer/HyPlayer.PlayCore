@@ -5,5 +5,5 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.AudioServices;
 
 public interface IAudioTicketListProvidable
 {
-    public abstract Task<ReadOnlyCollection<AudioTicketBase>> GetAudioTicketListAsync();
+    public abstract Task<List<AudioTicketBase>> GetAudioTicketListAsync();
 }

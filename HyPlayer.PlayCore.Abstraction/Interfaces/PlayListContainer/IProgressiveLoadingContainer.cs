@@ -7,5 +7,5 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.PlayListContainer;
 public interface IProgressiveLoadingContainer
 {
     public int MaxProgressiveCount { get; }
-    public Task<(bool, ReadOnlyCollection<ProvidableItemBase>)> GetProgressiveItemsList(int start, int count);
+    public Task<(bool, List<ProvidableItemBase>)> GetProgressiveItemsList(int start, int count);
 }

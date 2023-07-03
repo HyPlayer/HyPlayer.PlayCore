@@ -5,5 +5,5 @@ namespace HyPlayer.PlayCore.Abstraction.Models.Containers;
 
 public abstract class LinerContainerBase : ContainerBase
 {
-    public abstract Task<ReadOnlyCollection<ProvidableItemBase>> GetAllItems();
+    public abstract Task<List<ProvidableItemBase>> GetAllItems();
 }

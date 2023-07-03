@@ -5,6 +5,6 @@ namespace HyPlayer.PlayCore.Abstraction.Models.Notifications;
 
 public class PlayListChangedNotification : NotificationBase
 {
-    public required ReadOnlyCollection<SingleSongBase> NewList { get; init; }
+    public required List<SingleSongBase> NewList { get; init; }
     public bool IsRandom { get; init; } = false;
 }

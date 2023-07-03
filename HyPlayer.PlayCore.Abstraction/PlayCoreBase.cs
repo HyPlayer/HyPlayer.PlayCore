@@ -12,9 +12,9 @@ public abstract class PlayCoreBase : IPlayCoreService,
                                      IPlayCorePlayPositionModification
 
 {
-    public virtual ReadOnlyCollection<AudioServiceBase>? AudioServices { get; protected set; } = null;
-    public virtual ReadOnlyCollection<ProviderBase>? MusicProviders { get; protected set; } = null;
-    public virtual ReadOnlyCollection<PlayListControllerBase>? PlayListControllers { get; protected set; } = null;
+    public virtual List<AudioServiceBase>? AudioServices { get; protected set; } = null;
+    public virtual List<ProviderBase>? MusicProviders { get; protected set; } = null;
+    public virtual List<PlayListControllerBase>? PlayListControllers { get; protected set; } = null;
     public virtual AudioServiceBase? CurrentAudioService { get; protected set; } = null;
     public virtual PlayListControllerBase? CurrentPlayListController { get; protected set; } = null;
 
@@ -34,9 +34,9 @@ public abstract class PlayCoreBase : IPlayCoreService,
     public abstract Task FocusPlayListController(Type serviceType);
     public abstract Task ChangeSongContainer(ContainerBase? container);
     public abstract Task InsertSong(SingleSongBase item, int index = -1);
-    public abstract Task InsertSongRange(ReadOnlyCollection<SingleSongBase> items, int index = -1);
+    public abstract Task InsertSongRange(List<SingleSongBase> items, int index = -1);
     public abstract Task RemoveSong(SingleSongBase item);
-    public abstract Task RemoveSongRange(ReadOnlyCollection<SingleSongBase> item);
+    public abstract Task RemoveSongRange(List<SingleSongBase> item);
     public abstract Task RemoveAllSong();
     public abstract Task SetRandom(bool isRandom);
     public abstract Task ReRandom();

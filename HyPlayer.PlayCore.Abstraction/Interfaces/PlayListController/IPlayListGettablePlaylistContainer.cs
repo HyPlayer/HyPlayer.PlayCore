@@ -5,5 +5,5 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
 
 public interface IPlayListGettablePlaylistContainer
 {
-    public abstract Task<ReadOnlyCollection<SingleSongBase>> GetPlayList();
+    public abstract Task<List<SingleSongBase>> GetPlayList();
 }

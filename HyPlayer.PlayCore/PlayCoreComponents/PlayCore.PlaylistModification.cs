@@ -40,7 +40,7 @@ public partial class Chopin
             await controller.InsertSong(item, index);
     }
 
-    public override async Task InsertSongRange(ReadOnlyCollection<SingleSongBase> items, int index = -1)
+    public override async Task InsertSongRange(List<SingleSongBase> items, int index = -1)
     {
         if (_currentPlayListController is IRangeControllablePlayListController controller)
             await controller.InsertSongRange(items, index);
@@ -52,7 +52,7 @@ public partial class Chopin
             await controller.RemoveSong(item);
     }
 
-    public override async Task RemoveSongRange(ReadOnlyCollection<SingleSongBase> items)
+    public override async Task RemoveSongRange(List<SingleSongBase> items)
     {
         if (_currentPlayListController is IRangeControllablePlayListController controller)
             await controller.RemoveSongRange(items);

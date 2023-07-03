@@ -10,5 +10,5 @@ public abstract class AudioServiceBase
     public abstract string Name { get; }
     public abstract Task<AudioTicketBase> GetAudioTicket(MusicResourceBase musicResource);
     public abstract Task DisposeAudioTicket(MusicResourceBase musicResource);
-    public abstract Task<ReadOnlyCollection<AudioTicketBase>> GetCreatedAudioTickets();
+    public abstract Task<List<AudioTicketBase>> GetCreatedAudioTickets();
 }

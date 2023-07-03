@@ -6,5 +6,5 @@ public interface IProvableItemLikable
 {
     public Task LikeProvidableItem(string inProviderId, string? targetId);
     public Task UnlikeProvidableItem(string inProviderId, string? targetId);
-    public Task<ReadOnlyCollection<string>> GetLikedProvidableIds(string typeId);
+    public Task<List<string>> GetLikedProvidableIds(string typeId);
 }

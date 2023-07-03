@@ -6,5 +6,5 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
 public interface IRandomizablePlayListController
 {
     public Task Randomize(int seed = -1);
-    public Task<ReadOnlyCollection<SingleSongBase>> GetOriginalList();
+    public Task<List<SingleSongBase>> GetOriginalList();
 }

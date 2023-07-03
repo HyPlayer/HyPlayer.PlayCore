@@ -5,6 +5,6 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
 
 public interface IRangeControllablePlayListController
 {
-    public abstract Task InsertSongRange(ReadOnlyCollection<SingleSongBase> song, int index);
-    public abstract Task RemoveSongRange(ReadOnlyCollection<SingleSongBase> song);
+    public abstract Task InsertSongRange(List<SingleSongBase> song, int index);
+    public abstract Task RemoveSongRange(List<SingleSongBase> song);
 }
