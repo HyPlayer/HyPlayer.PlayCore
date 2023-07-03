@@ -3,7 +3,6 @@
 public abstract class RawLyricInfo : ResourceBase
 {
     public override ResourceType Type => ResourceType.Text;
-    public override Type ReturnType => typeof(string);
     public abstract LyricType LyricType { get; }
 }
 

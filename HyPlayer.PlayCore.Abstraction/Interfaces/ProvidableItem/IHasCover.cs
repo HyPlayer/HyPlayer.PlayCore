@@ -4,5 +4,5 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.ProvidableItem;
 
 public interface IHasCover
 {
-    public Task<ImageResourceBase> GetCover(ImageResourceQualityTag? qualityTag);
+    public Task<ImageResourceBase> GetCover();
 }
