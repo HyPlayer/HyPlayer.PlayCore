@@ -11,7 +11,7 @@ using HyPlayer.PlayCore.Abstraction.Models.Songs;
 
 namespace HyPlayer.PlayCore;
 
-public partial class Chopin :
+public sealed partial class Chopin :
     INotifyDependencyChanged<IEnumerable<AudioServiceBase>>,
     INotifyDependencyChanged<IEnumerable<ProviderBase>>,
     INotifyDependencyChanged<IEnumerable<PlayListControllerBase>>,

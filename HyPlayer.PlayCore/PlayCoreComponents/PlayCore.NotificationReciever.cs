@@ -5,7 +5,7 @@ using HyPlayer.PlayCore.Abstraction.Models.Songs;
 
 namespace HyPlayer.PlayCore;
 
-public partial class Chopin : 
+public sealed partial class Chopin : 
     INotificationSubscriber<CurrentSongChangedNotification>,
     INotificationSubscriber<PlayListChangedNotification>,
     INotificationSubscriber<PlayListClearedNotification>,

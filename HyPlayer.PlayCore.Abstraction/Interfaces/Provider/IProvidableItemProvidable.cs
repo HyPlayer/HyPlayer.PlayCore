@@ -4,5 +4,5 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.Provider;
 
 public interface IProvidableItemProvidable
 {
-    public Task<ProvidableItemBase> GetProvidableItemById(string inProviderId);
+    public Task<ProvidableItemBase?> GetProvidableItemById(string inProviderId);
 }

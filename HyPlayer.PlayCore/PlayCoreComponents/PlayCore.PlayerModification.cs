@@ -3,7 +3,7 @@ using HyPlayer.PlayCore.Abstraction.Models.AudioServiceComponents;
 
 namespace HyPlayer.PlayCore;
 
-public partial class Chopin
+public sealed partial class Chopin
 {
     private AudioTicketBase? _currentPlayingTicket;
 

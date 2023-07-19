@@ -5,7 +5,7 @@ using HyPlayer.PlayCore.Abstraction.Models.Songs;
 
 namespace HyPlayer.PlayCore;
 
-public partial class Chopin
+public sealed partial class Chopin
 {
     private ContainerBase? _currentSongContainer;
     private ObservableCollection<SingleSongBase>? _songList;

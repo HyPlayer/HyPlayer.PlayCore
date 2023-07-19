@@ -8,7 +8,7 @@ using HyPlayer.PlayCore.Services;
 
 namespace HyPlayer.PlayCore;
 
-public partial class Chopin : PlayCoreBase, INotifyPropertyChanged
+public sealed partial class Chopin : PlayCoreBase, INotifyPropertyChanged
 {
     public Chopin(
         IEnumerable<AudioServiceBase> audioServices,
@@ -35,11 +35,11 @@ public partial class Chopin : PlayCoreBase, INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         _smartDispatcher.InvokeAsync(() => { PropertyChanged?.Invoke(this, new(propertyName)); }); }
 
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
         if (EqualityComparer<T>.Default.Equals(field, value)) return false;
         field = value;

@@ -4,7 +4,7 @@ using HyPlayer.PlayCore.Abstraction.Models.Songs;
 
 namespace HyPlayer.PlayCore;
 
-public partial class Chopin
+public sealed partial class Chopin
 {
     public override async Task MovePointerTo(SingleSongBase song)
     {
