@@ -2,7 +2,7 @@
 
 public class PreProcessedLyricLine
 {
-    public required long StartTime { get; init; }
-    public required long EndTime { get; init; }
-    public string? Text { get; init; }
+    public required long StartTime { get; set; }
+    public required long EndTime { get; set; }
+    public string? Text { get; set; }
 }

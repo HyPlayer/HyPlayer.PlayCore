@@ -2,7 +2,7 @@
 
 public class LyricWord
 {
-    public string? Word { get; init; }
-    public required long StartTime { get; init; }
-    public required long EndTime { get; init; }
+    public string? Word { get; set; }
+    public required long StartTime { get; set; }
+    public required long EndTime { get; set; }
 }
