@@ -2,6 +2,11 @@
 
 public class ImageResourceQualityTag : ResourceQualityTag
 {
-    public int pixelX { get; }
-    public int pixelY { get; }
+    public ImageResourceQualityTag(int pixelX, int pixelY)
+    {
+        this.PixelX = pixelX;
+        this.PixelY = pixelY;
+    }
+    public int PixelX { get; }
+    public int PixelY { get; }
 }
