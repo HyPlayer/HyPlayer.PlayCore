@@ -7,7 +7,7 @@ using HyPlayer.PlayCore.Abstraction;
 
 namespace HyPlayer.PlayCore;
 
-public sealed partial class Chopin : PlayCoreBase, INotifyPropertyChanged
+public sealed partial class Chopin : PlayCoreBase
 {
     public Chopin(
         IEnumerable<AudioServiceBase> audioServices,
@@ -27,6 +27,4 @@ public sealed partial class Chopin : PlayCoreBase, INotifyPropertyChanged
             new(
                 new ObservableCollection<PlayListControllerBase>(playListControllers.ToList()));
     }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
 }

@@ -15,14 +15,14 @@ public sealed partial class Chopin :
     INotificationSubscriber<SongRangeRemovedNotification>
 
 {
-    public Task HandleNotification(CurrentSongChangedNotification notification, CancellationToken ctk = new CancellationToken())
+    public Task HandleNotificationAsync(CurrentSongChangedNotification notification, CancellationToken ctk = new CancellationToken())
     {
         ctk.ThrowIfCancellationRequested();
         CurrentSong = notification.CurrentPlayingSong;
         return Task.CompletedTask;
     }
 
-    public Task HandleNotification(PlayListChangedNotification notification, CancellationToken ctk = new CancellationToken())
+    public Task HandleNotificationAsync(PlayListChangedNotification notification, CancellationToken ctk = new CancellationToken())
     {
         ctk.ThrowIfCancellationRequested();
         IsRandom = notification.IsRandom;
@@ -30,21 +30,21 @@ public sealed partial class Chopin :
         return Task.CompletedTask;
     }
 
-    public Task HandleNotification(PlayListClearedNotification notification, CancellationToken ctk = new CancellationToken())
+    public Task HandleNotificationAsync(PlayListClearedNotification notification, CancellationToken ctk = new CancellationToken())
     {
         ctk.ThrowIfCancellationRequested();
         SongList?.Clear();
         return Task.CompletedTask;
     }
 
-    public Task HandleNotification(SongAppendNotification notification, CancellationToken ctk = new CancellationToken())
+    public Task HandleNotificationAsync(SongAppendNotification notification, CancellationToken ctk = new CancellationToken())
     {
         ctk.ThrowIfCancellationRequested();
         SongList?.Insert(notification.Index,notification.AppendedSong);
         return Task.CompletedTask;
     }
 
-    public Task HandleNotification(SongRangeAppendedNotification notification, CancellationToken ctk = new CancellationToken())
+    public Task HandleNotificationAsync(SongRangeAppendedNotification notification, CancellationToken ctk = new CancellationToken())
     {
         ctk.ThrowIfCancellationRequested();
         var index = notification.Index;
@@ -56,14 +56,14 @@ public sealed partial class Chopin :
         return Task.CompletedTask;
     }
 
-    public Task HandleNotification(SongRemoveNotification notification, CancellationToken ctk = new CancellationToken())
+    public Task HandleNotificationAsync(SongRemoveNotification notification, CancellationToken ctk = new CancellationToken())
     {
         ctk.ThrowIfCancellationRequested();
         SongList?.Remove(notification.RemovedSong);
         return Task.CompletedTask;
     }
 
-    public Task HandleNotification(SongRangeRemovedNotification notification, CancellationToken ctk = new CancellationToken())
+    public Task HandleNotificationAsync(SongRangeRemovedNotification notification, CancellationToken ctk = new CancellationToken())
     {
         ctk.ThrowIfCancellationRequested();
         if (SongList is null) return Task.CompletedTask;
