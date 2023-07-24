@@ -5,13 +5,7 @@ namespace HyPlayer.PlayCore;
 
 public sealed partial class Chopin
 {
-    private AudioTicketBase? _currentPlayingTicket;
-
-    public override AudioTicketBase? CurrentPlayingTicket
-    {
-        get => _currentPlayingTicket;
-        protected set => SetField(ref _currentPlayingTicket, value);
-    }
+    public override AudioTicketBase? CurrentPlayingTicket { get; protected set; }
 
     public override async Task Seek(long position)
     {

@@ -20,7 +20,7 @@ public abstract class PlayCoreBase : IPlayCoreService,
 
     public virtual SingleSongBase? CurrentSong { get; protected set; }
     public virtual ContainerBase? CurrentSongContainer { get; protected set; }
-    public virtual ObservableCollection<SingleSongBase>? SongList { get; protected set; }
+    public virtual List<SingleSongBase>? SongList { get; protected set; }
     public virtual AudioTicketBase? CurrentPlayingTicket { get; protected set; }
     public virtual bool IsRandom { get; protected set; }
 

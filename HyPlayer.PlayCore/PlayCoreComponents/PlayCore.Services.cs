@@ -18,43 +18,18 @@ public sealed partial class Chopin :
     INotifyDependencyChanged<AudioServiceBase>,
     INotifyDependencyChanged<PlayListControllerBase>
 {
-    public override List<AudioServiceBase>? AudioServices
-    {
-        get => _audioServices;
-        protected set => SetField(ref _audioServices, value);
-    }
+    public override List<AudioServiceBase>? AudioServices { get; protected set; }
 
-    public override List<ProviderBase>? MusicProviders
-    {
-        get => _musicProviders;
-        protected set => SetField(ref _musicProviders, value);
-    }
+    public override List<ProviderBase>? MusicProviders { get; protected set; }
 
-    public override List<PlayListControllerBase>? PlayListControllers
-    {
-        get => _playListControllers;
-        protected set => SetField(ref _playListControllers, value);
-    }
+    public override List<PlayListControllerBase>? PlayListControllers { get; protected set; }
 
-    public override AudioServiceBase? CurrentAudioService
-    {
-        get => _currentAudioService;
-        protected set => SetField(ref _currentAudioService, value);
-    }
+    public override AudioServiceBase? CurrentAudioService { get; protected set; }
 
-    public override PlayListControllerBase? CurrentPlayListController
-    {
-        get => _currentPlayListController;
-        protected set => SetField(ref _currentPlayListController, value);
-    }
+    public override PlayListControllerBase? CurrentPlayListController { get; protected set; }
 
 
     private readonly IDepository _depository;
-    private List<AudioServiceBase>? _audioServices;
-    private List<ProviderBase>? _musicProviders;
-    private List<PlayListControllerBase>? _playListControllers;
-    private AudioServiceBase? _currentAudioService;
-    private PlayListControllerBase? _currentPlayListController;
 
     private static readonly DependencyDescription _audioServiceDescription =
         new(typeof(AudioServiceBase), DependencyLifetime.Singleton);
@@ -64,7 +39,7 @@ public sealed partial class Chopin :
 
     private static readonly DependencyDescription _playListControllerDescription =
         new(typeof(PlayListControllerBase), DependencyLifetime.Singleton);
-    
+
     public override async Task RegisterAudioService(Type serviceType)
     {
         if (await _depository.GetDependencyAsync(typeof(AudioServiceBase)) is null)
