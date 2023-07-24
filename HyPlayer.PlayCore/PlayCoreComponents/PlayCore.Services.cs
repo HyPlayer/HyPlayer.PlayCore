@@ -45,6 +45,9 @@ public sealed partial class Chopin :
         if (_depository.GetDependency(typeof(AudioServiceBase)) is null)
             _depository.AddDependency(_audioServiceDescription);
         _depository.AddRelation(_audioServiceDescription, new(serviceType));
+        var depDesc = new DependencyDescription(serviceType, DependencyLifetime.Singleton);
+        _depository.AddDependency(depDesc);
+        _depository.AddRelation(depDesc, new(serviceType));
         return Task.CompletedTask;
     }
 
@@ -53,6 +56,9 @@ public sealed partial class Chopin :
         if (_depository.GetDependency(typeof(ProviderBase)) is null)
             _depository.AddDependency(_providerDescription);
         _depository.AddRelation(_providerDescription, new(serviceType));
+        var depDesc = new DependencyDescription(serviceType, DependencyLifetime.Singleton);
+        _depository.AddDependency(depDesc);
+        _depository.AddRelation(depDesc, new(serviceType));
         return Task.CompletedTask;
     }
 
@@ -61,6 +67,9 @@ public sealed partial class Chopin :
         if (_depository.GetDependency(typeof(PlayListControllerBase)) is null)
             _depository.AddDependency(_playListControllerDescription);
         _depository.AddRelation(_playListControllerDescription, new(serviceType));
+        var depDesc = new DependencyDescription(serviceType, DependencyLifetime.Singleton);
+        _depository.AddDependency(depDesc);
+        _depository.AddRelation(depDesc, new(serviceType));
         return Task.CompletedTask;
     }
 
@@ -69,6 +78,11 @@ public sealed partial class Chopin :
         _depository.DeleteRelation(
             _audioServiceDescription,
             new(serviceType));
+        var depDesc = _depository.GetDependency(serviceType);
+        if (depDesc is null) return Task.CompletedTask;
+        _depository.ClearRelations(depDesc);
+        _depository.DeleteDependency(depDesc);
+
         return Task.CompletedTask;
     }
 
@@ -77,6 +91,10 @@ public sealed partial class Chopin :
         _depository.DeleteRelation(
             _providerDescription,
             new(serviceType));
+        var depDesc = _depository.GetDependency(serviceType);
+        if (depDesc is null) return Task.CompletedTask;
+        _depository.ClearRelations(depDesc);
+        _depository.DeleteDependency(depDesc);
         return Task.CompletedTask;
     }
 
@@ -85,6 +103,10 @@ public sealed partial class Chopin :
         _depository.DeleteRelation(
             _providerDescription,
             new(serviceType));
+        var depDesc = _depository.GetDependency(serviceType);
+        if (depDesc is null) return Task.CompletedTask;
+        _depository.ClearRelations(depDesc);
+        _depository.DeleteDependency(depDesc);
         return Task.CompletedTask;
     }
 
@@ -97,7 +119,7 @@ public sealed partial class Chopin :
     public override Task FocusPlayListController(Type serviceType)
     {
         _depository.ChangeFocusingRelation(_playListControllerDescription,
-                                                      new(serviceType));
+                                           new(serviceType));
         return Task.CompletedTask;
     }
 
