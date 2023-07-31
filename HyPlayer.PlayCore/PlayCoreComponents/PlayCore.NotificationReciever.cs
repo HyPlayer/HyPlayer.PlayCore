@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using Depository.Abstraction.Interfaces;
 using HyPlayer.PlayCore.Abstraction.Models.Notifications;
-using HyPlayer.PlayCore.Abstraction.Models.Songs;
 
 namespace HyPlayer.PlayCore;
 

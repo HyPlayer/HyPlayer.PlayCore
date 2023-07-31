@@ -1,8 +1,7 @@
-﻿using System.Collections.ObjectModel;
-using HyPlayer.PlayCore.Abstraction.Interfaces.ProvidableItem;
+﻿using HyPlayer.PlayCore.Abstraction.Interfaces.ProvidableItem;
 using HyPlayer.PlayCore.Abstraction.Models.Containers;
 
-namespace HyPlayer.PlayCore.Abstraction.Models.Songs;
+namespace HyPlayer.PlayCore.Abstraction.Models.SingleItems;
 
 public abstract class SingleSongBase : ProvidableItemBase, IHasCreators
 {

@@ -1,6 +1,4 @@
-﻿using HyPlayer.PlayCore.Abstraction.Models.Songs;
-
-namespace HyPlayer.PlayCore.Abstraction.Models.Containers;
+﻿namespace HyPlayer.PlayCore.Abstraction.Models.Containers;
 
 public abstract class UndeterminedContainerBase : ContainerBase
 {

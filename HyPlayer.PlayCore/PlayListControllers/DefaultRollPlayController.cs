@@ -7,7 +7,7 @@ using HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
 using HyPlayer.PlayCore.Abstraction.Models;
 using HyPlayer.PlayCore.Abstraction.Models.Containers;
 using HyPlayer.PlayCore.Abstraction.Models.Notifications;
-using HyPlayer.PlayCore.Abstraction.Models.Songs;
+using HyPlayer.PlayCore.Abstraction.Models.SingleItems;
 
 namespace HyPlayer.PlayCore.PlayListControllers;
 

@@ -2,7 +2,7 @@
 using HyPlayer.PlayCore.Abstraction.Interfaces.PlayCore;
 using HyPlayer.PlayCore.Abstraction.Models;
 using HyPlayer.PlayCore.Abstraction.Models.AudioServiceComponents;
-using HyPlayer.PlayCore.Abstraction.Models.Songs;
+using HyPlayer.PlayCore.Abstraction.Models.SingleItems;
 
 namespace HyPlayer.PlayCore.Abstraction;
 

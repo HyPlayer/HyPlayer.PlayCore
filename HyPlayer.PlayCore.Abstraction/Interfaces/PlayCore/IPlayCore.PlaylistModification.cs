@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using HyPlayer.PlayCore.Abstraction.Models;
-using HyPlayer.PlayCore.Abstraction.Models.Songs;
+using HyPlayer.PlayCore.Abstraction.Models.SingleItems;
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.PlayCore;
 
