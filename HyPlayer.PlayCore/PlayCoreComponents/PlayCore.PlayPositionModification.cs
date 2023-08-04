@@ -6,21 +6,21 @@ namespace HyPlayer.PlayCore;
 
 public sealed partial class Chopin
 {
-    public override async Task MovePointerTo(SingleSongBase song)
+    public override async Task MovePointerToAsync(SingleSongBase song)
     {
         if (CurrentPlayListController is INavigateSongPlayListController controller)
             await controller.NavigateSongTo(song);
     }
 
-    public override async Task MoveNext()
+    public override async Task MoveNextAsync()
     {
         if (CurrentPlayListController is { } controller)
-            await controller.MoveNext();
+            await controller.MoveNextAsync();
     }
 
-    public override async Task MovePrevious()
+    public override async Task MovePreviousAsync()
     {
         if (CurrentPlayListController is { } controller)
-            await controller.MovePrevious();
+            await controller.MovePreviousAsync();
     }
 }

@@ -24,27 +24,27 @@ public abstract class PlayCoreBase : IPlayCoreService,
     public virtual AudioTicketBase? CurrentPlayingTicket { get; protected set; }
     public virtual bool IsRandom { get; protected set; }
 
-    public abstract Task RegisterAudioService(Type serviceType);
-    public abstract Task RegisterMusicProvider(Type serviceType);
-    public abstract Task RegisterPlayListController(Type serviceType);
-    public abstract Task UnregisterAudioService(Type serviceType);
-    public abstract Task UnregisterMusicProvider(Type serviceType);
-    public abstract Task UnregisterPlayListController(Type serviceType);
-    public abstract Task FocusAudioService(Type serviceType);
-    public abstract Task FocusPlayListController(Type serviceType);
-    public abstract Task ChangeSongContainer(ContainerBase? container);
-    public abstract Task InsertSong(SingleSongBase item, int index = -1);
-    public abstract Task InsertSongRange(List<SingleSongBase> items, int index = -1);
-    public abstract Task RemoveSong(SingleSongBase item);
-    public abstract Task RemoveSongRange(List<SingleSongBase> item);
-    public abstract Task RemoveAllSong();
-    public abstract Task SetRandom(bool isRandom);
-    public abstract Task ReRandom();
-    public abstract Task Seek(long position);
-    public abstract Task Play();
-    public abstract Task Pause();
-    public abstract Task Stop();
-    public abstract Task MovePointerTo(SingleSongBase song);
-    public abstract Task MoveNext();
-    public abstract Task MovePrevious();
+    public abstract Task RegisterAudioServiceAsync(Type serviceType);
+    public abstract Task RegisterMusicProviderAsync(Type serviceType);
+    public abstract Task RegisterPlayListControllerAsync(Type serviceType);
+    public abstract Task UnregisterAudioServiceAsync(Type serviceType);
+    public abstract Task UnregisterMusicProviderAsync(Type serviceType);
+    public abstract Task UnregisterPlayListControllerAsync(Type serviceType);
+    public abstract Task FocusAudioServiceAsync(Type serviceType);
+    public abstract Task FocusPlayListControllerAsync(Type serviceType);
+    public abstract Task ChangeSongContainerAsync(ContainerBase? container);
+    public abstract Task InsertSongAsync(SingleSongBase item, int index = -1);
+    public abstract Task InsertSongRangeAsync(List<SingleSongBase> items, int index = -1);
+    public abstract Task RemoveSongAsync(SingleSongBase item);
+    public abstract Task RemoveSongRangeAsync(List<SingleSongBase> item);
+    public abstract Task RemoveAllSongAsync();
+    public abstract Task SetRandomAsync(bool isRandom);
+    public abstract Task ReRandomAsync();
+    public abstract Task SeekAsync(long position);
+    public abstract Task PlayAsync();
+    public abstract Task PauseAsync();
+    public abstract Task StopAsync();
+    public abstract Task MovePointerToAsync(SingleSongBase song);
+    public abstract Task MoveNextAsync();
+    public abstract Task MovePreviousAsync();
 }

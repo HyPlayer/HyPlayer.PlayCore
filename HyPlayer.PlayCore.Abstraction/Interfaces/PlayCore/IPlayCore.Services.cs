@@ -4,14 +4,14 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.PlayCore;
 
 public interface IPlayCoreService
 {
-    public Task RegisterAudioService(Type serviceType);
-    public Task RegisterMusicProvider(Type serviceType);
-    public Task RegisterPlayListController(Type serviceType);
+    public Task RegisterAudioServiceAsync(Type serviceType);
+    public Task RegisterMusicProviderAsync(Type serviceType);
+    public Task RegisterPlayListControllerAsync(Type serviceType);
 
-    public Task UnregisterAudioService(Type serviceType);
-    public Task UnregisterMusicProvider(Type serviceType);
-    public Task UnregisterPlayListController(Type serviceType);
+    public Task UnregisterAudioServiceAsync(Type serviceType);
+    public Task UnregisterMusicProviderAsync(Type serviceType);
+    public Task UnregisterPlayListControllerAsync(Type serviceType);
 
-    public Task FocusAudioService(Type serviceType);
-    public Task FocusPlayListController(Type serviceType);
+    public Task FocusAudioServiceAsync(Type serviceType);
+    public Task FocusPlayListControllerAsync(Type serviceType);
 }

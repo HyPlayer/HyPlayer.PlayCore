@@ -7,7 +7,7 @@ public sealed partial class Chopin
 {
     public override AudioTicketBase? CurrentPlayingTicket { get; protected set; }
 
-    public override async Task Seek(long position)
+    public override async Task SeekAsync(long position)
     {
         if (CurrentPlayingTicket is null) return;
         if (CurrentPlayingTicket?.AudioServiceId == CurrentAudioService?.Id)
@@ -16,7 +16,7 @@ public sealed partial class Chopin
                 await seekableService.SeekAudioTicket(CurrentPlayingTicket!, position);
     }
 
-    public override async Task Play()
+    public override async Task PlayAsync()
     {
         if (CurrentPlayingTicket is null) return;
         if (CurrentPlayingTicket?.AudioServiceId == CurrentAudioService?.Id)
@@ -25,7 +25,7 @@ public sealed partial class Chopin
                 await playableService.PlayAudioTicket(CurrentPlayingTicket!);
     }
 
-    public override async Task Pause()
+    public override async Task PauseAsync()
     {
         if (CurrentPlayingTicket is null) return;
         if (CurrentPlayingTicket?.AudioServiceId == CurrentAudioService?.Id)
@@ -34,7 +34,7 @@ public sealed partial class Chopin
                 await pauseService.PauseAudioTicket(CurrentPlayingTicket!);
     }
 
-    public override async Task Stop()
+    public override async Task StopAsync()
     {
         if (CurrentPlayingTicket is null) return;
         if (CurrentPlayingTicket?.AudioServiceId == CurrentAudioService?.Id)

@@ -6,11 +6,11 @@ namespace HyPlayer.PlayCore.Abstraction;
 
 public abstract class PlayListControllerBase
 {
-    public abstract Task AddSongContainer(ContainerBase container);
-    public abstract Task RemoveSongContainer(ContainerBase container);
-    public abstract Task ClearSongContainers();
-    public abstract Task LoadSongContainer(ContainerBase container);
-    public abstract Task ClearSongs();
-    public abstract Task<SingleSongBase?> MoveNext();
-    public abstract Task<SingleSongBase?> MovePrevious();
+    public abstract Task AddSongContainerAsync(ContainerBase container);
+    public abstract Task RemoveSongContainerAsync(ContainerBase container);
+    public abstract Task ClearSongContainersAsync();
+    public abstract Task LoadSongContainerAsync(ContainerBase container);
+    public abstract Task ClearSongsAsync();
+    public abstract Task<SingleSongBase?> MoveNextAsync();
+    public abstract Task<SingleSongBase?> MovePreviousAsync();
 }

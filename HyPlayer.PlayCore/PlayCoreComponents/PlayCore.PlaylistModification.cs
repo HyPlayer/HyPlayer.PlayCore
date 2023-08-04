@@ -13,49 +13,49 @@ public sealed partial class Chopin
 
     public override List<SingleSongBase>? SongList { get; protected set; }
 
-    public override Task ChangeSongContainer(ContainerBase? container)
+    public override Task ChangeSongContainerAsync(ContainerBase? container)
     {
         CurrentSongContainer = container;
         return Task.CompletedTask;
     }
 
-    public override async Task InsertSong(SingleSongBase item, int index = -1)
+    public override async Task InsertSongAsync(SingleSongBase item, int index = -1)
     {
         if (CurrentPlayListController is IInsertablePlaylistController controller)
             await controller.InsertSong(item, index);
     }
 
-    public override async Task InsertSongRange(List<SingleSongBase> items, int index = -1)
+    public override async Task InsertSongRangeAsync(List<SingleSongBase> items, int index = -1)
     {
         if (CurrentPlayListController is IRangeControllablePlayListController controller)
             await controller.InsertSongRange(items, index);
     }
 
-    public override async Task RemoveSong(SingleSongBase item)
+    public override async Task RemoveSongAsync(SingleSongBase item)
     {
         if (CurrentPlayListController is IInsertablePlaylistController controller)
             await controller.RemoveSong(item);
     }
 
-    public override async Task RemoveSongRange(List<SingleSongBase> items)
+    public override async Task RemoveSongRangeAsync(List<SingleSongBase> items)
     {
         if (CurrentPlayListController is IRangeControllablePlayListController controller)
             await controller.RemoveSongRange(items);
     }
 
-    public override async Task RemoveAllSong()
+    public override async Task RemoveAllSongAsync()
     {
         if (CurrentPlayListController is not null)
-            await CurrentPlayListController.ClearSongs();
+            await CurrentPlayListController.ClearSongsAsync();
     }
 
-    public override async Task SetRandom(bool isRandom)
+    public override async Task SetRandomAsync(bool isRandom)
     {
         if (CurrentSongContainer is IRandomizablePlayListController randomizablePlayListController)
             await randomizablePlayListController.Randomize(isRandom ? -1 : DateTime.Now.Millisecond);
     }
 
-    public override async Task ReRandom()
+    public override async Task ReRandomAsync()
     {
         if (CurrentPlayListController is IRandomizablePlayListController randomizablePlayListController)
             await randomizablePlayListController.Randomize(DateTime.Now.Millisecond);

@@ -39,7 +39,7 @@ public sealed partial class Chopin :
     private static readonly DependencyDescription _playListControllerDescription =
         new(typeof(PlayListControllerBase), DependencyLifetime.Singleton);
 
-    public override Task RegisterAudioService(Type serviceType)
+    public override Task RegisterAudioServiceAsync(Type serviceType)
     {
         if (_depository.GetDependency(typeof(AudioServiceBase)) is null)
             _depository.AddDependency(_audioServiceDescription);
@@ -50,7 +50,7 @@ public sealed partial class Chopin :
         return Task.CompletedTask;
     }
 
-    public override Task RegisterMusicProvider(Type serviceType)
+    public override Task RegisterMusicProviderAsync(Type serviceType)
     {
         if (_depository.GetDependency(typeof(ProviderBase)) is null)
             _depository.AddDependency(_providerDescription);
@@ -61,7 +61,7 @@ public sealed partial class Chopin :
         return Task.CompletedTask;
     }
 
-    public override Task RegisterPlayListController(Type serviceType)
+    public override Task RegisterPlayListControllerAsync(Type serviceType)
     {
         if (_depository.GetDependency(typeof(PlayListControllerBase)) is null)
             _depository.AddDependency(_playListControllerDescription);
@@ -72,7 +72,7 @@ public sealed partial class Chopin :
         return Task.CompletedTask;
     }
 
-    public override Task UnregisterAudioService(Type serviceType)
+    public override Task UnregisterAudioServiceAsync(Type serviceType)
     {
         _depository.DeleteRelation(
             _audioServiceDescription,
@@ -85,7 +85,7 @@ public sealed partial class Chopin :
         return Task.CompletedTask;
     }
 
-    public override Task UnregisterMusicProvider(Type serviceType)
+    public override Task UnregisterMusicProviderAsync(Type serviceType)
     {
         _depository.DeleteRelation(
             _providerDescription,
@@ -97,7 +97,7 @@ public sealed partial class Chopin :
         return Task.CompletedTask;
     }
 
-    public override Task UnregisterPlayListController(Type serviceType)
+    public override Task UnregisterPlayListControllerAsync(Type serviceType)
     {
         _depository.DeleteRelation(
             _providerDescription,
@@ -109,13 +109,13 @@ public sealed partial class Chopin :
         return Task.CompletedTask;
     }
 
-    public override Task FocusAudioService(Type serviceType)
+    public override Task FocusAudioServiceAsync(Type serviceType)
     {
         _depository.ChangeFocusingRelation(_audioServiceDescription, new(serviceType));
         return Task.CompletedTask;
     }
 
-    public override Task FocusPlayListController(Type serviceType)
+    public override Task FocusPlayListControllerAsync(Type serviceType)
     {
         _depository.ChangeFocusingRelation(_playListControllerDescription,
                                            new(serviceType));

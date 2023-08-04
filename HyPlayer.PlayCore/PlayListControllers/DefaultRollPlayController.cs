@@ -39,7 +39,7 @@ public class DefaultRollPlayController : PlayListControllerBase,
         return Task.FromResult(_list);
     }
 
-    public override Task AddSongContainer(ContainerBase container)
+    public override Task AddSongContainerAsync(ContainerBase container)
     {
         _currentSongListContainers.RemoveAll(t => t is UndeterminedContainerBase);
         if (container is UndeterminedContainerBase)
@@ -51,19 +51,19 @@ public class DefaultRollPlayController : PlayListControllerBase,
         return Task.CompletedTask;
     }
 
-    public override Task RemoveSongContainer(ContainerBase container)
+    public override Task RemoveSongContainerAsync(ContainerBase container)
     {
         _currentSongListContainers.Remove(container);
         return Task.CompletedTask;
     }
 
-    public override Task ClearSongContainers()
+    public override Task ClearSongContainersAsync()
     {
         _currentSongListContainers.Clear();
         return Task.CompletedTask;
     }
 
-    public override async Task LoadSongContainer(ContainerBase container)
+    public override async Task LoadSongContainerAsync(ContainerBase container)
     {
         List<SingleSongBase> songsToBeAdd = new();
         if (container is IProgressiveLoadingContainer progressiveContainer)
@@ -112,7 +112,7 @@ public class DefaultRollPlayController : PlayListControllerBase,
     }
 
 
-    public override Task ClearSongs()
+    public override Task ClearSongsAsync()
     {
         _list.Clear();
         _randomedList.Clear();
@@ -120,7 +120,7 @@ public class DefaultRollPlayController : PlayListControllerBase,
         return Task.CompletedTask;
     }
 
-    public override async Task<SingleSongBase?> MoveNext()
+    public override async Task<SingleSongBase?> MoveNextAsync()
     {
         if (_currentSongListContainers.FirstOrDefault() is UndeterminedContainerBase undc)
         {
@@ -152,7 +152,7 @@ public class DefaultRollPlayController : PlayListControllerBase,
         return targetList[_index];
     }
 
-    public override Task<SingleSongBase?> MovePrevious()
+    public override Task<SingleSongBase?> MovePreviousAsync()
     {
         var targetList = _isRandomList ? _randomedList : _list;
         if (_index == -1) _index = targetList.Count - 1;

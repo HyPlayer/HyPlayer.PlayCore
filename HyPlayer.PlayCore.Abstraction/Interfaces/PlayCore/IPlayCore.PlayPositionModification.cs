@@ -4,7 +4,7 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.PlayCore;
 
 public interface IPlayCorePlayPositionModification
 {
-    public Task MovePointerTo(SingleSongBase song);
-    public Task MoveNext();
-    public Task MovePrevious();
+    public Task MovePointerToAsync(SingleSongBase song);
+    public Task MoveNextAsync();
+    public Task MovePreviousAsync();
 }
