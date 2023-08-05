@@ -8,3 +8,5 @@ public abstract class ProvidableItemBase
     public abstract string TypeId { get; }
     public required string ActualId { get; set; }
 }
+
+public interface IProvidableItem { }

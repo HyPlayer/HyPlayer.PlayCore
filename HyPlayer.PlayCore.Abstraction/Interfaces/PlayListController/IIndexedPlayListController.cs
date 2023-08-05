@@ -2,8 +2,8 @@
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
 
-public interface IIndexedPlayListController
+public interface IIndexedPlayListController : IPlaylistController
 {
-    public Task<int> GetCurrentIndex();
-    public Task<SingleSongBase?> GetSongAt(int index);
+    public Task<int> GetCurrentIndexAsync( CancellationToken ctk = new());
+    public Task<SingleSongBase?> GetSongAtAsync(int index, CancellationToken ctk = new());
 }

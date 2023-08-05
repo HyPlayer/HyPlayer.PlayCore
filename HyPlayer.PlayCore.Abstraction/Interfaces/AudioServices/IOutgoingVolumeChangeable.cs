@@ -1,6 +1,6 @@
 ﻿namespace HyPlayer.PlayCore.Abstraction.Interfaces.AudioServices;
 
-public interface IOutgoingVolumeChangeable
+public interface IOutgoingVolumeChangeable : IAudioService
 {
-    public Task ChangeOutgoingVolume(double volume);
+    public Task ChangeOutgoingVolume(double volume, CancellationToken ctk = new());
 }

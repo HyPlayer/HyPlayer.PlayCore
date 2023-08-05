@@ -1,6 +1,8 @@
-﻿namespace HyPlayer.PlayCore.Abstraction.Interfaces.Lyric;
+﻿using HyPlayer.PlayCore.Abstraction.Models.Lyric;
 
-public interface ILyricRomaji
+namespace HyPlayer.PlayCore.Abstraction.Interfaces.Lyric;
+
+public interface ILyricRomaji : ILyricLine
 {
     public string? Romaji { get; set; }
 }

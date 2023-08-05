@@ -2,7 +2,7 @@
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
 
-public interface INavigateSongPlayListController
+public interface INavigateSongPlayListController : IPlaylistController
 {
-    public abstract Task NavigateSongTo(SingleSongBase song);
+    public abstract Task NavigateSongToAsync(SingleSongBase song, CancellationToken ctk = new());
 }

@@ -1,6 +1,8 @@
-﻿namespace HyPlayer.PlayCore.Abstraction.Interfaces.Lyric;
+﻿using HyPlayer.PlayCore.Abstraction.Models.Lyric;
 
-public interface ILyricSoramimi
+namespace HyPlayer.PlayCore.Abstraction.Interfaces.Lyric;
+
+public interface ILyricSoramimi : ILyricLine
 {
     public string? Soramimi { get; set; }
 }

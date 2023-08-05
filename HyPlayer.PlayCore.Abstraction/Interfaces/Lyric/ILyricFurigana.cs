@@ -1,6 +1,8 @@
-﻿namespace HyPlayer.PlayCore.Abstraction.Interfaces.Lyric;
+﻿using HyPlayer.PlayCore.Abstraction.Models.Lyric;
 
-public interface ILyricFurigana
+namespace HyPlayer.PlayCore.Abstraction.Interfaces.Lyric;
+
+public interface ILyricFurigana : ILyricLine
 {
     public string? Furigana { get; set; } // TODO: Need to define format of furigana
 }

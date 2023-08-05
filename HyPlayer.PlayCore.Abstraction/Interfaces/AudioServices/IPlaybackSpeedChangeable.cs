@@ -2,7 +2,7 @@
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.AudioServices;
 
-public interface IPlaybackSpeedChangeable
+public interface IPlaybackSpeedChangeable : IAudioService
 {
     /// <summary>
     /// 允许更改播放更改播放倍速 (x1.0)
@@ -15,6 +15,6 @@ public interface IPlaybackSpeedChangeable
         /// <param name="ticket">音频票</param>
         /// <param name="playbackSpeed">目标速度(x1.0)</param>
         /// <returns></returns>
-        public Task ChangePlaybackSpeed(AudioTicketBase ticket, double playbackSpeed);
+        public Task ChangePlaybackSpeed(AudioTicketBase ticket, double playbackSpeed, CancellationToken ctk = new());
     }
 }

@@ -2,7 +2,7 @@
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.Provider;
 
-public interface IRecommendationProvidable
+public interface IRecommendationProvidable : IProvider
 {
-    public Task<ContainerBase?> GetRecommendation(string? typeId = null);
+    public Task<ContainerBase?> GetRecommendationAsync(string? typeId = null, CancellationToken ctk = new());
 }

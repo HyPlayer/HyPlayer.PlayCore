@@ -2,7 +2,7 @@
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.AudioServices;
 
-public interface IStopAudioTicketService
+public interface IStopAudioTicketService : IAudioService
 {
-    public Task StopTicket(AudioTicketBase ticket);
+    public Task StopTicket(AudioTicketBase ticket, CancellationToken ctk = new());
 }

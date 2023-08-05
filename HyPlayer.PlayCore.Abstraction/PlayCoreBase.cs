@@ -14,37 +14,39 @@ public abstract class PlayCoreBase : IPlayCoreService,
 {
     public virtual List<AudioServiceBase>? AudioServices { get; protected set; } = null;
     public virtual List<ProviderBase>? MusicProviders { get; protected set; } = null;
-    public virtual List<PlayListControllerBase>? PlayListControllers { get; protected set; } = null;
+    public virtual List<PlayControllerBase>? PlayListControllers { get; protected set; } = null;
     public virtual AudioServiceBase? CurrentAudioService { get; protected set; } = null;
-    public virtual PlayListControllerBase? CurrentPlayListController { get; protected set; } = null;
+    public virtual PlayControllerBase? CurrentPlayListController { get; protected set; } = null;
 
     public virtual SingleSongBase? CurrentSong { get; protected set; }
     public virtual ContainerBase? CurrentSongContainer { get; protected set; }
-    public virtual List<SingleSongBase>? SongList { get; protected set; }
+    public virtual PlayListManagerBase? CurrentPlayList { get; protected set; }
     public virtual AudioTicketBase? CurrentPlayingTicket { get; protected set; }
     public virtual bool IsRandom { get; protected set; }
 
-    public abstract Task RegisterAudioServiceAsync(Type serviceType);
-    public abstract Task RegisterMusicProviderAsync(Type serviceType);
-    public abstract Task RegisterPlayListControllerAsync(Type serviceType);
-    public abstract Task UnregisterAudioServiceAsync(Type serviceType);
-    public abstract Task UnregisterMusicProviderAsync(Type serviceType);
-    public abstract Task UnregisterPlayListControllerAsync(Type serviceType);
-    public abstract Task FocusAudioServiceAsync(Type serviceType);
-    public abstract Task FocusPlayListControllerAsync(Type serviceType);
-    public abstract Task ChangeSongContainerAsync(ContainerBase? container);
-    public abstract Task InsertSongAsync(SingleSongBase item, int index = -1);
-    public abstract Task InsertSongRangeAsync(List<SingleSongBase> items, int index = -1);
-    public abstract Task RemoveSongAsync(SingleSongBase item);
-    public abstract Task RemoveSongRangeAsync(List<SingleSongBase> item);
-    public abstract Task RemoveAllSongAsync();
-    public abstract Task SetRandomAsync(bool isRandom);
-    public abstract Task ReRandomAsync();
-    public abstract Task SeekAsync(long position);
-    public abstract Task PlayAsync();
-    public abstract Task PauseAsync();
-    public abstract Task StopAsync();
-    public abstract Task MovePointerToAsync(SingleSongBase song);
-    public abstract Task MoveNextAsync();
-    public abstract Task MovePreviousAsync();
+    public abstract Task RegisterAudioServiceAsync(Type serviceType, CancellationToken ctk = new());
+    public abstract Task RegisterMusicProviderAsync(Type serviceType, CancellationToken ctk = new());
+    public abstract Task RegisterPlayListControllerAsync(Type serviceType, CancellationToken ctk = new());
+    public abstract Task UnregisterAudioServiceAsync(Type serviceType, CancellationToken ctk = new());
+    public abstract Task UnregisterMusicProviderAsync(Type serviceType, CancellationToken ctk = new());
+    public abstract Task UnregisterPlayListControllerAsync(Type serviceType, CancellationToken ctk = new());
+    public abstract Task FocusAudioServiceAsync(Type serviceType, CancellationToken ctk = new());
+    public abstract Task FocusPlayListControllerAsync(Type serviceType, CancellationToken ctk = new());
+    public abstract Task ChangeSongContainerAsync(ContainerBase? container, CancellationToken ctk = new());
+    public abstract Task InsertSongAsync(SingleSongBase item, int index = -1, CancellationToken ctk = new());
+    public abstract Task InsertSongRangeAsync(List<SingleSongBase> items, int index = -1, CancellationToken ctk = new());
+    public abstract Task RemoveSongAsync(SingleSongBase item, CancellationToken ctk = new());
+    public abstract Task RemoveSongRangeAsync(List<SingleSongBase> item, CancellationToken ctk = new());
+    public abstract Task RemoveAllSongAsync(CancellationToken ctk = new());
+    public abstract Task SetRandomAsync(bool isRandom, CancellationToken ctk = new());
+    public abstract Task ReRandomAsync(CancellationToken ctk = new());
+    public abstract Task SeekAsync(long position, CancellationToken ctk = new());
+    public abstract Task PlayAsync(CancellationToken ctk = new());
+    public abstract Task PauseAsync(CancellationToken ctk = new());
+    public abstract Task StopAsync(CancellationToken ctk = new());
+    public abstract Task MovePointerToAsync(SingleSongBase song, CancellationToken ctk = new());
+    public abstract Task MoveNextAsync(CancellationToken ctk = new());
+    public abstract Task MovePreviousAsync(CancellationToken ctk = new());
 }
+
+public interface IPlayCore { }

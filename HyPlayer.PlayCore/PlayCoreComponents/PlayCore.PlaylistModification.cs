@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using HyPlayer.PlayCore.Abstraction;
 using HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
 using HyPlayer.PlayCore.Abstraction.Models;
 using HyPlayer.PlayCore.Abstraction.Models.SingleItems;
@@ -11,53 +12,49 @@ public sealed partial class Chopin
 
     public override ContainerBase? CurrentSongContainer { get; protected set; }
 
-    public override List<SingleSongBase>? SongList { get; protected set; }
+    public override PlayListManagerBase? CurrentPlayList { get; protected set; }
 
-    public override Task ChangeSongContainerAsync(ContainerBase? container)
+
+    public override Task ChangeSongContainerAsync(ContainerBase? container, CancellationToken ctk = new())
     {
         CurrentSongContainer = container;
         return Task.CompletedTask;
     }
 
-    public override async Task InsertSongAsync(SingleSongBase item, int index = -1)
+    public override async Task InsertSongAsync(SingleSongBase item, int index = -1, CancellationToken ctk = new())
     {
-        if (CurrentPlayListController is IInsertablePlaylistController controller)
-            await controller.InsertSong(item, index);
+        await (CurrentPlayList?.AddSongAsync(item, index, ctk) ?? Task.CompletedTask);
     }
 
-    public override async Task InsertSongRangeAsync(List<SingleSongBase> items, int index = -1)
+    public override async Task InsertSongRangeAsync(List<SingleSongBase> items, int index = -1, CancellationToken ctk = new())
     {
-        if (CurrentPlayListController is IRangeControllablePlayListController controller)
-            await controller.InsertSongRange(items, index);
+        await (CurrentPlayList?.AddSongRangeAsync(items, index, ctk) ?? Task.CompletedTask);
     }
 
-    public override async Task RemoveSongAsync(SingleSongBase item)
+    public override async Task RemoveSongAsync(SingleSongBase item, CancellationToken ctk = new())
     {
-        if (CurrentPlayListController is IInsertablePlaylistController controller)
-            await controller.RemoveSong(item);
+        await (CurrentPlayList?.RemoveSongAsync(item, ctk) ?? Task.CompletedTask);
     }
 
-    public override async Task RemoveSongRangeAsync(List<SingleSongBase> items)
+    public override async Task RemoveSongRangeAsync(List<SingleSongBase> items, CancellationToken ctk = new())
     {
-        if (CurrentPlayListController is IRangeControllablePlayListController controller)
-            await controller.RemoveSongRange(items);
+        await (CurrentPlayList?.RemoveSongRangeAsync(items, ctk) ?? Task.CompletedTask);
     }
 
-    public override async Task RemoveAllSongAsync()
+    public override async Task RemoveAllSongAsync( CancellationToken ctk = new())
     {
-        if (CurrentPlayListController is not null)
-            await CurrentPlayListController.ClearSongsAsync();
+        await (CurrentPlayList?.ClearSongsAsync(ctk) ?? Task.CompletedTask);
     }
 
-    public override async Task SetRandomAsync(bool isRandom)
+    public override async Task SetRandomAsync(bool isRandom, CancellationToken ctk = new())
     {
         if (CurrentSongContainer is IRandomizablePlayListController randomizablePlayListController)
-            await randomizablePlayListController.Randomize(isRandom ? -1 : DateTime.Now.Millisecond);
+            await randomizablePlayListController.RandomizeAsync(isRandom ? -1 : DateTime.Now.Millisecond, ctk);
     }
 
-    public override async Task ReRandomAsync()
+    public override async Task ReRandomAsync(CancellationToken ctk = new())
     {
         if (CurrentPlayListController is IRandomizablePlayListController randomizablePlayListController)
-            await randomizablePlayListController.Randomize(DateTime.Now.Millisecond);
+            await randomizablePlayListController.RandomizeAsync(DateTime.Now.Millisecond, ctk);
     }
 }

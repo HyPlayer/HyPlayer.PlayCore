@@ -3,7 +3,7 @@ using HyPlayer.PlayCore.Abstraction.Models.SingleItems;
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.Provider;
 
-public interface IMusicResourceProvidable
+public interface IMusicResourceProvidable : IProvider
 {
-    public Task<MusicResourceBase?> GetMusicResource(SingleSongBase song, ResourceQualityTag qualityTag);
+    public Task<MusicResourceBase?> GetMusicResourceAsync(SingleSongBase song, ResourceQualityTag qualityTag, CancellationToken ctk = new());
 }

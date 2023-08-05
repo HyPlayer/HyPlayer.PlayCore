@@ -13,19 +13,19 @@ namespace HyPlayer.PlayCore;
 public sealed partial class Chopin :
     INotifyDependencyChanged<IEnumerable<AudioServiceBase>>,
     INotifyDependencyChanged<IEnumerable<ProviderBase>>,
-    INotifyDependencyChanged<IEnumerable<PlayListControllerBase>>,
+    INotifyDependencyChanged<IEnumerable<PlayControllerBase>>,
     INotifyDependencyChanged<AudioServiceBase>,
-    INotifyDependencyChanged<PlayListControllerBase>
+    INotifyDependencyChanged<PlayControllerBase>
 {
     public override List<AudioServiceBase>? AudioServices { get; protected set; }
 
     public override List<ProviderBase>? MusicProviders { get; protected set; }
 
-    public override List<PlayListControllerBase>? PlayListControllers { get; protected set; }
+    public override List<PlayControllerBase>? PlayListControllers { get; protected set; }
 
     public override AudioServiceBase? CurrentAudioService { get; protected set; }
 
-    public override PlayListControllerBase? CurrentPlayListController { get; protected set; }
+    public override PlayControllerBase? CurrentPlayListController { get; protected set; }
 
 
     private readonly IDepository _depository;
@@ -37,9 +37,9 @@ public sealed partial class Chopin :
         new(typeof(ProviderBase), DependencyLifetime.Singleton);
 
     private static readonly DependencyDescription _playListControllerDescription =
-        new(typeof(PlayListControllerBase), DependencyLifetime.Singleton);
+        new(typeof(PlayControllerBase), DependencyLifetime.Singleton);
 
-    public override Task RegisterAudioServiceAsync(Type serviceType)
+    public override Task RegisterAudioServiceAsync(Type serviceType, CancellationToken ctk = new())
     {
         if (_depository.GetDependency(typeof(AudioServiceBase)) is null)
             _depository.AddDependency(_audioServiceDescription);
@@ -50,7 +50,7 @@ public sealed partial class Chopin :
         return Task.CompletedTask;
     }
 
-    public override Task RegisterMusicProviderAsync(Type serviceType)
+    public override Task RegisterMusicProviderAsync(Type serviceType, CancellationToken ctk = new())
     {
         if (_depository.GetDependency(typeof(ProviderBase)) is null)
             _depository.AddDependency(_providerDescription);
@@ -61,9 +61,9 @@ public sealed partial class Chopin :
         return Task.CompletedTask;
     }
 
-    public override Task RegisterPlayListControllerAsync(Type serviceType)
+    public override Task RegisterPlayListControllerAsync(Type serviceType, CancellationToken ctk = new())
     {
-        if (_depository.GetDependency(typeof(PlayListControllerBase)) is null)
+        if (_depository.GetDependency(typeof(PlayControllerBase)) is null)
             _depository.AddDependency(_playListControllerDescription);
         _depository.AddRelation(_playListControllerDescription, new(serviceType));
         var depDesc = new DependencyDescription(serviceType, DependencyLifetime.Singleton);
@@ -72,7 +72,7 @@ public sealed partial class Chopin :
         return Task.CompletedTask;
     }
 
-    public override Task UnregisterAudioServiceAsync(Type serviceType)
+    public override Task UnregisterAudioServiceAsync(Type serviceType, CancellationToken ctk = new())
     {
         _depository.DeleteRelation(
             _audioServiceDescription,
@@ -85,7 +85,7 @@ public sealed partial class Chopin :
         return Task.CompletedTask;
     }
 
-    public override Task UnregisterMusicProviderAsync(Type serviceType)
+    public override Task UnregisterMusicProviderAsync(Type serviceType, CancellationToken ctk = new())
     {
         _depository.DeleteRelation(
             _providerDescription,
@@ -97,7 +97,7 @@ public sealed partial class Chopin :
         return Task.CompletedTask;
     }
 
-    public override Task UnregisterPlayListControllerAsync(Type serviceType)
+    public override Task UnregisterPlayListControllerAsync(Type serviceType, CancellationToken ctk = new())
     {
         _depository.DeleteRelation(
             _providerDescription,
@@ -109,13 +109,13 @@ public sealed partial class Chopin :
         return Task.CompletedTask;
     }
 
-    public override Task FocusAudioServiceAsync(Type serviceType)
+    public override Task FocusAudioServiceAsync(Type serviceType, CancellationToken ctk = new())
     {
         _depository.ChangeFocusingRelation(_audioServiceDescription, new(serviceType));
         return Task.CompletedTask;
     }
 
-    public override Task FocusPlayListControllerAsync(Type serviceType)
+    public override Task FocusPlayListControllerAsync(Type serviceType, CancellationToken ctk = new())
     {
         _depository.ChangeFocusingRelation(_playListControllerDescription,
                                            new(serviceType));
@@ -138,11 +138,11 @@ public sealed partial class Chopin :
             .ToList());
     }
 
-    public void OnDependencyChanged(IEnumerable<PlayListControllerBase>? marker)
+    public void OnDependencyChanged(IEnumerable<PlayControllerBase>? marker)
     {
         PlayListControllers = new(
-            (_depository.ResolveDependencies(typeof(IEnumerable<PlayListControllerBase>)))
-            .Select(o => (PlayListControllerBase)o)
+            (_depository.ResolveDependencies(typeof(IEnumerable<PlayControllerBase>)))
+            .Select(o => (PlayControllerBase)o)
             .ToList());
     }
 
@@ -152,9 +152,9 @@ public sealed partial class Chopin :
             = (AudioServiceBase)_depository.ResolveDependency(typeof(AudioServiceBase));
     }
 
-    public void OnDependencyChanged(PlayListControllerBase? marker)
+    public void OnDependencyChanged(PlayControllerBase? marker)
     {
         CurrentPlayListController
-            = (PlayListControllerBase)_depository.ResolveDependency(typeof(PlayListControllerBase));
+            = (PlayControllerBase)_depository.ResolveDependency(typeof(PlayControllerBase));
     }
 }

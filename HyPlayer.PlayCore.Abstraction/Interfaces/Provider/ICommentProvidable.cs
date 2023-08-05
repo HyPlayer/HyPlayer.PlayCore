@@ -2,7 +2,7 @@
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.Provider;
 
-public interface ICommentProvidable
+public interface ICommentProvidable : IProvider
 {
-    public Task<ContainerBase?> GetCommentContainer();
+    public Task<ContainerBase?> GetCommentContainerAsync( CancellationToken ctk = new());
 }

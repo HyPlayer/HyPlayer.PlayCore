@@ -3,8 +3,8 @@ using HyPlayer.PlayCore.Abstraction.Models.SingleItems;
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
 
-public interface IRandomizablePlayListController
+public interface IRandomizablePlayListController : IPlaylistController
 {
-    public Task Randomize(int seed = -1);
-    public Task<List<SingleSongBase>> GetOriginalList();
+    public Task RandomizeAsync(int seed = -1, CancellationToken ctk = new());
+    public Task<List<SingleSongBase>> GetOriginalListAsync(CancellationToken ctk = new());
 }

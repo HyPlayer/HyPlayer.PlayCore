@@ -3,7 +3,7 @@ using HyPlayer.PlayCore.Abstraction.Models.SingleItems;
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.Provider;
 
-public interface ILyricProvidable
+public interface ILyricProvidable : IProvider
 {
-    public Task<List<RawLyricInfo>> GetLyricInfo(SingleSongBase song);
+    public Task<List<RawLyricInfo>> GetLyricInfoAsync(SingleSongBase song, CancellationToken ctk = new());
 }

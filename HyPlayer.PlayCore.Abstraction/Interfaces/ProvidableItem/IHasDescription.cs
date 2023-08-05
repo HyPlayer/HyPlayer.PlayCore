@@ -1,6 +1,8 @@
-﻿namespace HyPlayer.PlayCore.Abstraction.Interfaces.ProvidableItem;
+﻿using HyPlayer.PlayCore.Abstraction.Models;
 
-public interface IHasDescription
+namespace HyPlayer.PlayCore.Abstraction.Interfaces.ProvidableItem;
+
+public interface IHasDescription : IProvidableItem
 {
     public string? Description { get; set; }
 }

@@ -2,7 +2,7 @@
 
 namespace HyPlayer.PlayCore.Abstraction.Models.Lyric;
 
-public class PreProcessedWordLyricLine : PreProcessedLyricLine
+public class ProcessedWordLyricLine : ProcessedLyricLine
 {
     public required List<LyricWord> Words { get; init; }
 }

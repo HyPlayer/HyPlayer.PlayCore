@@ -1,6 +1,8 @@
-﻿namespace HyPlayer.PlayCore.Abstraction.Interfaces.Lyric;
+﻿using HyPlayer.PlayCore.Abstraction.Models.Lyric;
 
-public interface ILyricTranslation
+namespace HyPlayer.PlayCore.Abstraction.Interfaces.Lyric;
+
+public interface ILyricTranslation : ILyricLine
 {
     public string? Translation { get; set; }
 }

@@ -2,9 +2,9 @@ using System.Collections.ObjectModel;
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.Provider;
 
-public interface IProvableItemLikable
+public interface IProvableItemLikable : IProvider
 {
-    public Task LikeProvidableItem(string inProviderId, string? targetId);
-    public Task UnlikeProvidableItem(string inProviderId, string? targetId);
-    public Task<List<string>> GetLikedProvidableIds(string typeId);
+    public Task LikeProvidableItemAsync(string inProviderId, string? targetId, CancellationToken ctk = new());
+    public Task UnlikeProvidableItemAsync(string inProviderId, string? targetId, CancellationToken ctk = new());
+    public Task<List<string>> GetLikedProvidableIdsAsync(string typeId, CancellationToken ctk = new());
 }

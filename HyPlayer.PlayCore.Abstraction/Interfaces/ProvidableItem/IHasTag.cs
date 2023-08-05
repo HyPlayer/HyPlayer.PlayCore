@@ -1,8 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using HyPlayer.PlayCore.Abstraction.Models;
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.ProvidableItem;
 
-public interface IHasTag
+public interface IHasTag : IProvidableItem
 {
     public List<string> Tags { get; set; }
 }

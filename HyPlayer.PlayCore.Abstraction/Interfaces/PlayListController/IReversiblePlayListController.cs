@@ -1,6 +1,6 @@
 ﻿namespace HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
 
-public interface IReversiblePlayListController
+public interface IReversiblePlayListController : IPlaylistController
 {
-    public Task Reverse();
+    public Task Reverse(CancellationToken ctk = new());
 }

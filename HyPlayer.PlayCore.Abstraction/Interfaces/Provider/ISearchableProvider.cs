@@ -2,7 +2,7 @@ using HyPlayer.PlayCore.Abstraction.Models;
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.Provider;
 
-public interface ISearchableProvider
+public interface ISearchableProvider : IProvider
 {
-    public Task<ContainerBase?> SearchProvidableItems(string keyword,string typeId);
+    public Task<ContainerBase?> SearchProvidableItemsAsync(string keyword,string typeId, CancellationToken ctk = new());
 }

@@ -4,11 +4,13 @@ using HyPlayer.PlayCore.Abstraction.Models.Resources;
 
 namespace HyPlayer.PlayCore.Abstraction;
 
-public abstract class AudioServiceBase
+public abstract class AudioServiceBase : IAudioService
 {
     public abstract string Id { get; }
     public abstract string Name { get; }
-    public abstract Task<AudioTicketBase> GetAudioTicket(MusicResourceBase musicResource);
-    public abstract Task DisposeAudioTicket(AudioTicketBase audioTicket);
-    public abstract Task<List<AudioTicketBase>> GetCreatedAudioTickets();
+    public abstract Task<AudioTicketBase> GetAudioTicketAsync(MusicResourceBase musicResource, CancellationToken ctk = new());
+    public abstract Task DisposeAudioTicketAsync(AudioTicketBase audioTicket, CancellationToken ctk = new());
+    public abstract Task<List<AudioTicketBase>> GetCreatedAudioTicketsAsync(CancellationToken ctk = new());
 }
+
+public interface IAudioService { }

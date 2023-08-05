@@ -3,7 +3,7 @@ using HyPlayer.PlayCore.Abstraction.Models.Lyric;
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.Lyric;
 
-public interface ILyricProcessor
+public interface ILyricProcessor : ILyricLine
 {
-    public Task<List<PreProcessedLyricLine>> ProcessLyric(string lrcText);
+    public Task<List<ProcessedLyricLine>> ProcessLyric(string lrcText, CancellationToken ctk = new());
 }

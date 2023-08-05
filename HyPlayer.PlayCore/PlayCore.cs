@@ -12,7 +12,7 @@ public sealed partial class Chopin : PlayCoreBase
     public Chopin(
         IEnumerable<AudioServiceBase> audioServices,
         IEnumerable<ProviderBase> providers,
-        IEnumerable<PlayListControllerBase> playListControllers,
+        IEnumerable<PlayControllerBase> playListControllers,
         IDepository depository)
     {
         SafeFireAndForgetExtensions.Initialize(false);
@@ -25,6 +25,6 @@ public sealed partial class Chopin : PlayCoreBase
                 new ObservableCollection<ProviderBase>(providers.ToList()));
         PlayListControllers =
             new(
-                new ObservableCollection<PlayListControllerBase>(playListControllers.ToList()));
+                new ObservableCollection<PlayControllerBase>(playListControllers.ToList()));
     }
 }

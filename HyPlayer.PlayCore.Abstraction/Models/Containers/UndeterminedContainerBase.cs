@@ -2,5 +2,5 @@
 
 public abstract class UndeterminedContainerBase : ContainerBase
 {
-    public abstract Task<List<ProvidableItemBase>> GetNextItemsRange();
+    public abstract Task<List<ProvidableItemBase>> GetNextItemsRangeAsync(CancellationToken ctk = new());
 }

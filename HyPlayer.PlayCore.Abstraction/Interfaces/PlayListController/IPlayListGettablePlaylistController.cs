@@ -3,7 +3,7 @@ using HyPlayer.PlayCore.Abstraction.Models.SingleItems;
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
 
-public interface IPlayListGettablePlaylistContainer
+public interface IPlayListGettablePlaylistController : IPlaylistController
 {
-    public abstract Task<List<SingleSongBase>> GetPlayList();
+    public Task<List<SingleSongBase>> GetOrderedPlayListAsync( CancellationToken ctk = new());
 }
