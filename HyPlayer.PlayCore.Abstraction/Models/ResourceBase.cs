@@ -9,7 +9,7 @@ public abstract class ResourceBase
     public bool HasContent { get; set; }
     public string? ExtensionName { get; set; }
     public abstract ResourceType Type { get; }
-    public abstract Task<object?> GetResource(ResourceQualityTag? qualityTag = null, Type? awaitingType = null, CancellationToken ctk = new());
+    public abstract Task<object?> GetResourceAsync(ResourceQualityTag? qualityTag = null, Type? awaitingType = null, CancellationToken ctk = new());
 }
 
 public enum ResourceType
