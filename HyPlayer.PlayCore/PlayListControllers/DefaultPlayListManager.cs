@@ -47,7 +47,7 @@ public class DefaultPlayListManager : PlayListManagerBase
             var start = 0;
             while (hasMore)
             {
-                (hasMore, var progressiveList) = await progressiveLoadingContainer.GetProgressiveItemsList(
+                (hasMore, var progressiveList) = await progressiveLoadingContainer.GetProgressiveItemsListAsync(
                     start, progressiveLoadingContainer.MaxProgressiveCount,
                     ctk);
                 var resultList = progressiveList.OfType<SingleSongBase>().ToList();
