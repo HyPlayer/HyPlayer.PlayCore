@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using AsyncAwaitBestPractices;
 using Depository.Abstraction.Interfaces;
+using Depository.Abstraction.Interfaces.NotificationHub;
 using HyPlayer.PlayCore.Abstraction;
 using HyPlayer.PlayCore.Abstraction.Interfaces.PlayListContainer;
 using HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
@@ -21,13 +22,15 @@ public class OrderedRollPlayController : PlayControllerBase,
 {
     private int _index = 0;
     private readonly IDepository _depository;
+    private readonly INotificationHub _notificationHub;
     private PlayListManagerBase? _playListManager;
     private List<SingleSongBase> _list = new();
 
-    public OrderedRollPlayController(IDepository depository, PlayListManagerBase? playListManager)
+    public OrderedRollPlayController(IDepository depository, PlayListManagerBase? playListManager, INotificationHub notificationHub)
     {
         _depository = depository;
         _playListManager = playListManager;
+        _notificationHub = notificationHub;
     }
 
 
@@ -38,8 +41,8 @@ public class OrderedRollPlayController : PlayControllerBase,
             _index = -1;
         _index++;
         var curSong = _list[_index];
-        _depository.PublishNotificationAsync(new CurrentSongChangedNotification() { CurrentPlayingSong = curSong },
-                                             ctk).SafeFireAndForget();
+        _notificationHub.PublishNotificationAsync(new CurrentSongChangedNotification() { CurrentPlayingSong = curSong },
+                                                  ctk).SafeFireAndForget();
         return Task.FromResult<SingleSongBase?>(curSong);
     }
 
@@ -50,8 +53,8 @@ public class OrderedRollPlayController : PlayControllerBase,
             _index = _list.Count;
         _index--;
         var curSong = _list[_index];
-        _depository.PublishNotificationAsync(new CurrentSongChangedNotification() { CurrentPlayingSong = curSong },
-                                             ctk).SafeFireAndForget();
+        _notificationHub.PublishNotificationAsync(new CurrentSongChangedNotification() { CurrentPlayingSong = curSong },
+                                                  ctk).SafeFireAndForget();
         return Task.FromResult<SingleSongBase?>(curSong);
     }
 
@@ -60,8 +63,8 @@ public class OrderedRollPlayController : PlayControllerBase,
         if (_list.Count >= index || index < 0) return Task.FromResult<SingleSongBase?>(null);
         _index = index;
         var curSong = _list[index];
-        _depository.PublishNotificationAsync(new CurrentSongChangedNotification() { CurrentPlayingSong = curSong },
-                                             ctk).SafeFireAndForget();
+        _notificationHub.PublishNotificationAsync(new CurrentSongChangedNotification() { CurrentPlayingSong = curSong },
+                                                  ctk).SafeFireAndForget();
         return Task.FromResult<SingleSongBase?>(_list[index]);
     }
 
@@ -69,7 +72,7 @@ public class OrderedRollPlayController : PlayControllerBase,
     {
         _list.Reverse();
         _index = _list.Count - _index - 1;
-        _depository.PublishNotificationAsync(new OrderedPlaylistChangedNotification(){ IsRandom = false, OrderedList = _list}, ctk).SafeFireAndForget();
+        _notificationHub.PublishNotificationAsync(new OrderedPlaylistChangedNotification(){ IsRandom = false, OrderedList = _list}, ctk).SafeFireAndForget();
         return Task.CompletedTask;
     }
 
@@ -78,8 +81,8 @@ public class OrderedRollPlayController : PlayControllerBase,
         var indexOfSong = _list.IndexOf(song);
         if (indexOfSong >= 0)
             _index = indexOfSong;
-        _depository.PublishNotificationAsync(new CurrentSongChangedNotification() { CurrentPlayingSong = _list[_index] },
-                                             ctk).SafeFireAndForget();
+        _notificationHub.PublishNotificationAsync(new CurrentSongChangedNotification() { CurrentPlayingSong = _list[_index] },
+                                                  ctk).SafeFireAndForget();
         return Task.CompletedTask;
     }
 
@@ -103,7 +106,7 @@ public class OrderedRollPlayController : PlayControllerBase,
     {
         _playListManager = _depository.ResolveDependency(typeof(PlayListManagerBase)) as PlayListManagerBase;
         _list = await (_playListManager?.GetPlayListAsync() ?? Task.FromResult(new List<SingleSongBase>()));
-        _depository.PublishNotificationAsync(new OrderedPlaylistChangedNotification(){ IsRandom = false, OrderedList = _list}).SafeFireAndForget();
+        _notificationHub.PublishNotificationAsync(new OrderedPlaylistChangedNotification(){ IsRandom = false, OrderedList = _list}).SafeFireAndForget();
     }
 
     public async Task HandleNotificationAsync(
@@ -111,6 +114,6 @@ public class OrderedRollPlayController : PlayControllerBase,
         CancellationToken ctk = new())
     {
         _list = await (_playListManager?.GetPlayListAsync(ctk) ?? Task.FromResult(new List<SingleSongBase>()));
-        _depository.PublishNotificationAsync(new OrderedPlaylistChangedNotification(){ IsRandom = false, OrderedList = _list}, ctk).SafeFireAndForget();
+        _notificationHub.PublishNotificationAsync(new OrderedPlaylistChangedNotification(){ IsRandom = false, OrderedList = _list}, ctk).SafeFireAndForget();
     }
 }
