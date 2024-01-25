@@ -1,24 +1,11 @@
-using HyPlayer.PlayCore.Implementation.AudioGraphService;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Storage.Pickers;
-using Windows.Storage;
-using HyPlayer.PlayCore.Abstraction.Models.Resources;
-using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions;
 using HyPlayer.PlayCore.Abstraction.Models.AudioServiceComponents;
+using HyPlayer.PlayCore.Implementation.AudioGraphService;
+using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions;
+using Microsoft.UI.Xaml;
+using System;
+using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -41,6 +28,10 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
         private async void SelectSong_Click(object sender, RoutedEventArgs e)
         {
             var file = await PickFileAsync();
+            if (file == null)
+            {
+                return;
+            }
             var musicResource = new AudioGraphMusicResource() { ExtensionName = file.FileType, HasContent = true, ResourceName = file.Name, Url = file.Path };
             _audioGraphTicket = await _audioGraphService.GetAudioTicketAsync(musicResource);
         }

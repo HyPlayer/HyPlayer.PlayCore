@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Media.Audio;
 using Windows.Media.Core;
+using Windows.Storage;
 
 namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions
 {
@@ -16,13 +17,22 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions
 
         public static async Task<AudioGraphTicket> CreateAudioGraphTicket(MusicResourceBase musicResource, AudioGraph audioGraph)
         {
-            var mediaSource = MediaSource.CreateFromUri(new Uri(musicResource.Url));
+            var targetUri = new Uri(musicResource.Url);
+            MediaSource mediaSource;
+            if (targetUri.Host == string.Empty)
+            {
+                StorageFile storageFile = await StorageFile.GetFileFromPathAsync(musicResource.Url);
+                mediaSource = MediaSource.CreateFromStorageFile(storageFile);
+            }
+            else
+            {
+                mediaSource = MediaSource.CreateFromUri(targetUri);
+            }
             var nodeResult = await audioGraph.CreateMediaSourceAudioInputNodeAsync(mediaSource);
             if (nodeResult.Status != MediaSourceAudioInputNodeCreationStatus.Success)
             {
                 throw nodeResult.ExtendedError;
             }
-            var node = nodeResult.Node;
             return new AudioGraphTicket(nodeResult.Node, mediaSource)
             {
                 AudioServiceId = "com.storyteller.audiograph.chopin",
@@ -41,7 +51,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions
         {
             if (Status != AudioTicketStatus.Playing)
             {
-                PlaybackMediaSourceInputNode.Stop();
+                PlaybackMediaSourceInputNode.Start();
                 Status = AudioTicketStatus.Playing;
             }
         }

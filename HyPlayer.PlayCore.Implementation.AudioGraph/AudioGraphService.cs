@@ -78,7 +78,6 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
         {
             ctk.ThrowIfCancellationRequested();
             var result = await AudioGraphTicket.CreateAudioGraphTicket(musicResource, PlaybackAudioGraph);
-            await ConnectTicketToOutputNodeAsync(result, _deviceOutputNode);
             _createdAudioTickets.Add(result);
             return result;
         }
@@ -103,9 +102,12 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
         public Task PlayAudioTicketAsync(AudioTicketBase audioTicket, CancellationToken ctk = default)
         {
             ctk.ThrowIfCancellationRequested();
-            Start();
             if (audioTicket is AudioGraphTicket ticket)
             {
+                if (ticket.PlaybackMediaSourceInputNode.OutgoingConnections.Count == 0)
+                {
+                    ConnectTicketToOutputNodeAsync(ticket, _deviceOutputNode);
+                }
                 ticket.Start();
             }
             return Task.CompletedTask;
@@ -267,12 +269,18 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
 
         public async Task InitializeService()
         {
-            var createResult = await AudioGraph.CreateAsync(_audioGraphSettings);
-            if (createResult.Status != AudioGraphCreationStatus.Success)
+            var creationResult = await AudioGraph.CreateAsync(_audioGraphSettings);
+            if (creationResult.Status != AudioGraphCreationStatus.Success)
             {
-                throw createResult.ExtendedError;
+                throw creationResult.ExtendedError;
             }
-            PlaybackAudioGraph = createResult.Graph;
+            PlaybackAudioGraph = creationResult.Graph;
+            var creationResultDevice = await PlaybackAudioGraph.CreateDeviceOutputNodeAsync();
+            if (creationResultDevice.Status != AudioDeviceNodeCreationStatus.Success)
+            {
+                throw creationResult.ExtendedError;
+            }
+            _deviceOutputNode = creationResultDevice.DeviceOutputNode;
         }
 
         public AudioGraphService(AudioServiceSettingsBase serviceSettings)
