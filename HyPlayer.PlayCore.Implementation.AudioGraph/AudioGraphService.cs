@@ -276,6 +276,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
                 _audioGraphSettings = settings.AudioGraphSettings;
             }
             _positionNotifyTimer.Elapsed += OnPositionNotifyTimerElapsed;
+            _positionNotifyTimer.Start();
         }
     }
 }
