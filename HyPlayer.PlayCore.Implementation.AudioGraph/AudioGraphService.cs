@@ -238,6 +238,12 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             OnPositionChanged?.Invoke(MasterTicket.PlaybackMediaSourceInputNode.Position.TotalMilliseconds);
         }
 
+        public Task SetMasterTicketAsync(AudioGraphTicket graphTicket)
+        {
+            MasterTicket = graphTicket;
+            return Task.CompletedTask;
+        }
+
         public void Start()
         {
 
