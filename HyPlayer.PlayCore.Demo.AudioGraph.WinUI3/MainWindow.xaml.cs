@@ -4,6 +4,8 @@ using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions;
 using Microsoft.UI.Xaml;
 using System;
 using System.Threading.Tasks;
+using Windows.Devices.Enumeration;
+using Windows.Foundation;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 
@@ -34,6 +36,7 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
             }
             var musicResource = new AudioGraphMusicResource() { ExtensionName = file.FileType, HasContent = true, ResourceName = file.Name, Url = file.Path };
             _audioGraphTicket = await _audioGraphService.GetAudioTicketAsync(musicResource);
+            await _audioGraphService.SetMasterTicketAsync(_audioGraphTicket as AudioGraphTicket);
         }
 
         private void Start_Click(object sender, RoutedEventArgs e)
@@ -44,7 +47,8 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
 
         private void Stop_Click(object sender, RoutedEventArgs e)
         {
-            _audioGraphService?.StopTicketAsync(_audioGraphTicket);
+            _audioGraphService?.Stop();
+            _audioGraphService?.PauseAudioTicketAsync(_audioGraphTicket);
         }
         private async Task<StorageFile> PickFileAsync()
         {
@@ -69,6 +73,28 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
             {
                 return null;
             }
+        }
+
+        private async void ChangeDevice_Click(object sender, RoutedEventArgs e)
+        {
+            var devicePicker = new DevicePicker();
+            devicePicker.Filter.SupportedDeviceClasses.Add(DeviceClass.AudioRender);
+            var ge = ChangeDevice.TransformToVisual(null);
+            var point = ge.TransformPoint(new Point());
+            var rect = new Rect(point,
+                new Point(point.X + ChangeDevice.ActualWidth,
+                    point.Y + ChangeDevice.ActualHeight));
+            var device = await devicePicker.PickSingleDeviceAsync(rect);
+            if (device != null)
+            {
+                var outputDevice = new AudioGraphOutputDevice() {DeviceInformation = device, Name = device.Name};
+                await _audioGraphService.SetOutputDevicesAsync(outputDevice);
+            }
+        }
+
+        private async void Default_Click(object sender, RoutedEventArgs e)
+        {
+            await _audioGraphService.SetOutputDevicesAsync(null);
         }
     }
 }

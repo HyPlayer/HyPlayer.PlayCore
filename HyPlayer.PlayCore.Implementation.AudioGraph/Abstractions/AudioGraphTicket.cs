@@ -44,27 +44,24 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions
         {
             if (disposedValue)
             {
-                throw new ObjectDisposedException(typeof(AudioGraphTicket).Name);
+                throw new ObjectDisposedException(nameof(AudioGraphTicket));
             }
         }
         public void Start()
         {
-            if (Status != AudioTicketStatus.Playing)
-            {
-                PlaybackMediaSourceInputNode.Start();
-                Status = AudioTicketStatus.Playing;
-            }
+            ThrowExceptionIfDisposed();
+            PlaybackMediaSourceInputNode.Start();
+            Status = AudioTicketStatus.Playing;
         }
         public void Stop()
         {
-            if (Status != AudioTicketStatus.Stopped)
-            {
-                PlaybackMediaSourceInputNode.Stop();
-                Status = AudioTicketStatus.Stopped;
-            }
+            ThrowExceptionIfDisposed();
+            PlaybackMediaSourceInputNode.Stop();
+            Status = AudioTicketStatus.Stopped;
         }
         public void RemoveAllOutputConnections()
         {
+            ThrowExceptionIfDisposed();
             var connections = PlaybackMediaSourceInputNode.OutgoingConnections.ToList();
             foreach (var connection in connections)
             {
@@ -73,15 +70,18 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions
         }
         public async Task ReplaceAudioGraph(AudioGraph audioGraph)
         {
+            ThrowExceptionIfDisposed();
             var previousMediaSourceNode = PlaybackMediaSourceInputNode;
+            var position = previousMediaSourceNode.Position;
+            previousMediaSourceNode.Dispose();
+            PlaybackMediaSource.Reset();
             var creationResult = await audioGraph.CreateMediaSourceAudioInputNodeAsync(PlaybackMediaSource);
             if (creationResult.Status != MediaSourceAudioInputNodeCreationStatus.Success)
             {
                 throw creationResult.ExtendedError;
             }
             var newMediaSourceNode = creationResult.Node;
-            newMediaSourceNode.Seek(previousMediaSourceNode.Position);
-            previousMediaSourceNode.Dispose();
+            newMediaSourceNode.Seek(position);
             PlaybackMediaSourceInputNode = newMediaSourceNode;
         }
         protected virtual void Dispose(bool disposing)
@@ -95,7 +95,6 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions
                     PlaybackMediaSourceInputNode?.Dispose();
                     PlaybackMediaSource?.Dispose();
                 }
-
                 disposedValue = true;
             }
         }
