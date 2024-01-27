@@ -17,28 +17,33 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions
 
         public static async Task<AudioGraphTicket> CreateAudioGraphTicket(MusicResourceBase musicResource, AudioGraph audioGraph)
         {
-            var targetUri = new Uri(musicResource.Url);
-            MediaSource mediaSource;
-            if (targetUri.Host == string.Empty)
+            if (musicResource is AudioGraphMusicResource resource)
             {
-                StorageFile storageFile = await StorageFile.GetFileFromPathAsync(musicResource.Url);
-                mediaSource = MediaSource.CreateFromStorageFile(storageFile);
+                MediaSource mediaSource;
+                if (resource.LocalFile != null)
+                {
+                    mediaSource = MediaSource.CreateFromStorageFile(resource.LocalFile);
+                }
+                else
+                {
+                    mediaSource = MediaSource.CreateFromUri(resource.Uri);
+                }
+                var nodeResult = await audioGraph.CreateMediaSourceAudioInputNodeAsync(mediaSource);
+                if (nodeResult.Status != MediaSourceAudioInputNodeCreationStatus.Success)
+                {
+                    throw nodeResult.ExtendedError;
+                }
+                return new AudioGraphTicket(nodeResult.Node, mediaSource)
+                {
+                    AudioServiceId = "com.storyteller.audiograph.chopin",
+                    MusicResource = musicResource,
+                    Status = AudioTicketStatus.None,
+                };
             }
             else
             {
-                mediaSource = MediaSource.CreateFromUri(targetUri);
+                throw new ArgumentException();
             }
-            var nodeResult = await audioGraph.CreateMediaSourceAudioInputNodeAsync(mediaSource);
-            if (nodeResult.Status != MediaSourceAudioInputNodeCreationStatus.Success)
-            {
-                throw nodeResult.ExtendedError;
-            }
-            return new AudioGraphTicket(nodeResult.Node, mediaSource)
-            {
-                AudioServiceId = "com.storyteller.audiograph.chopin",
-                MusicResource = musicResource,
-                Status = AudioTicketStatus.None,
-            };
         }
         public void ThrowExceptionIfDisposed()
         {

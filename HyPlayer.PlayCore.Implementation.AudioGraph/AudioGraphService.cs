@@ -5,6 +5,7 @@ using HyPlayer.PlayCore.Abstraction.Models;
 using HyPlayer.PlayCore.Abstraction.Models.AudioServiceComponents;
 using HyPlayer.PlayCore.Abstraction.Models.Resources;
 using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions;
+using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions.Notifications;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,11 +49,10 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             Interval = 150,
             Enabled = true
         };
+
+        private INotificationHub _notificationHub;
+
         private bool disposedValue;
-
-        public event PlaybackPositionChangedHandler OnPositionChanged;
-
-        public delegate void PlaybackPositionChangedHandler(double Position);
 
         public AudioGraphTicket MasterTicket { get; internal set; }
 
@@ -124,7 +124,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             return Task.CompletedTask;
         }
 
-        public Task SeekAudioTicketAsync(AudioTicketBase audioTicket, long position, CancellationToken ctk = default)
+        public Task SeekAudioTicketAsync(AudioTicketBase audioTicket, double position, CancellationToken ctk = default)
         {
             ThrowExceptionIfDisposed();
             ctk.ThrowIfCancellationRequested();
@@ -272,13 +272,17 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             {
                 return;
             }
-            OnPositionChanged?.Invoke(MasterTicket.PlaybackMediaSourceInputNode.Position.TotalMilliseconds);
+            var value = MasterTicket.PlaybackMediaSourceInputNode.Position.TotalMilliseconds;
+            var notification = new PlaybackPositionChangedNotification(value);
+            _notificationHub.PublishNotificationAsync(notification);
         }
 
         public Task SetMasterTicketAsync(AudioGraphTicket graphTicket)
         {
             ThrowExceptionIfDisposed();
             MasterTicket = graphTicket;
+            var notification = new MasterTicketChangedNotification(graphTicket);
+             _notificationHub.PublishNotificationAsync(notification);
             return Task.CompletedTask;
         }
 
@@ -323,12 +327,13 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             _deviceOutputNode = creationResultDevice.DeviceOutputNode;
         }
 
-        public AudioGraphService(AudioServiceSettingsBase serviceSettings)
+        public AudioGraphService(AudioServiceSettingsBase serviceSettings, INotificationHub notificationHub)
         {
             if (serviceSettings is AudioGraphServiceSettings settings)
             {
                 _audioGraphSettings = settings.AudioGraphSettings;
             }
+            _notificationHub = notificationHub;
             _positionNotifyTimer.Elapsed += OnPositionNotifyTimerElapsed;
             _positionNotifyTimer.Start();
         }
