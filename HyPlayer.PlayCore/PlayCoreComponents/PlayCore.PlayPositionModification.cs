@@ -1,5 +1,4 @@
-﻿using HyPlayer.PlayCore.Abstraction;
-using HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
+﻿using HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
 using HyPlayer.PlayCore.Abstraction.Models.SingleItems;
 
 namespace HyPlayer.PlayCore;

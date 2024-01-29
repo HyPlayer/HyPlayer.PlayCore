@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "HyPlayer.PlayCore.Demo.AudioGraph.WinUI3 (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "HyPlayer.PlayCore.Demo.AudioGraph.WinUI3 (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
