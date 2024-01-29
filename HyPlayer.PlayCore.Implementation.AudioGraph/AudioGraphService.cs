@@ -110,7 +110,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
 
         private void OnAudioGraphTicketReachesEnd(AudioGraphTicket audioGraphTicket)
         {
-            _notificationHub?.PublishNotificationAsync(new AudioTicketReachesEndNotification(audioGraphTicket));
+            _notificationHub?.PublishNotificationAsync(new AudioGraphTicketReachesEndNotification(audioGraphTicket));
         }
 
         public override Task<List<AudioTicketBase>> GetCreatedAudioTicketsAsync(CancellationToken ctk = default)
@@ -321,7 +321,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
                 return;
             }
             var value = MasterTicket.PlaybackMediaSourceInputNode.Position.TotalMilliseconds;
-            var notification = new PlaybackPositionChangedNotification(value);
+            var notification = new AudioGraphPlaybackPositionChangedNotification(value);
             _notificationHub.PublishNotificationAsync(notification);
         }
 

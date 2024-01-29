@@ -1,9 +1,12 @@
-﻿namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions.Notifications
+﻿using HyPlayer.PlayCore.Abstraction.Models.AudioServiceComponents;
+using HyPlayer.PlayCore.Abstraction.Models.Notifications;
+
+namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions.Notifications
 {
-    public class AudioTicketReachesEndNotification
+    public class AudioGraphTicketReachesEndNotification:AudioTicketReachesEndNotification
     {
-        public AudioGraphTicket AudioGraphTicket { get; init; }
-        public AudioTicketReachesEndNotification(AudioGraphTicket ticket)
+        public override AudioTicketBase AudioGraphTicket { get; init; }
+        public AudioGraphTicketReachesEndNotification(AudioGraphTicket ticket)
         {
             AudioGraphTicket = ticket;
         }

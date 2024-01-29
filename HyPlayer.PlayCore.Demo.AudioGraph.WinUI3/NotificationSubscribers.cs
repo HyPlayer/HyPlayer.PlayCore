@@ -2,6 +2,7 @@
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Interfaces.NotificationHub;
 using Depository.Extensions;
+using HyPlayer.PlayCore.Abstraction.Models.Notifications;
 using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions;
 using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions.Notifications;
 using Microsoft.UI.Dispatching;
