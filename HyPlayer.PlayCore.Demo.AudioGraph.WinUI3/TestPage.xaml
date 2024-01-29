@@ -12,11 +12,18 @@
     <Grid>
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBox Name="Url"/>
+                <Button Content="Add Online Song" Name="AddOnline" Click="AddOnline_Click"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Button Content="Select Songs" Name="SelectSong" Click="SelectSong_Click"/>
                 <Button Content="Start" Name="Start" Click="Start_Click"/>
+                <Button Content="StartAudioGraph" Name="StartAudioGraph" Click="StartAudioGraph_Click"/>
                 <Button Content="PauseMasterTicket" Name="Stop" Click="Stop_Click"/>
+                <Button Content="StopAudioGraph" Name="StopAudioGraph" Click="StopAudioGraph_Click"/>
                 <Button Content="ChangeDevice" Name="ChangeDevice" Click="ChangeDevice_Click"/>
                 <Button Content="Default" Name="Default" Click="Default_Click"/>
+                <Button Content="Dispose" Name="Dispose" Click="Dispose_Click"/>
             </StackPanel>
             <Slider 
                 Name="Timeline"
@@ -24,9 +31,22 @@
                 Maximum="{x:Bind _masterTicketChangedNotification.AudioGraphTicket.PlaybackMediaSourceInputNode.Duration, Converter={StaticResource TimeSpanConverter}, Mode=OneWay}" 
                 Value="{x:Bind _positionNotificationSubscriber.Position, Mode=OneWay}"
                 ManipulationMode="TranslateX"
-                ManipulationStarting="Timeline_ManipulationStarting"
                 ManipulationStarted="Timeline_ManipulationStarted"
-                ManipulationCompleted="Timeline_ManipulationCompleted"/>
+                ManipulationCompleted="Timeline_ManipulationCompleted"
+                ManipulationStarting="Timeline_ManipulationStarting"/>
+            <Slider Name="OutgoingVolume"
+                    Minimum="0"
+                    Maximum="100"
+                    ValueChanged="OutgoingVolume_ValueChanged"
+                    TickFrequency="1"/>
+            <StackPanel Orientation="Horizontal">
+                <Button Name="Refresh" Content="Refresh" Click="Refresh_Click"/>
+                <CheckBox Name="SetMasterTicket" Content="SetMasterTicket"/>
+                <ComboBox Name="Songs" SelectionChanged="Songs_SelectionChanged"/>
+                <Button Name="DisposeSong" Content="DisposeSong" Click="DisposeSong_Click"/>
+            </StackPanel>
+            <Slider Name="SongVolume" Minimum="0" Maximum="100" ValueChanged="SongVolume_ValueChanged" TickFrequency="1"/>
+            <TextBlock Text="{x:Bind _audioTicketReachesEndNotification.AudioGraphTicketReachesEndName, Mode=OneWay}"/>
         </StackPanel>
     </Grid>
 </Page>

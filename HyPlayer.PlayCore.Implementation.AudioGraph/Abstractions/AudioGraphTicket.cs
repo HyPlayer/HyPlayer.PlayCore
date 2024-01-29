@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Media.Audio;
 using Windows.Media.Core;
-using Windows.Storage;
 
 namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions
 {
@@ -13,8 +12,26 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions
     {
         public MediaSourceAudioInputNode PlaybackMediaSourceInputNode { get; internal set; }
         public MediaSource PlaybackMediaSource { get; internal set; }
-        private bool disposedValue;
 
+        internal delegate void AudioGraphTicketReachesEndHandler(AudioGraphTicket audioGraphTicket);
+
+        internal event AudioGraphTicketReachesEndHandler OnAudioGraphTicketReachesEnd;
+
+
+        public double OutgoingVolume
+        {
+            get => _outgoingVolume;
+            internal set
+            {
+                _outgoingVolume = value;
+                if (PlaybackMediaSourceInputNode != null)
+                {
+                    PlaybackMediaSourceInputNode.OutgoingGain = _outgoingVolume;
+                }
+            }
+        }
+        private double _outgoingVolume = 1d;
+        private bool disposedValue;
         public static async Task<AudioGraphTicket> CreateAudioGraphTicket(MusicResourceBase musicResource, AudioGraph audioGraph)
         {
             if (musicResource is AudioGraphMusicResource resource)
@@ -45,6 +62,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions
                 throw new ArgumentException();
             }
         }
+
         public void ThrowExceptionIfDisposed()
         {
             if (disposedValue)
@@ -89,12 +107,17 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions
             newMediaSourceNode.Seek(position);
             PlaybackMediaSourceInputNode = newMediaSourceNode;
         }
+        private void OnPlaybackMediaReachesEnd(MediaSourceAudioInputNode sender, object args)
+        {
+            OnAudioGraphTicketReachesEnd?.Invoke(this);
+        }
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
                 if (disposing)
                 {
+                    PlaybackMediaSourceInputNode.MediaSourceCompleted -= OnPlaybackMediaReachesEnd;
                     PlaybackMediaSourceInputNode?.Stop();
                     RemoveAllOutputConnections();
                     PlaybackMediaSourceInputNode?.Dispose();
@@ -113,6 +136,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions
         {
             PlaybackMediaSourceInputNode = playbackMediaSourceInputNode;
             PlaybackMediaSource = playbackMediaSource;
+            PlaybackMediaSourceInputNode.MediaSourceCompleted += OnPlaybackMediaReachesEnd;
         }
     }
 }

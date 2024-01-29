@@ -31,9 +31,10 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
             var settings = new AudioGraphServiceSettings() { AudioGraphSettings = new AudioGraphSettings(AudioRenderCategory.Media) };
             container.AddSingleton<AudioServiceSettingsBase, AudioGraphServiceSettings>(settings);
             container.AddSingleton<AudioGraphService>();
-            container.AddSingleton<INotificationHub,NotificationHub>();
+            container.AddSingleton<INotificationHub, NotificationHub>();
             container.AddSingleton<INotificationSubscriber<PlaybackPositionChangedNotification>, PositionNotificationSubscriber>();
-            container.AddSingleton< INotificationSubscriber<MasterTicketChangedNotification> ,MasterTicketNotificationSubscriber >();
+            container.AddSingleton<INotificationSubscriber<MasterTicketChangedNotification>, MasterTicketNotificationSubscriber>();
+            container.AddSingleton<INotificationSubscriber<AudioTicketReachesEndNotification>, OnTicketReachesEndNotificationSubscriber>();
             container.AddSingleton<MainWindow>();
             Services = container;
         }

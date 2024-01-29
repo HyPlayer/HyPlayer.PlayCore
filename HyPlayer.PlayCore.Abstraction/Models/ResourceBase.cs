@@ -15,7 +15,7 @@ public abstract class ResourceBase
 public abstract class ResourceResultBase
 {
     public abstract required Exception ExternalException { get; init; }
-    public abstract required ResourceStatus ResourceStatus{ get; init; }
+    public abstract required ResourceStatus ResourceStatus { get; init; }
 }
 public enum ResourceType
 {

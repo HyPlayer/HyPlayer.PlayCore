@@ -14,8 +14,8 @@
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="BlankPage1.xaml" />
     <None Remove="Converters\ConverterDictionary.xaml" />
+    <None Remove="TestPage.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,7 +48,7 @@
     <ProjectReference Include="..\HyPlayer.PlayCore.Implementation.AudioGraph\HyPlayer.PlayCore.Implementation.AudioGraphService.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Page Update="BlankPage1.xaml">
+    <Page Update="TestPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

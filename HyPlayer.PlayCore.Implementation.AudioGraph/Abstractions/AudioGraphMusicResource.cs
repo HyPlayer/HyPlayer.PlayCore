@@ -4,7 +4,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
-using Windows.Storage.Streams;
 
 namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions
 {

@@ -1,30 +1,20 @@
-using Depository.Abstraction.Interfaces.NotificationHub;
 using Depository.Abstraction.Interfaces;
-using HyPlayer.PlayCore.Abstraction.Models.AudioServiceComponents;
-using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions.Notifications;
-using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions;
+using Depository.Abstraction.Interfaces.NotificationHub;
+using Depository.Extensions;
 using HyPlayer.PlayCore.Implementation.AudioGraphService;
+using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions;
+using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions.Notifications;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Storage.Pickers;
 using Windows.Storage;
-using Microsoft.UI.Dispatching;
-using Depository.Extensions;
-using Depository.Core;
+using Windows.Storage.Pickers;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -37,9 +27,9 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
     public sealed partial class BlankPage1 : Page
     {
         private AudioGraphService _audioGraphService;
-        private AudioTicketBase _audioGraphTicket => _masterTicketChangedNotification?.AudioGraphTicket;
         private PositionNotificationSubscriber _positionNotificationSubscriber;
         private MasterTicketNotificationSubscriber _masterTicketChangedNotification;
+        private OnTicketReachesEndNotificationSubscriber _audioTicketReachesEndNotification;
         private IDepository _depository;
         public BlankPage1()
         {
@@ -50,10 +40,11 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
             base.OnNavigatedTo(e);
             _depository = e.Parameter as IDepository;
             _audioGraphService = _depository.Resolve<AudioGraphService>();
-            _positionNotificationSubscriber = _depository.Resolve<INotificationSubscriber<PlaybackPositionChangedNotification>>() as  PositionNotificationSubscriber;
+            _positionNotificationSubscriber = _depository.Resolve<INotificationSubscriber<PlaybackPositionChangedNotification>>() as PositionNotificationSubscriber;
             _masterTicketChangedNotification = _depository.Resolve<INotificationSubscriber<MasterTicketChangedNotification>>() as MasterTicketNotificationSubscriber;
-
-
+            _audioTicketReachesEndNotification = _depository.Resolve<INotificationSubscriber<AudioTicketReachesEndNotification>>() as OnTicketReachesEndNotificationSubscriber;
+            OutgoingVolume.Value = 100;
+            SongVolume.Value = 100;
         }
         private async void SelectSong_Click(object sender, RoutedEventArgs e)
         {
@@ -74,14 +65,16 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
 
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-            _audioGraphService?.Start();
-            _audioGraphService?.PlayAudioTicketAsync(_audioGraphTicket);
+            var value = (Songs.SelectedItem as ComboBoxItem)?.Tag as AudioGraphTicket;
+            if (value == null) return;
+            _audioGraphService?.PlayAudioTicketAsync(value);
         }
 
         private void Stop_Click(object sender, RoutedEventArgs e)
         {
-            _audioGraphService?.Stop();
-            _audioGraphService?.PauseAudioTicketAsync(_audioGraphTicket);
+            var value = (Songs.SelectedItem as ComboBoxItem)?.Tag as AudioGraphTicket;
+            if (value == null) return;
+            _audioGraphService?.PauseAudioTicketAsync(value);
         }
         private async Task<StorageFile> PickFileAsync()
         {
@@ -133,18 +126,89 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
         private void Timeline_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
         {
             _positionNotificationSubscriber.Sliding = true;
-            
+
         }
 
         private void Timeline_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
         {
-            _audioGraphService.SeekAudioTicketAsync(_audioGraphTicket, Timeline.Value);
+            var value = (Songs.SelectedItem as ComboBoxItem)?.Tag as AudioGraphTicket;
+            if (value == null) return;
+            _audioGraphService.SeekAudioTicketAsync(value, Timeline.Value);
             _positionNotificationSubscriber.Sliding = false;
+        }
+
+        private async void AddOnline_Click(object sender, RoutedEventArgs e)
+        {
+            var uri = new Uri(Url.Text);
+            var resource = new AudioGraphMusicResource() { ExtensionName = "Unknown", Uri = uri, HasContent = true, ResourceName = "Unknown" };
+            var ticket = await _audioGraphService.GetAudioTicketAsync(resource) as AudioGraphTicket;
+            await _audioGraphService.SetMasterTicketAsync(ticket);
         }
 
         private void Timeline_ManipulationStarting(object sender, ManipulationStartingRoutedEventArgs e)
         {
-            _audioGraphService.SeekAudioTicketAsync(_audioGraphTicket, Timeline.Value);
+            var value = (Songs.SelectedItem as ComboBoxItem)?.Tag as AudioGraphTicket;
+            if (value == null) return;
+            _audioGraphService.SeekAudioTicketAsync(value, Timeline.Value);
+        }
+
+        private void OutgoingVolume_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            if (e.NewValue != _audioGraphService.OutgoingVolume)
+            {
+                _audioGraphService.ChangeOutgoingVolumeAsync(e.NewValue / 100);
+            }
+        }
+
+        private void Dispose_Click(object sender, RoutedEventArgs e)
+        {
+            _audioGraphService.Dispose();
+        }
+
+        private async void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            Songs.Items.Clear();
+            var values = await _audioGraphService.GetCreatedAudioTicketsAsync();
+            foreach (var tickets in values)
+            {
+                if (tickets is AudioGraphTicket ticket)
+                {
+                    Songs.Items.Add(new ComboBoxItem() { Content = ticket.MusicResource.ResourceName, Tag = ticket });
+                }
+            }
+        }
+
+        private async void Songs_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (Songs.SelectedItem == null || SetMasterTicket.IsChecked == false) return;
+            await _audioGraphService.SetMasterTicketAsync((Songs.SelectedItem as ComboBoxItem).Tag as AudioGraphTicket);
+        }
+
+        private void StartAudioGraph_Click(object sender, RoutedEventArgs e)
+        {
+            _audioGraphService?.Start();
+        }
+
+        private void StopAudioGraph_Click(object sender, RoutedEventArgs e)
+        {
+            _audioGraphService?.Stop();
+        }
+
+        private void SongVolume_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            var value = (Songs.SelectedItem as ComboBoxItem)?.Tag as AudioGraphTicket;
+            if (value == null) return;
+            if (e.NewValue != value.OutgoingVolume)
+            {
+                _audioGraphService.ChangeVolumeAsync(value, e.NewValue / 100);
+            }
+        }
+
+        private void DisposeSong_Click(object sender, RoutedEventArgs e)
+        {
+            var value = (Songs.SelectedItem as ComboBoxItem)?.Tag as AudioGraphTicket;
+            if (value == null) return;
+            _audioGraphService.DisposeAudioTicketAsync(value);
         }
     }
 }

@@ -35,6 +35,14 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
 
         public override string Name => "Chopin.AudioGraph";
 
+        public double OutgoingVolume
+        {
+            get => _outgoingVolume;
+            private set => _outgoingVolume = value;
+        }
+
+        private double _outgoingVolume = 1d;
+
         public AudioGraph PlaybackAudioGraph { get; internal set; }
 
         private AudioDeviceOutputNode _deviceOutputNode;
@@ -42,6 +50,10 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
         private AudioGraphSettings _audioGraphSettings;
 
         private readonly List<AudioGraphTicket> _createdAudioTickets = [];
+
+        private Dictionary<AudioGraphTicket, Task> _currentSeekingSessions = new();
+
+        private Dictionary<AudioGraphTicket, double> _nextSeekingValues = new();
 
         private Timer _positionNotifyTimer = new()
         {
@@ -65,15 +77,20 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             {
                 if (audioTicket is AudioGraphTicket ticket)
                 {
+                    ticket.OnAudioGraphTicketReachesEnd -= OnAudioGraphTicketReachesEnd;
                     ticket.Dispose();
+                    if (ticket == MasterTicket)
+                    {
+                        MasterTicket = null;
+                    }
                 }
                 return Task.CompletedTask;
             }
             finally
             {
                 if (audioTicket is AudioGraphTicket ticket)
-                { 
-                    if(_createdAudioTickets.Contains(ticket))
+                {
+                    if (_createdAudioTickets.Contains(ticket))
                     {
                         _createdAudioTickets.Remove(ticket);
                     }
@@ -86,8 +103,14 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             ThrowExceptionIfDisposed();
             ctk.ThrowIfCancellationRequested();
             var result = await AudioGraphTicket.CreateAudioGraphTicket(musicResource, PlaybackAudioGraph);
+            result.OnAudioGraphTicketReachesEnd += OnAudioGraphTicketReachesEnd;
             _createdAudioTickets.Add(result);
             return result;
+        }
+
+        private void OnAudioGraphTicketReachesEnd(AudioGraphTicket audioGraphTicket)
+        {
+            _notificationHub?.PublishNotificationAsync(new AudioTicketReachesEndNotification(audioGraphTicket));
         }
 
         public override Task<List<AudioTicketBase>> GetCreatedAudioTicketsAsync(CancellationToken ctk = default)
@@ -128,18 +151,39 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
         {
             ThrowExceptionIfDisposed();
             ctk.ThrowIfCancellationRequested();
-            if (audioTicket is AudioGraphTicket ticket)
+            if (audioTicket is AudioGraphTicket targetTicket)
             {
-                ticket.PlaybackMediaSourceInputNode.Seek(TimeSpan.FromMilliseconds(position));
+                if (_currentSeekingSessions.ContainsKey(targetTicket) && _nextSeekingValues.ContainsKey(targetTicket))
+                {
+                    _nextSeekingValues[targetTicket] = position;
+                }
+                else
+                {
+                    _nextSeekingValues[targetTicket] = position;
+                    _currentSeekingSessions[targetTicket] = CommitSeekingValue(targetTicket, ctk);
+                }
             }
             return Task.CompletedTask;
+        }
+
+        private async Task CommitSeekingValue(AudioGraphTicket ticket, CancellationToken ctk)
+        {
+            double previousValue = 0d;
+            while (previousValue != _nextSeekingValues[ticket])
+            {
+                previousValue = _nextSeekingValues[ticket];
+                ticket.PlaybackMediaSourceInputNode.Seek(TimeSpan.FromMilliseconds(previousValue));
+                await Task.Delay(150);
+            }
+            _currentSeekingSessions.Remove(ticket);
+            _nextSeekingValues.Remove(ticket);
         }
 
         public async Task StopTicketAsync(AudioTicketBase audioTicket, CancellationToken ctk = default)
         {
             ThrowExceptionIfDisposed();
             ctk.ThrowIfCancellationRequested();
-            if(audioTicket is AudioGraphTicket ticket)
+            if (audioTicket is AudioGraphTicket ticket)
             {
                 ticket.Stop();
                 await DisposeAudioTicketAsync(ticket);
@@ -161,7 +205,11 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
         {
             ThrowExceptionIfDisposed();
             ctk.ThrowIfCancellationRequested();
-            _deviceOutputNode.OutgoingGain = volume;
+            if (_deviceOutputNode != null)
+            {
+                _deviceOutputNode.OutgoingGain = volume;
+            }
+            _outgoingVolume = volume;
             return Task.CompletedTask;
         }
         public async Task<List<OutputDeviceBase>> GetOutputDevicesAsync(CancellationToken ctk = default)
@@ -206,7 +254,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
                 };
                 await CreateAudioGraphFromSettings(audioGraphServiceSettings);
             }
-            
+
         }
         private async Task CreateAudioGraphFromSettings(AudioGraphServiceSettings audioGraphServiceSettings)
         {
@@ -246,7 +294,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             ctk.ThrowIfCancellationRequested();
             if (ticket is AudioGraphTicket graphTicket)
             {
-                graphTicket.PlaybackMediaSourceInputNode.OutgoingGain = volume;
+                graphTicket.OutgoingVolume = volume;
             }
             return Task.CompletedTask;
         }
@@ -282,7 +330,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             ThrowExceptionIfDisposed();
             MasterTicket = graphTicket;
             var notification = new MasterTicketChangedNotification(graphTicket);
-             _notificationHub.PublishNotificationAsync(notification);
+            _notificationHub.PublishNotificationAsync(notification);
             return Task.CompletedTask;
         }
 
@@ -299,7 +347,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
                 IsPlaybackAudioGraphStarted = true;
             }
         }
-        
+
         public void Stop()
         {
             ThrowExceptionIfDisposed();
@@ -353,7 +401,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
                 if (disposing)
                 {
                     Stop();
-                    foreach(var ticket in _createdAudioTickets)
+                    foreach (var ticket in _createdAudioTickets)
                     {
                         ticket?.Dispose();
                     }
