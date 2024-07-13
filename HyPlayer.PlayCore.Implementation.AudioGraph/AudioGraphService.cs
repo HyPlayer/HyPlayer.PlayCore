@@ -3,6 +3,7 @@ using HyPlayer.PlayCore.Abstraction;
 using HyPlayer.PlayCore.Abstraction.Interfaces.AudioServices;
 using HyPlayer.PlayCore.Abstraction.Models;
 using HyPlayer.PlayCore.Abstraction.Models.AudioServiceComponents;
+using HyPlayer.PlayCore.Abstraction.Models.Notifications;
 using HyPlayer.PlayCore.Abstraction.Models.Resources;
 using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions;
 using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions.Notifications;
@@ -333,8 +334,8 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
         {
             ThrowExceptionIfDisposed();
             MasterTicket = graphTicket;
-            var notification = new MasterTicketChangedNotification(graphTicket);
-            _notificationHub.PublishNotificationAsync(notification);
+            var notification = new AudioGraphMasterTicketChangedNotification(graphTicket);
+            _notificationHub.PublishNotificationAsync(notification as MasterTicketChangedNotification);
             return Task.CompletedTask;
         }
 

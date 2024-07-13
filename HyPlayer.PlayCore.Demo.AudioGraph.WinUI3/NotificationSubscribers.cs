@@ -48,7 +48,7 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
             }
             _dispatcherQueue?.TryEnqueue(() =>
             {
-                AudioGraphTicket = notification.MasterTicket;
+                AudioGraphTicket = notification.MasterTicket as AudioGraphTicket;
             });
             return Task.CompletedTask;
         }

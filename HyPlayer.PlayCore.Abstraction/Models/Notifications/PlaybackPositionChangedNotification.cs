@@ -1,4 +1,4 @@
-﻿namespace HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions.Notifications
+﻿namespace HyPlayer.PlayCore.Abstraction.Models.Notifications
 {
     public abstract class PlaybackPositionChangedNotification
     {
