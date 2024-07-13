@@ -322,7 +322,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             }
             var value = MasterTicket.PlaybackMediaSourceInputNode.Position.TotalMilliseconds;
             var notification = new AudioGraphPlaybackPositionChangedNotification(value);
-            _notificationHub.PublishNotificationAsync(notification);
+            _notificationHub.PublishNotificationAsync(notification as PlaybackPositionChangedNotification);
         }
 
         public Task SetMasterTicketAsync(AudioGraphTicket graphTicket)

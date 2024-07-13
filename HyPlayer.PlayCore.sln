@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyPlayer.PlayCore.Benchmark
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyPlayer.PlayCore.Implementation.AudioGraphService", "HyPlayer.PlayCore.Implementation.AudioGraph\HyPlayer.PlayCore.Implementation.AudioGraphService.csproj", "{0666E0F5-5AEE-4D0B-989A-53A17D08D104}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyPlayer.PlayCore.Demo.AudioGraph.WinUI3", "HyPlayer.PlayCore.Demo.AudioGraph.WinUI3\HyPlayer.PlayCore.Demo.AudioGraph.WinUI3.csproj", "{099B9FAB-9D05-41E7-88FE-38665110EF4B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyPlayer.PlayCore.Demo.AudioGraph.WinUI3", "HyPlayer.PlayCore.Demo.AudioGraph.WinUI3\HyPlayer.PlayCore.Demo.AudioGraph.WinUI3.csproj", "{099B9FAB-9D05-41E7-88FE-38665110EF4B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
