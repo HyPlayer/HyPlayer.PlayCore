@@ -38,7 +38,11 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
         public double OutgoingVolume
         {
             get => _outgoingVolume;
-            private set => _outgoingVolume = value;
+            private set
+            {
+                _outgoingVolume = value;
+                _audioGraphServiceSettings.OutputVolume = _outgoingVolume;
+            }
         }
 
         private double _outgoingVolume = 1d;
@@ -48,6 +52,8 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
         private AudioDeviceOutputNode _deviceOutputNode;
 
         private AudioGraphSettings _audioGraphSettings;
+
+        private AudioGraphServiceSettings _audioGraphServiceSettings;
 
         private readonly List<AudioGraphTicket> _createdAudioTickets = [];
 
@@ -237,10 +243,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
                 {
                     audioGraphServiceSettings = new AudioGraphServiceSettings()
                     {
-                        AudioGraphSettings = new AudioGraphSettings(Windows.Media.Render.AudioRenderCategory.Media)
-                        {
-                            PrimaryRenderDevice = outputDevice.DeviceInformation
-                        }
+                        DefaultOutputDeviceId = outputDevice.DeviceInformation.Id
                     };
                     await CreateAudioGraphFromSettings(audioGraphServiceSettings);
                 }
@@ -250,7 +253,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             {
                 audioGraphServiceSettings = new AudioGraphServiceSettings()
                 {
-                    AudioGraphSettings = new AudioGraphSettings(Windows.Media.Render.AudioRenderCategory.Media)
+                    DefaultOutputDeviceId = null
                 };
                 await CreateAudioGraphFromSettings(audioGraphServiceSettings);
             }
@@ -258,7 +261,8 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
         }
         private async Task CreateAudioGraphFromSettings(AudioGraphServiceSettings audioGraphServiceSettings)
         {
-            var newAudioGraphResult = await AudioGraph.CreateAsync(audioGraphServiceSettings.AudioGraphSettings);
+            var settings = await audioGraphServiceSettings.GetAudioGraphSettingsAsync();
+            var newAudioGraphResult = await AudioGraph.CreateAsync(settings);
             if (newAudioGraphResult.Status != AudioGraphCreationStatus.Success)
             {
                 throw newAudioGraphResult.ExtendedError;
@@ -379,7 +383,8 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
         {
             if (serviceSettings is AudioGraphServiceSettings settings)
             {
-                _audioGraphSettings = settings.AudioGraphSettings;
+                _audioGraphServiceSettings = settings;
+                _audioGraphSettings = settings.GetAudioGraphSettingsAsync().GetAwaiter().GetResult();
             }
             _notificationHub = notificationHub;
             _positionNotifyTimer.Elapsed += OnPositionNotifyTimerElapsed;

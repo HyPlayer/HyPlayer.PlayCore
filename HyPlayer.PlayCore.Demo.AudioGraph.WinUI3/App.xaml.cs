@@ -8,8 +8,6 @@ using HyPlayer.PlayCore.Implementation.AudioGraphService;
 using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions;
 using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions.Notifications;
 using Microsoft.UI.Xaml;
-using Windows.Media.Audio;
-using Windows.Media.Render;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -29,7 +27,7 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
         {
             this.InitializeComponent();
             var container = DepositoryFactory.CreateNew();
-            var settings = new AudioGraphServiceSettings() { AudioGraphSettings = new AudioGraphSettings(AudioRenderCategory.Media) };
+            var settings = new AudioGraphServiceSettings();
             container.AddSingleton<AudioServiceSettingsBase, AudioGraphServiceSettings>(settings);
             container.AddSingleton<AudioGraphService>();
             container.AddSingleton<INotificationHub, NotificationHub>();
