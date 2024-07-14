@@ -13,33 +13,33 @@ public sealed partial class Chopin
         if (CurrentPlayingTicket?.AudioServiceId == CurrentAudioService?.Id)
             // ReSharper disable once SuspiciousTypeConversion.Global
             if (CurrentAudioService is IAudioTicketSeekableService seekableService)
-                await seekableService.SeekAudioTicket(CurrentPlayingTicket!, position, ctk);
+                await seekableService.SeekAudioTicketAsync(CurrentPlayingTicket!, position, ctk).ConfigureAwait(false);
     }
 
-    public override async Task PlayAsync( CancellationToken ctk = new())
+    public override async Task PlayAsync(CancellationToken ctk = new())
     {
         if (CurrentPlayingTicket is null) return;
         if (CurrentPlayingTicket?.AudioServiceId == CurrentAudioService?.Id)
             // ReSharper disable once SuspiciousTypeConversion.Global
             if (CurrentAudioService is IPlayAudioTicketService playableService)
-                await playableService.PlayAudioTicket(CurrentPlayingTicket!, ctk);
+                await playableService.PlayAudioTicketAsync(CurrentPlayingTicket!, ctk).ConfigureAwait(false);
     }
 
-    public override async Task PauseAsync( CancellationToken ctk = new())
+    public override async Task PauseAsync(CancellationToken ctk = new())
     {
         if (CurrentPlayingTicket is null) return;
         if (CurrentPlayingTicket?.AudioServiceId == CurrentAudioService?.Id)
             // ReSharper disable once SuspiciousTypeConversion.Global
             if (CurrentAudioService is IPauseAudioTicketService pauseService)
-                await pauseService.PauseAudioTicket(CurrentPlayingTicket!, ctk);
+                await pauseService.PauseAudioTicketAsync(CurrentPlayingTicket!, ctk).ConfigureAwait(false);
     }
 
-    public override async Task StopAsync( CancellationToken ctk = new())
+    public override async Task StopAsync(CancellationToken ctk = new())
     {
         if (CurrentPlayingTicket is null) return;
         if (CurrentPlayingTicket?.AudioServiceId == CurrentAudioService?.Id)
             // ReSharper disable once SuspiciousTypeConversion.Global
             if (CurrentAudioService is IStopAudioTicketService stopService)
-                await stopService.StopTicket(CurrentPlayingTicket!, ctk);
+                await stopService.StopTicketAsync(CurrentPlayingTicket!, ctk).ConfigureAwait(false);
     }
 }
