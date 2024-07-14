@@ -17,7 +17,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: 8.0.x
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
@@ -30,7 +30,7 @@ jobs:
           dotnet pack HyPlayer.PlayCore.Abstraction/HyPlayer.PlayCore.Abstraction.csproj -c Release -o Packages/
 
       - name: Publish Packages to Artifacts
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@v4.3.4
         with:
           name: packages
           path: Packages
