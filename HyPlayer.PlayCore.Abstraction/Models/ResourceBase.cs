@@ -1,4 +1,4 @@
-﻿using HyPlayer.PlayCore.Abstraction.Models.Resources;
+using HyPlayer.PlayCore.Abstraction.Models.Resources;
 
 namespace HyPlayer.PlayCore.Abstraction.Models;
 
@@ -14,7 +14,7 @@ public abstract class ResourceBase
 
 public abstract class ResourceResultBase
 {
-    public abstract required Exception ExternalException { get; init; }
+    public abstract Exception? ExternalException { get; init; }
     public abstract required ResourceStatus ResourceStatus { get; init; }
 }
 public enum ResourceType
@@ -31,4 +31,8 @@ public enum ResourceStatus
 {
     Success,
     Fail
+}
+public interface IResourceResultOf<T>
+{
+    public Task<T?> GetResourceAsync(CancellationToken cancellationToken = default);
 }

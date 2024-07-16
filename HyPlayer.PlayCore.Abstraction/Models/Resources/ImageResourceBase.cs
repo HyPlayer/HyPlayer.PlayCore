@@ -1,4 +1,4 @@
-﻿namespace HyPlayer.PlayCore.Abstraction.Models.Resources;
+namespace HyPlayer.PlayCore.Abstraction.Models.Resources;
 
 public abstract class ImageResourceBase : ResourceBase
 {
