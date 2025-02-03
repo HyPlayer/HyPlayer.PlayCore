@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyPlayer.PlayCore.Abstracti
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyPlayer.PlayCore.Tests", "HyPlayer.PlayCore.Tests\HyPlayer.PlayCore.Tests.csproj", "{5145D382-5FA6-44F6-B05E-5591B610CD94}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyPlayer.PlayCore.Benchmark", "HyPlayer.PlayCore.Benchmark\HyPlayer.PlayCore.Benchmark.csproj", "{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyPlayer.PlayCore.Implementation.AudioGraphService", "HyPlayer.PlayCore.Implementation.AudioGraph\HyPlayer.PlayCore.Implementation.AudioGraphService.csproj", "{0666E0F5-5AEE-4D0B-989A-53A17D08D104}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyPlayer.PlayCore.Demo.AudioGraph.WinUI3", "HyPlayer.PlayCore.Demo.AudioGraph.WinUI3\HyPlayer.PlayCore.Demo.AudioGraph.WinUI3.csproj", "{099B9FAB-9D05-41E7-88FE-38665110EF4B}"
@@ -75,22 +73,6 @@ Global
 		{5145D382-5FA6-44F6-B05E-5591B610CD94}.Release|x64.Build.0 = Release|Any CPU
 		{5145D382-5FA6-44F6-B05E-5591B610CD94}.Release|x86.ActiveCfg = Release|Any CPU
 		{5145D382-5FA6-44F6-B05E-5591B610CD94}.Release|x86.Build.0 = Release|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Debug|ARM64.ActiveCfg = Debug|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Debug|ARM64.Build.0 = Debug|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Debug|x64.Build.0 = Debug|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Debug|x86.Build.0 = Debug|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Release|ARM64.Build.0 = Release|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Release|x64.ActiveCfg = Release|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Release|x64.Build.0 = Release|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Release|x86.ActiveCfg = Release|Any CPU
-		{7D21EAC9-08BD-4E27-AE2E-F7ACC6655A4C}.Release|x86.Build.0 = Release|Any CPU
 		{0666E0F5-5AEE-4D0B-989A-53A17D08D104}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0666E0F5-5AEE-4D0B-989A-53A17D08D104}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0666E0F5-5AEE-4D0B-989A-53A17D08D104}.Debug|ARM64.ActiveCfg = Debug|Any CPU
