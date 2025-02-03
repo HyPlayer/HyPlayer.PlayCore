@@ -9,4 +9,9 @@ public class ImageResourceQualityTag : ResourceQualityTag
     }
     public int PixelX { get; }
     public int PixelY { get; }
+    
+    public override string ToString()
+    {
+        return $"{PixelX}y{PixelY}";
+    }
 }
