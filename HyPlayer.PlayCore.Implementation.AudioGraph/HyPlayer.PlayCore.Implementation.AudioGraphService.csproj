@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
 	  <TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
       <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
 	  <TargetPlatformVersion>10.0.22621.0</TargetPlatformVersion>
@@ -11,9 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <PackageReference Include="Depository" Version="3.2.0" />
-      <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250108002" />
-      <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
+      <PackageReference Include="Depository" Version="3.2.2" />
+      <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.0-experimental3" />
+      <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1-RTM" />
   </ItemGroup>
 
   <ItemGroup>
