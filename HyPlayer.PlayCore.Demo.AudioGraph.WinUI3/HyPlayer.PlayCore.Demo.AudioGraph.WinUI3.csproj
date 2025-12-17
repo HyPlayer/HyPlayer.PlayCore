@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows10.0.26100.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>HyPlayer.PlayCore.Demo.AudioGraph.WinUI3</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -30,9 +30,9 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="Depository" Version="3.2.0" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250108002" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
+    <PackageReference Include="Depository" Version="3.2.2" />
+	  <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.0.0-experimental3" />
+	  <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1-RTM" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
