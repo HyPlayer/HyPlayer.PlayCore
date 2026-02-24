@@ -4,6 +4,12 @@
     <Platform Name="ARM64" />
     <Platform Name="x64" />
   </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="global.json" />
+    <File Path="LICENCE" />
+    <File Path="renovate.json" />
+  </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/Demo/">
     <Project Path="HyPlayer.PlayCore.Demo.AudioGraph.WinUI3/HyPlayer.PlayCore.Demo.AudioGraph.WinUI3.csproj">
