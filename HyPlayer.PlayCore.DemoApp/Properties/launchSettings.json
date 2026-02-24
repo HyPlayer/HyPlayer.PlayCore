@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "HyPlayer.PlayCore.DemoApp (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "HyPlayer.PlayCore.DemoApp (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
