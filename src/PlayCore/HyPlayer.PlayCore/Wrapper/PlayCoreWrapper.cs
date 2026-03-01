@@ -1,4 +1,5 @@
 ﻿using HyPlayer.PlayCore.Abstraction;
+using HyPlayer.PlayCore.Abstraction.Interfaces.Wrapper;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Text;
 
 namespace HyPlayer.PlayCore.Wrapper
 {
-    internal class PlayCoreWrapper
+    public class PlayCoreWrapper : IPlayCoreWrapper
     {
         private readonly HashSet<AudioServiceBase> _audioServices = new();
         private readonly HashSet<ProviderBase> _musicProviders = new();
@@ -19,6 +20,7 @@ namespace HyPlayer.PlayCore.Wrapper
             { get => new(new ObservableCollection<ProviderBase>(_musicProviders.ToList())); }
         public ObservableCollection<PlayListManagerBase> PlayListControllers
             { get => new(new ObservableCollection<PlayListManagerBase>(_playlistControllers.ToList())); }
+
 
         public PlayCoreWrapper()
         {
