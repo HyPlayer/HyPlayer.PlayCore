@@ -21,6 +21,7 @@ using Depository.Abstraction.Interfaces;
 using HyPlayer.PlayCore.Abstraction;
 using HyPlayer.PlayCore.Implementation.AudioGraphService;
 using HyPlayer.PlayCore.PlayListControllers;
+using Depository.Abstraction.Models.Options;
 
 
 
@@ -55,8 +56,16 @@ namespace HyPlayer.PlayCore.DemoApp
         public App()
         {
             InitializeComponent();
-
-            var container = DepositoryFactory.CreateNew();
+            Action<DepositoryOption> option = (opt)
+                => {
+                    opt.AutoNotifyDependencyChange = true;
+                    opt.CheckerOption = new DepositoryCheckerOption()
+                    {
+                        AutoConstructor = true,
+                        
+                    };
+                };
+            var container = DepositoryFactory.CreateNew(option);
             container.AddSingleton<PlayCoreBase, Chopin>();
             container.AddSingleton<MainWindow>();
             Services = container;

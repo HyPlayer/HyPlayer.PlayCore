@@ -29,6 +29,6 @@
     <Project Path="HyPlayer.PlayCore.Abstraction/HyPlayer.PlayCore.Abstraction.csproj" />
     <Project Path="HyPlayer.PlayCore.Implementation.AudioGraph/HyPlayer.PlayCore.Implementation.AudioGraphService.csproj" />
     <Project Path="HyPlayer.PlayCore.Tests/HyPlayer.PlayCore.Tests.csproj" />
-    <Project Path="HyPlayer.PlayCore/HyPlayer.PlayCore.csproj" />
+    <Project Path="src/PlayCore/HyPlayer.PlayCore/HyPlayer.PlayCore.csproj" />
   </Folder>
 </Solution>
