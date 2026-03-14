@@ -1,63 +1,70 @@
 ﻿using HyPlayer.PlayCore.Abstraction;
+using HyPlayer.PlayCore.Abstraction.Interfaces.NotificationHub;
 using HyPlayer.PlayCore.Abstraction.Interfaces.Wrapper;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using HyPlayer.PlayCore.Wrapper.Notifications;
 using System.Collections.ObjectModel;
-using System.Text;
 
 namespace HyPlayer.PlayCore.Wrapper
 {
     public class PlayCoreWrapper : IPlayCoreWrapper
     {
-        private readonly HashSet<AudioServiceBase> _audioServices = new();
-        private readonly HashSet<ProviderBase> _musicProviders = new();
-        private readonly HashSet<PlayListManagerBase> _playlistControllers = new();
+        private readonly HashSet<object> _components = new(); 
+        private readonly List<INotificationSubscriberBase> _notificationSubscribers = new();
+        private readonly NotificationHub _notificationHub;
 
         public ObservableCollection<AudioServiceBase> AudioServices 
-            { get => new( new ObservableCollection<AudioServiceBase>(_audioServices.ToList())); }
+            { get => new(new ObservableCollection<AudioServiceBase>
+                (_components.Where(t => t is AudioServiceBase).Select(t => (AudioServiceBase)t).ToList())); }
         public ObservableCollection<ProviderBase> MusicProviders
-            { get => new(new ObservableCollection<ProviderBase>(_musicProviders.ToList())); }
+            {get => new(new ObservableCollection<ProviderBase>
+                (_components.Where(t => t is ProviderBase).Select(t => (ProviderBase)t).ToList()));
+        }
         public ObservableCollection<PlayListManagerBase> PlayListControllers
-            { get => new(new ObservableCollection<PlayListManagerBase>(_playlistControllers.ToList())); }
+            {
+            get => new(new ObservableCollection<PlayListManagerBase>
+                (_components.Where(t => t is PlayListManagerBase).Select(t => (PlayListManagerBase)t).ToList()));
+        }
 
+        public ObservableCollection<INotificationSubscriberBase> NotificationSubscribers
+        { get => new(new ObservableCollection<INotificationSubscriberBase>(_notificationSubscribers.ToList())); }
 
         public PlayCoreWrapper()
         {
-            
+            _notificationHub = new NotificationHub(this);
         }
 
-        public void AddAudioService(Type serviceType)
+        public void AddNotificationSubscriber(Type subscriberType)
         {
-            _audioServices.RemoveWhere(t => t.GetType() == serviceType);
-            _audioServices.Add((AudioServiceBase) Activator.CreateInstance(serviceType));
+            _notificationSubscribers.Add((INotificationSubscriberBase) Activator.CreateInstance(subscriberType));
         }
 
-        public void AddProvider(Type providerType)
+        private object AddCompnentToWrapper(Type type)
         {
-            _musicProviders.RemoveWhere(t => t.GetType() == providerType);
-            _musicProviders.Add((ProviderBase) Activator.CreateInstance(providerType));
+            var instance = Activator.CreateInstance(type); 
+            _components.Add(instance);
+            return instance;
         }
 
-        public void AddPlayListManager(Type managerType)
+        private void RemoveComponentFromWrapper(Type type)
         {
-            _playlistControllers.RemoveWhere(t => t.GetType() == managerType);
-            _playlistControllers.Add((PlayListManagerBase) Activator.CreateInstance(managerType));
+            _components.Where(t => t.GetType() == type);
         }
 
-        public void RemoveAudioService(Type serviceType)
+
+        public async void AddAudioService(Type audioServiceType)
         {
-            _audioServices.Remove((AudioServiceBase)Activator.CreateInstance(serviceType));
+            var component = AddCompnentToWrapper(audioServiceType);
+            var notification = new AudioServiceChangedNotification()
+            {
+                AudioService = (AudioServiceBase)component,
+                ChangeType = 0
+            };
+            await _notificationHub.PublishNotificationAsync<AudioServiceChangedNotification>(notification);
         }
 
-        public void RemoveProvider(Type providerType)
+        public async void RemoveAudioService(Type audioServiceType)
         {
-            _musicProviders.Remove((ProviderBase)Activator.CreateInstance(providerType));
-        }
 
-        public void RemovePlayListManager(Type managerType)
-        {
-            _playlistControllers.Remove((PlayListManagerBase)Activator.CreateInstance(managerType));
         }
     }
 }
