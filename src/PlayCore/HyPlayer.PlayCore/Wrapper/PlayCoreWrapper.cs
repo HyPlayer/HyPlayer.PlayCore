@@ -12,6 +12,10 @@ namespace HyPlayer.PlayCore.Wrapper
         private readonly List<INotificationSubscriberBase> _notificationSubscribers = new();
         private readonly NotificationHub _notificationHub;
 
+        private AudioServiceBase _currentAudioService;
+        private ProviderBase _currentMusicProvider;
+        private PlayListManagerBase _currentPlayListController;
+
         public ObservableCollection<AudioServiceBase> AudioServices
         {
             get => new(new ObservableCollection<AudioServiceBase>
@@ -30,6 +34,12 @@ namespace HyPlayer.PlayCore.Wrapper
 
         public ObservableCollection<INotificationSubscriberBase> NotificationSubscribers
         { get => new(new ObservableCollection<INotificationSubscriberBase>(_notificationSubscribers.ToList())); }
+
+        public AudioServiceBase CurrentAudioService => _currentAudioService;
+
+        public ProviderBase CurrentMusicProvider => _currentMusicProvider;
+
+        public PlayListManagerBase CurrentPlayListController => _currentPlayListController;
 
         public PlayCoreWrapper()
         {
@@ -77,7 +87,7 @@ namespace HyPlayer.PlayCore.Wrapper
             var notification = new AudioServiceChangedNotification()
             {
                 AudioService = null,
-                ChangeType = ChangeType.Remove   
+                ChangeType = ChangeType.Remove
             };
             await _notificationHub.PublishNotificationAsync<AudioServiceChangedNotification>(notification);
         }
@@ -126,6 +136,39 @@ namespace HyPlayer.PlayCore.Wrapper
                 ChangeType = ChangeType.Remove   // 移除
             };
             await _notificationHub.PublishNotificationAsync<PlaylistControllerChangedNotification>(notification);
+        }
+
+        public void SetCurrentAudioService(Type serviceType)
+        {
+            if (serviceType == null) throw new ArgumentNullException(nameof(serviceType));
+
+            var service = _components.FirstOrDefault(c => c.GetType() == serviceType) as AudioServiceBase;
+            if (service == null)
+                throw new InvalidOperationException($"未找到类型为 {serviceType.Name} 的 AudioService。");
+
+            _currentAudioService = service;
+        }
+
+        public void SetCurrentProvider(Type providerType)
+        {
+            if (providerType == null) throw new ArgumentNullException(nameof(providerType));
+
+            var provider = _components.FirstOrDefault(c => c.GetType() == providerType) as ProviderBase;
+            if (provider == null)
+                throw new InvalidOperationException($"未找到类型为 {providerType.Name} 的 Provider。");
+
+            _currentMusicProvider = provider;
+        }
+
+        public void SetCurrentPlayistController(Type controllerType)
+        {
+            if (controllerType == null) throw new ArgumentNullException(nameof(controllerType));
+
+            var controller = _components.FirstOrDefault(c => c.GetType() == controllerType) as PlayListManagerBase;
+            if (controller == null)
+                throw new InvalidOperationException($"未找到类型为 {controllerType.Name} 的 PlayListManager。");
+
+            _currentPlayListController = controller;
         }
     }
 }
