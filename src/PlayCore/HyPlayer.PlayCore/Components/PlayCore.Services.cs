@@ -37,28 +37,48 @@ namespace HyPlayer.PlayCore
 
         public override Task FocusAudioServiceAsync(Type serviceType, CancellationToken ctk = default)
         {
-            throw new NotImplementedException();
+            if (_wrapper is not null)
+            {
+                _wrapper.SetCurrentAudioService(serviceType);
+            }
+            return Task.CompletedTask;
         }
 
         public override Task FocusPlayListControllerAsync(Type serviceType, CancellationToken ctk = default)
         {
-            throw new NotImplementedException();
+             if (_wrapper is not null)
+            {
+                _wrapper.SetCurrentPlayistController(serviceType);
+            }
+            return Task.CompletedTask;
         }
 
 
         public override Task UnregisterAudioServiceAsync(Type serviceType, CancellationToken ctk = default)
         {
-            throw new NotImplementedException();
+            if (_wrapper is not null)
+            {
+                _wrapper.RemoveAudioService(serviceType);
+            }
+            return Task.CompletedTask;
         }
 
         public override Task UnregisterMusicProviderAsync(Type serviceType, CancellationToken ctk = default)
         {
-            throw new NotImplementedException();
+            if (_wrapper is not null)
+            {
+                _wrapper.RemoveProvider(serviceType);
+            }
+            return Task.CompletedTask;
         }
 
         public override Task UnregisterPlayListControllerAsync(Type serviceType, CancellationToken ctk = default)
         {
-            throw new NotImplementedException();
+            if (_wrapper is not null)
+            {
+                _wrapper.RemovePlayListManager(serviceType);
+            }
+            return Task.CompletedTask;
         }
     }
 }

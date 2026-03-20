@@ -15,8 +15,6 @@ namespace HyPlayer.PlayCore
         public Chopin(IPlayCoreWrapper wrapper)
         {
             _wrapper = wrapper;
-        }
-
-       
+        } 
     }
 }
