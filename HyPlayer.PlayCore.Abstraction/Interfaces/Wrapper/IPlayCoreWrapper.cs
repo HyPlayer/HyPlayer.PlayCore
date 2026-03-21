@@ -6,21 +6,19 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.Wrapper
     {
         ObservableCollection<AudioServiceBase> AudioServices { get; }
         ObservableCollection<ProviderBase> MusicProviders { get;}
-        ObservableCollection<PlayListManagerBase> PlayListControllers { get; }
+        ObservableCollection<PlayListManagerBase> PlayControllers { get; }
 
         AudioServiceBase CurrentAudioService { get; }
-        ProviderBase CurrentMusicProvider { get; }
-        PlayListManagerBase CurrentPlayListController { get; }
+        PlayControllerBase CurrentPlayController { get; }
 
         void AddNotificationSubscriber(Type subscriberType);
         void AddAudioService(Type audioServiceType);
         void RemoveAudioService(Type audioServiceType);
         void AddProvider(Type providerType);
         void RemoveProvider(Type providerType);
-        void AddPlayListManager(Type playListManagerType);
-        void RemovePlayListManager(Type playListManagerType);
+        void AddPlayController(Type playControllerType);
+        void RemovePlayController(Type playControllerType);
         void SetCurrentAudioService(Type serviceType);
-        void SetCurrentProvider(Type serviceType);
         void SetCurrentPlayistController(Type serviceType);
     }
 }

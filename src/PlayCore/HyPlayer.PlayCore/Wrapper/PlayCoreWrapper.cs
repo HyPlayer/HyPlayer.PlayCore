@@ -13,8 +13,7 @@ namespace HyPlayer.PlayCore.Wrapper
         private readonly NotificationHub _notificationHub;
 
         private AudioServiceBase _currentAudioService;
-        private ProviderBase _currentMusicProvider;
-        private PlayListManagerBase _currentPlayListController;
+        private PlayControllerBase _currentPlayController;
 
         public ObservableCollection<AudioServiceBase> AudioServices
         {
@@ -26,7 +25,7 @@ namespace HyPlayer.PlayCore.Wrapper
             get => new(new ObservableCollection<ProviderBase>
             (_components.Where(t => t is ProviderBase).Select(t => (ProviderBase)t).ToList()));
         }
-        public ObservableCollection<PlayListManagerBase> PlayListControllers
+        public ObservableCollection<PlayListManagerBase> PlayControllers
         {
             get => new(new ObservableCollection<PlayListManagerBase>
                 (_components.Where(t => t is PlayListManagerBase).Select(t => (PlayListManagerBase)t).ToList()));
@@ -36,10 +35,7 @@ namespace HyPlayer.PlayCore.Wrapper
         { get => new(new ObservableCollection<INotificationSubscriberBase>(_notificationSubscribers.ToList())); }
 
         public AudioServiceBase CurrentAudioService => _currentAudioService;
-
-        public ProviderBase CurrentMusicProvider => _currentMusicProvider;
-
-        public PlayListManagerBase CurrentPlayListController => _currentPlayListController;
+        public PlayControllerBase CurrentPlayController => _currentPlayController;
 
         public PlayCoreWrapper()
         {
@@ -116,9 +112,9 @@ namespace HyPlayer.PlayCore.Wrapper
         }
 
         // ---------- PlayListManager 操作 ----------
-        public async void AddPlayListManager(Type playListManagerType)
+        public async void AddPlayController(Type playControllerType)
         {
-            var component = AddCompnentToWrapper(playListManagerType);
+            var component = AddCompnentToWrapper(playControllerType);
             var notification = new PlaylistControllerChangedNotification()
             {
                 Controller = (PlayListManagerBase)component,
@@ -127,9 +123,9 @@ namespace HyPlayer.PlayCore.Wrapper
             await _notificationHub.PublishNotificationAsync<PlaylistControllerChangedNotification>(notification);
         }
 
-        public async void RemovePlayListManager(Type playListManagerType)
+        public async void RemovePlayController(Type playControllerType)
         {
-            RemoveComponentFromWrapper(playListManagerType);
+            RemoveComponentFromWrapper(playControllerType);
             var notification = new PlaylistControllerChangedNotification()
             {
                 Controller = null,
@@ -149,26 +145,15 @@ namespace HyPlayer.PlayCore.Wrapper
             _currentAudioService = service;
         }
 
-        public void SetCurrentProvider(Type providerType)
-        {
-            if (providerType == null) throw new ArgumentNullException(nameof(providerType));
-
-            var provider = _components.FirstOrDefault(c => c.GetType() == providerType) as ProviderBase;
-            if (provider == null)
-                throw new InvalidOperationException($"未找到类型为 {providerType.Name} 的 Provider。");
-
-            _currentMusicProvider = provider;
-        }
-
         public void SetCurrentPlayistController(Type controllerType)
         {
             if (controllerType == null) throw new ArgumentNullException(nameof(controllerType));
 
-            var controller = _components.FirstOrDefault(c => c.GetType() == controllerType) as PlayListManagerBase;
+            var controller = _components.FirstOrDefault(c => c.GetType() == controllerType) as PlayControllerBase;
             if (controller == null)
                 throw new InvalidOperationException($"未找到类型为 {controllerType.Name} 的 PlayListManager。");
 
-            _currentPlayListController = controller;
+            _currentPlayController = controller;
         }
     }
 }
