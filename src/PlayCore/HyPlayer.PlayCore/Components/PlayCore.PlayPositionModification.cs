@@ -1,4 +1,5 @@
-﻿using HyPlayer.PlayCore.Abstraction.Models;
+﻿using HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
+using HyPlayer.PlayCore.Abstraction.Models;
 using HyPlayer.PlayCore.Abstraction.Models.SingleItems;
 using System;
 using System.Collections.Generic;
@@ -8,45 +9,22 @@ namespace HyPlayer.PlayCore
 {
     public partial class Chopin
     {
-        public override Task ChangeSongContainerAsync(ContainerBase? container, CancellationToken ctk = default)
+        public override async Task MovePointerToAsync(SingleSongBase song, CancellationToken ctk = new())
         {
-            throw new NotImplementedException();
+            if (CurrentPlayListController is INavigateSongPlayListController controller)
+                await controller.NavigateSongToAsync(song, ctk);
         }
 
-
-        public override Task InsertSongAsync(SingleSongBase item, int index = -1, CancellationToken ctk = default)
+        public override async Task MoveNextAsync(CancellationToken ctk = new())
         {
-            throw new NotImplementedException();
+            if (CurrentPlayListController is { } controller)
+                await controller.MoveNextAsync(ctk);
         }
 
-        public override Task InsertSongRangeAsync(List<SingleSongBase> items, int index = -1, CancellationToken ctk = default)
+        public override async Task MovePreviousAsync(CancellationToken ctk = new())
         {
-            throw new NotImplementedException();
-        }
-
-        public override Task RemoveAllSongAsync(CancellationToken ctk = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task RemoveSongAsync(SingleSongBase item, CancellationToken ctk = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task RemoveSongRangeAsync(List<SingleSongBase> item, CancellationToken ctk = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task ReRandomAsync(CancellationToken ctk = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task SetRandomAsync(bool isRandom, CancellationToken ctk = default)
-        {
-            throw new NotImplementedException();
+            if (CurrentPlayListController is { } controller)
+                await controller.MovePreviousAsync(ctk);
         }
     }
 }
