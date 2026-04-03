@@ -26,11 +26,11 @@ namespace HyPlayer.PlayCore
             return Task.CompletedTask;
         }
 
-        public override Task RegisterPlayListControllerAsync(Type serviceType, CancellationToken ctk = default)
+        public override Task RegisterPlayControllerAsync(Type serviceType, CancellationToken ctk = default)
         {
             if (_wrapper is not null)
             {
-                _wrapper.AddPlayListManager(serviceType);
+                _wrapper.AddPlayController(serviceType);
             }
             return Task.CompletedTask;
         }
@@ -72,11 +72,11 @@ namespace HyPlayer.PlayCore
             return Task.CompletedTask;
         }
 
-        public override Task UnregisterPlayListControllerAsync(Type serviceType, CancellationToken ctk = default)
+        public override Task UnregisterPlayControllerAsync(Type serviceType, CancellationToken ctk = default)
         {
             if (_wrapper is not null)
             {
-                _wrapper.RemovePlayListManager(serviceType);
+                _wrapper.RemovePlayController(serviceType);
             }
             return Task.CompletedTask;
         }
