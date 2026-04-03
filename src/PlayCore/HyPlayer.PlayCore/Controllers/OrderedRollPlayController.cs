@@ -1,7 +1,6 @@
 ﻿using AsyncAwaitBestPractices;
-using Depository.Abstraction.Interfaces;
-using Depository.Abstraction.Interfaces.NotificationHub;
 using HyPlayer.PlayCore.Abstraction;
+using HyPlayer.PlayCore.Abstraction.Interfaces.NotificationHub;
 using HyPlayer.PlayCore.Abstraction.Interfaces.PlayListController;
 using HyPlayer.PlayCore.Abstraction.Interfaces.Wrapper;
 using HyPlayer.PlayCore.Abstraction.Models.Notifications;

@@ -30,7 +30,7 @@ public abstract class PlayCoreBase : IPlayCoreService,
     public abstract Task UnregisterMusicProviderAsync(Type serviceType, CancellationToken ctk = new());
     public abstract Task UnregisterPlayControllerAsync(Type serviceType, CancellationToken ctk = new());
     public abstract Task FocusAudioServiceAsync(Type serviceType, CancellationToken ctk = new());
-    public abstract Task FocusPlayListControllerAsync(Type serviceType, CancellationToken ctk = new());
+    public abstract Task FocusPlayControllerAsync(Type serviceType, CancellationToken ctk = new());
     public abstract Task ChangeSongContainerAsync(ContainerBase? container, CancellationToken ctk = new());
     public abstract Task InsertSongAsync(SingleSongBase item, int index = -1, CancellationToken ctk = new());
     public abstract Task InsertSongRangeAsync(List<SingleSongBase> items, int index = -1, CancellationToken ctk = new());

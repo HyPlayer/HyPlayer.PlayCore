@@ -44,7 +44,7 @@ namespace HyPlayer.PlayCore
             return Task.CompletedTask;
         }
 
-        public override Task FocusPlayListControllerAsync(Type serviceType, CancellationToken ctk = default)
+        public override Task FocusPlayControllerAsync(Type serviceType, CancellationToken ctk = default)
         {
              if (_wrapper is not null)
             {
