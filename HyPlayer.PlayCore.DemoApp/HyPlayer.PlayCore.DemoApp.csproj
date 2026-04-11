@@ -43,7 +43,7 @@
   <ItemGroup>
     <ProjectReference Include="..\HyPlayer.PlayCore.Abstraction\HyPlayer.PlayCore.Abstraction.csproj" />
     <ProjectReference Include="..\HyPlayer.PlayCore.Implementation.AudioGraph\HyPlayer.PlayCore.Implementation.AudioGraphService.csproj" />
-    <ProjectReference Include="..\HyPlayer.PlayCore\HyPlayer.PlayCore.csproj" />
+    <ProjectReference Include="..\src\PlayCore\HyPlayer.PlayCore\HyPlayer.PlayCore.csproj" />
   </ItemGroup>
 
   <!--

@@ -12,10 +12,10 @@ namespace HyPlayer.PlayCore
 {
     public partial class Chopin : PlayCoreBase
     {
-        public override AudioServiceBase? CurrentAudioService 
-            { get => _wrapper.CurrentAudioService; protected set => _wrapper.SetCurrentAudioService(value.GetType()); }
-        public override PlayControllerBase? CurrentPlayListController 
-            { get => _wrapper.CurrentPlayController; protected set => _wrapper.SetCurrentPlayistController(value.GetType()); }
+        public override AudioServiceBase? CurrentAudioService
+            { get => _wrapper.CurrentAudioService; protected set { if (value == null) _wrapper.SetCurrentAudioService(typeof(object)); else _wrapper.SetCurrentAudioService(value.GetType()); } }
+        public override PlayControllerBase? CurrentPlayListController
+            { get => _wrapper.CurrentPlayController; protected set { if (value == null) _wrapper.SetCurrentPlayistController(typeof(object)); else _wrapper.SetCurrentPlayistController(value.GetType()); } }
 
         public Chopin(IPlayCoreWrapper wrapper)
         {

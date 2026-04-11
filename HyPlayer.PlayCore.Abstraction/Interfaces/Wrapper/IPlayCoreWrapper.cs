@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace HyPlayer.PlayCore.Abstraction.Interfaces.Wrapper
 {
@@ -8,16 +10,16 @@ namespace HyPlayer.PlayCore.Abstraction.Interfaces.Wrapper
         ObservableCollection<ProviderBase> MusicProviders { get;}
         ObservableCollection<PlayListManagerBase> PlayControllers { get; }
 
-        AudioServiceBase CurrentAudioService { get; }
-        PlayControllerBase CurrentPlayController { get; }
+        AudioServiceBase? CurrentAudioService { get; }
+        PlayControllerBase? CurrentPlayController { get; }
 
         void AddNotificationSubscriber(Type subscriberType);
-        void AddAudioService(Type audioServiceType);
-        void RemoveAudioService(Type audioServiceType);
-        void AddProvider(Type providerType);
-        void RemoveProvider(Type providerType);
-        void AddPlayController(Type playControllerType);
-        void RemovePlayController(Type playControllerType);
+        Task AddAudioService(Type audioServiceType);
+        Task RemoveAudioService(Type audioServiceType);
+        Task AddProvider(Type providerType);
+        Task RemoveProvider(Type providerType);
+        Task AddPlayController(Type playControllerType);
+        Task RemovePlayController(Type playControllerType);
         void SetCurrentAudioService(Type serviceType);
         void SetCurrentPlayistController(Type serviceType);
     }

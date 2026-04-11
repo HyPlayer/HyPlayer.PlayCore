@@ -2,7 +2,11 @@
 using HyPlayer.PlayCore.Abstraction.Interfaces.NotificationHub;
 using HyPlayer.PlayCore.Abstraction.Interfaces.Wrapper;
 using HyPlayer.PlayCore.Wrapper.Notifications;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace HyPlayer.PlayCore.Wrapper
 {
@@ -12,30 +16,27 @@ namespace HyPlayer.PlayCore.Wrapper
         private readonly List<INotificationSubscriberBase> _notificationSubscribers = new();
         private readonly NotificationHub _notificationHub;
 
-        private AudioServiceBase _currentAudioService;
-        private PlayControllerBase _currentPlayController;
+        private AudioServiceBase? _currentAudioService;
+        private PlayControllerBase? _currentPlayController;
 
         public ObservableCollection<AudioServiceBase> AudioServices
         {
-            get => new(new ObservableCollection<AudioServiceBase>
-            (_components.Where(t => t is AudioServiceBase).Select(t => (AudioServiceBase)t).ToList()));
+            get => new ObservableCollection<AudioServiceBase>(_components.OfType<AudioServiceBase>().ToList());
         }
         public ObservableCollection<ProviderBase> MusicProviders
         {
-            get => new(new ObservableCollection<ProviderBase>
-            (_components.Where(t => t is ProviderBase).Select(t => (ProviderBase)t).ToList()));
+            get => new ObservableCollection<ProviderBase>(_components.OfType<ProviderBase>().ToList());
         }
         public ObservableCollection<PlayListManagerBase> PlayControllers
         {
-            get => new(new ObservableCollection<PlayListManagerBase>
-                (_components.Where(t => t is PlayListManagerBase).Select(t => (PlayListManagerBase)t).ToList()));
+            get => new ObservableCollection<PlayListManagerBase>(_components.OfType<PlayListManagerBase>().ToList());
         }
 
         public ObservableCollection<INotificationSubscriberBase> NotificationSubscribers
-        { get => new(new ObservableCollection<INotificationSubscriberBase>(_notificationSubscribers.ToList())); }
+        { get => new ObservableCollection<INotificationSubscriberBase>(_notificationSubscribers.ToList()); }
 
-        public AudioServiceBase CurrentAudioService => _currentAudioService;
-        public PlayControllerBase CurrentPlayController => _currentPlayController;
+        public AudioServiceBase? CurrentAudioService => _currentAudioService;
+        public PlayControllerBase? CurrentPlayController => _currentPlayController;
 
         public PlayCoreWrapper()
         {
@@ -44,13 +45,23 @@ namespace HyPlayer.PlayCore.Wrapper
 
         public void AddNotificationSubscriber(Type subscriberType)
         {
-            _notificationSubscribers.Add((INotificationSubscriberBase)Activator.CreateInstance(subscriberType));
+            if (subscriberType == null) throw new ArgumentNullException(nameof(subscriberType));
+            var instance = Activator.CreateInstance(subscriberType);
+            if (instance is INotificationSubscriberBase sub)
+            {
+                _notificationSubscribers.Add(sub);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Type {subscriberType.FullName} does not implement INotificationSubscriberBase");
+            }
         }
 
-        // 修正方法名拼写（可选，但为了保持兼容性可保留原拼写）
-        private object AddCompnentToWrapper(Type type)
+        // 创建并添加组件到包装器，返回实例（安全检查）
+        private object AddComponentToWrapper(Type type)
         {
-            var instance = Activator.CreateInstance(type);
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            var instance = Activator.CreateInstance(type) ?? throw new InvalidOperationException($"Unable to create instance of {type.FullName}");
             _components.Add(instance);
             return instance;
         }
@@ -65,73 +76,81 @@ namespace HyPlayer.PlayCore.Wrapper
         }
 
         // ---------- AudioService 操作 ----------
-        public async void AddAudioService(Type audioServiceType)
+        public async Task AddAudioService(Type audioServiceType)
         {
-            var component = AddCompnentToWrapper(audioServiceType);
+            if (audioServiceType == null) throw new ArgumentNullException(nameof(audioServiceType));
+            if (!typeof(AudioServiceBase).IsAssignableFrom(audioServiceType)) throw new ArgumentException("Type must derive from AudioServiceBase", nameof(audioServiceType));
+            var component = AddComponentToWrapper(audioServiceType);
             var notification = new AudioServiceChangedNotification()
             {
                 AudioService = (AudioServiceBase)component,
                 ChangeType = 0   // 假设 0 表示添加
             };
-            await _notificationHub.PublishNotificationAsync<AudioServiceChangedNotification>(notification);
+            await _notificationHub.PublishNotificationAsync<AudioServiceChangedNotification>(notification).ConfigureAwait(false);
         }
 
-        public async void RemoveAudioService(Type audioServiceType)
+        public async Task RemoveAudioService(Type audioServiceType)
         {
-            // 注意：此处未保留被移除的实例引用，通知中只能传 null
+            if (audioServiceType == null) throw new ArgumentNullException(nameof(audioServiceType));
             RemoveComponentFromWrapper(audioServiceType);
             var notification = new AudioServiceChangedNotification()
             {
                 AudioService = null,
                 ChangeType = ChangeType.Remove
             };
-            await _notificationHub.PublishNotificationAsync<AudioServiceChangedNotification>(notification);
+            await _notificationHub.PublishNotificationAsync<AudioServiceChangedNotification>(notification).ConfigureAwait(false);
         }
 
         // ---------- Provider 操作 ----------
-        public async void AddProvider(Type providerType)
+        public async Task AddProvider(Type providerType)
         {
-            var component = AddCompnentToWrapper(providerType);
+            if (providerType == null) throw new ArgumentNullException(nameof(providerType));
+            if (!typeof(ProviderBase).IsAssignableFrom(providerType)) throw new ArgumentException("Type must derive from ProviderBase", nameof(providerType));
+            var component = AddComponentToWrapper(providerType);
             var notification = new ProviderChangeNotification()
             {
                 Provider = (ProviderBase)component,
                 ChangeType = 0   // 添加
             };
-            await _notificationHub.PublishNotificationAsync<ProviderChangeNotification>(notification);
+            await _notificationHub.PublishNotificationAsync<ProviderChangeNotification>(notification).ConfigureAwait(false);
         }
 
-        public async void RemoveProvider(Type providerType)
+        public async Task RemoveProvider(Type providerType)
         {
+            if (providerType == null) throw new ArgumentNullException(nameof(providerType));
             RemoveComponentFromWrapper(providerType);
             var notification = new ProviderChangeNotification()
             {
                 Provider = null,
                 ChangeType = ChangeType.Remove   // 移除
             };
-            await _notificationHub.PublishNotificationAsync<ProviderChangeNotification>(notification);
+            await _notificationHub.PublishNotificationAsync<ProviderChangeNotification>(notification).ConfigureAwait(false);
         }
 
         // ---------- PlayListManager 操作 ----------
-        public async void AddPlayController(Type playControllerType)
+        public async Task AddPlayController(Type playControllerType)
         {
-            var component = AddCompnentToWrapper(playControllerType);
+            if (playControllerType == null) throw new ArgumentNullException(nameof(playControllerType));
+            if (!typeof(PlayListManagerBase).IsAssignableFrom(playControllerType)) throw new ArgumentException("Type must derive from PlayListManagerBase", nameof(playControllerType));
+            var component = AddComponentToWrapper(playControllerType);
             var notification = new PlaylistControllerChangedNotification()
             {
                 Controller = (PlayListManagerBase)component,
                 ChangeType = 0   // 添加
             };
-            await _notificationHub.PublishNotificationAsync<PlaylistControllerChangedNotification>(notification);
+            await _notificationHub.PublishNotificationAsync<PlaylistControllerChangedNotification>(notification).ConfigureAwait(false);
         }
 
-        public async void RemovePlayController(Type playControllerType)
+        public async Task RemovePlayController(Type playControllerType)
         {
+            if (playControllerType == null) throw new ArgumentNullException(nameof(playControllerType));
             RemoveComponentFromWrapper(playControllerType);
             var notification = new PlaylistControllerChangedNotification()
             {
                 Controller = null,
                 ChangeType = ChangeType.Remove   // 移除
             };
-            await _notificationHub.PublishNotificationAsync<PlaylistControllerChangedNotification>(notification);
+            await _notificationHub.PublishNotificationAsync<PlaylistControllerChangedNotification>(notification).ConfigureAwait(false);
         }
 
         public void SetCurrentAudioService(Type serviceType)

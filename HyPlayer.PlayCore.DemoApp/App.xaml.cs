@@ -21,7 +21,9 @@ using Depository.Abstraction.Interfaces;
 using HyPlayer.PlayCore.Abstraction;
 using HyPlayer.PlayCore.Implementation.AudioGraphService;
 using HyPlayer.PlayCore.PlayListControllers;
+using HyPlayer.PlayCore.Wrapper;
 using Depository.Abstraction.Models.Options;
+using HyPlayer.PlayCore.Abstraction.Interfaces.Wrapper;
 
 
 
@@ -36,16 +38,16 @@ namespace HyPlayer.PlayCore.DemoApp
 
         public static IDepository Services { get; private set; }
 
-        public static object GetService<TService>()
+        public static TService GetService<TService>()
             where TService : class
         {
             try
             {
                 return Services.Resolve<TService>();
             }
-            catch
+            catch (Exception ex)
             {
-                throw new Exception();
+                throw new InvalidOperationException($"Unable to resolve service {typeof(TService).FullName}", ex);
             }
         }
 
@@ -66,7 +68,9 @@ namespace HyPlayer.PlayCore.DemoApp
                     };
                 };
             var container = DepositoryFactory.CreateNew(option);
-            container.AddSingleton<PlayCoreBase, Chopin>();
+            // register wrapper so Chopin can be constructed
+            container.AddSingleton<IPlayCoreWrapper, PlayCoreWrapper>();
+            //container.AddSingleton<PlayCoreBase, Chopin>();
             container.AddSingleton<MainWindow>();
             Services = container;
         }
@@ -77,14 +81,14 @@ namespace HyPlayer.PlayCore.DemoApp
         /// <param name="args">Details about the launch request and process.</param>
         protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
+            /*
             var playCore = (Chopin) GetService<PlayCoreBase>();
             if (playCore != null)
             {
                 await playCore.RegisterAudioServiceAsync(typeof(AudioGraphService));
-                await playCore.RegisterPlayListControllerAsync(typeof(DefaultPlayListManager));
-                await playCore.RegisterPlayListControllerAsync(typeof(OrderedRollPlayController));
+                await playCore.RegisterPlayControllerAsync(typeof(OrderedRollPlayController));
             }
-
+            */
             _window = (Window) GetService<MainWindow>();
             _window.Activate();
         }

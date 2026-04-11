@@ -12,7 +12,8 @@ namespace HyPlayer.PlayCore
         {
             if (_wrapper is not null)
             {
-                _wrapper.AddAudioService(serviceType);
+                // wrapper.AddAudioService returns Task now
+                return _wrapper.AddAudioService(serviceType);
             }
             return Task.CompletedTask;
         }
@@ -21,7 +22,7 @@ namespace HyPlayer.PlayCore
         {
             if (_wrapper is not null)
             {
-                _wrapper.AddProvider(serviceType);
+                return _wrapper.AddProvider(serviceType);
             }
             return Task.CompletedTask;
         }
@@ -30,7 +31,7 @@ namespace HyPlayer.PlayCore
         {
             if (_wrapper is not null)
             {
-                _wrapper.AddPlayController(serviceType);
+                return _wrapper.AddPlayController(serviceType);
             }
             return Task.CompletedTask;
         }
@@ -58,7 +59,7 @@ namespace HyPlayer.PlayCore
         {
             if (_wrapper is not null)
             {
-                _wrapper.RemoveAudioService(serviceType);
+                return _wrapper.RemoveAudioService(serviceType);
             }
             return Task.CompletedTask;
         }
@@ -67,7 +68,7 @@ namespace HyPlayer.PlayCore
         {
             if (_wrapper is not null)
             {
-                _wrapper.RemoveProvider(serviceType);
+                return _wrapper.RemoveProvider(serviceType);
             }
             return Task.CompletedTask;
         }
@@ -76,7 +77,7 @@ namespace HyPlayer.PlayCore
         {
             if (_wrapper is not null)
             {
-                _wrapper.RemovePlayController(serviceType);
+                return _wrapper.RemovePlayController(serviceType);
             }
             return Task.CompletedTask;
         }
