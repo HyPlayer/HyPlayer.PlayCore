@@ -12,13 +12,13 @@
   </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/Demo/">
-    <Project Path="HyPlayer.PlayCore.Demo.AudioGraph.WinUI3/HyPlayer.PlayCore.Demo.AudioGraph.WinUI3.csproj">
+    <Project Path="src/HyPlayer.PlayCore.Demo.AudioGraph.WinUI3/HyPlayer.PlayCore.Demo.AudioGraph.WinUI3.csproj">
       <Platform Solution="*|Any CPU" Project="x64" />
       <Platform Solution="*|ARM64" Project="ARM64" />
       <Platform Solution="*|x64" Project="x64" />
       <Deploy />
     </Project>
-    <Project Path="HyPlayer.PlayCore.DemoApp/HyPlayer.PlayCore.DemoApp.csproj">
+    <Project Path="src/HyPlayer.PlayCore.DemoApp/HyPlayer.PlayCore.DemoApp.csproj">
       <Platform Solution="*|Any CPU" Project="x64" />
       <Platform Solution="*|ARM64" Project="ARM64" />
       <Platform Solution="*|x64" Project="x64" />
@@ -26,9 +26,9 @@
     </Project>
   </Folder>
   <Folder Name="/src/PlayCore/">
-    <Project Path="HyPlayer.PlayCore.Abstraction/HyPlayer.PlayCore.Abstraction.csproj" />
-    <Project Path="HyPlayer.PlayCore.Implementation.AudioGraph/HyPlayer.PlayCore.Implementation.AudioGraphService.csproj" />
-    <Project Path="HyPlayer.PlayCore.Tests/HyPlayer.PlayCore.Tests.csproj" />
-    <Project Path="src/PlayCore/HyPlayer.PlayCore/HyPlayer.PlayCore.csproj" />
+    <Project Path="src/HyPlayer.PlayCore.Abstraction/HyPlayer.PlayCore.Abstraction.csproj" />
+    <Project Path="src/HyPlayer.PlayCore.Implementation.AudioGraph/HyPlayer.PlayCore.Implementation.AudioGraphService.csproj" />
+    <Project Path="src/HyPlayer.PlayCore.Tests/HyPlayer.PlayCore.Tests.csproj" />
+    <Project Path="src/HyPlayer.PlayCore/HyPlayer.PlayCore.csproj" />
   </Folder>
 </Solution>

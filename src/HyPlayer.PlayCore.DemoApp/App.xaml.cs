@@ -69,8 +69,9 @@ namespace HyPlayer.PlayCore.DemoApp
                 };
             var container = DepositoryFactory.CreateNew(option);
             // register wrapper so Chopin can be constructed
-            container.AddSingleton<IPlayCoreWrapper, PlayCoreWrapper>();
+            // container.AddSingleton<IPlayCoreWrapper, PlayCoreWrapper>();
             //container.AddSingleton<PlayCoreBase, Chopin>();
+            container.AddSingleton<Class1>();
             container.AddSingleton<MainWindow>();
             Services = container;
         }
