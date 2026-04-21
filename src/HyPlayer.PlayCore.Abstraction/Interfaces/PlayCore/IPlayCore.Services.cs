@@ -2,7 +2,7 @@
 
 public interface IPlayCoreService : IPlayCore
 {
-    public Task RegisterAudioServiceAsync(Type serviceType, CancellationToken ctk = new());
+    public Task RegisterAudioServiceAsync(Type serviceType, Type settingsType,CancellationToken ctk = new());
     public Task RegisterMusicProviderAsync(Type serviceType, CancellationToken ctk = new());
     public Task RegisterPlayControllerAsync(Type serviceType, CancellationToken ctk = new());
 

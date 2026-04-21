@@ -8,12 +8,12 @@ namespace HyPlayer.PlayCore
     {
         private readonly IPlayCoreWrapper _wrapper;
 
-        public override Task RegisterAudioServiceAsync(Type serviceType, CancellationToken ctk = default)
+        public override Task RegisterAudioServiceAsync(Type serviceType, Type settingsType, CancellationToken ctk = default)
         {
             if (_wrapper is not null)
             {
                 // wrapper.AddAudioService returns Task now
-                return _wrapper.AddAudioService(serviceType);
+                return _wrapper.AddAudioService(serviceType, settingsType);
             }
             return Task.CompletedTask;
         }

@@ -1,5 +1,5 @@
-using Depository.Abstraction.Interfaces;
-using Depository.Extensions;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 
@@ -13,16 +13,15 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        public IDepository Depository { get; set; }
-        public MainWindow(IDepository depository)
+        public IServiceProvider Services { get; }
+        public MainWindow(IServiceProvider services)
         {
             this.InitializeComponent();
-            Depository = depository;
-            depository.AddSingleton<DispatcherQueue>(DispatcherQueue);
+            Services = services ?? throw new ArgumentNullException(nameof(services));
         }
         public void Navigate()
         {
-            MainFrame.Navigate(typeof(BlankPage1), Depository);
+            MainFrame.Navigate(typeof(BlankPage1), Services);
         }
     }
 }

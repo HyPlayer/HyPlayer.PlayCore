@@ -23,7 +23,7 @@ public abstract class PlayCoreBase : IPlayCoreService,
     public virtual AudioTicketBase? CurrentPlayingTicket { get; protected set; }
     public virtual bool IsRandom { get; protected set; }
 
-    public abstract Task RegisterAudioServiceAsync(Type serviceType, CancellationToken ctk = new());
+    public abstract Task RegisterAudioServiceAsync(Type serviceType, Type settingsType, CancellationToken ctk = new());
     public abstract Task RegisterMusicProviderAsync(Type serviceType, CancellationToken ctk = new());
     public abstract Task RegisterPlayControllerAsync(Type serviceType, CancellationToken ctk = new());
     public abstract Task UnregisterAudioServiceAsync(Type serviceType, CancellationToken ctk = new());

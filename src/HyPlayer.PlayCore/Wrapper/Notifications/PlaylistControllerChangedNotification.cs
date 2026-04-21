@@ -4,7 +4,7 @@ namespace HyPlayer.PlayCore.Wrapper.Notifications
 {
     public class PlaylistControllerChangedNotification
     {
-        public PlayListManagerBase? Controller { get; set; }
+        public PlayControllerBase? Controller { get; set; }
         public ChangeType ChangeType { get; set; }
     }
 }

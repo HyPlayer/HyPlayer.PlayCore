@@ -15,16 +15,19 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
-using Depository.Core;
-using Depository.Extensions;
-using Depository.Abstraction.Interfaces;
+using System;
+using Microsoft.Extensions.DependencyInjection;
+using HyPlayer.PlayCore.Abstraction.Interfaces.NotificationHub;
 using HyPlayer.PlayCore.Abstraction;
 using HyPlayer.PlayCore.Implementation.AudioGraphService;
 using HyPlayer.PlayCore.PlayListControllers;
 using HyPlayer.PlayCore.Wrapper;
 using Depository.Abstraction.Models.Options;
 using HyPlayer.PlayCore.Abstraction.Interfaces.Wrapper;
-
+using HyPlayer.PlayCore.Abstraction.Interfaces.AudioServices;
+using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions;
+using NotificationHub = HyPlayer.PlayCore.Wrapper.NotificationHub;
+using INotificationHub = HyPlayer.PlayCore.Abstraction.Interfaces.NotificationHub.INotificationHub;
 
 
 namespace HyPlayer.PlayCore.DemoApp
@@ -36,14 +39,14 @@ namespace HyPlayer.PlayCore.DemoApp
     {
         private Window? _window;
 
-        public static IDepository Services { get; private set; }
+        public static IServiceProvider Services { get; private set; }
 
         public static TService GetService<TService>()
             where TService : class
         {
             try
             {
-                return Services.Resolve<TService>();
+                return Services.GetRequiredService<TService>();
             }
             catch (Exception ex)
             {
@@ -58,22 +61,33 @@ namespace HyPlayer.PlayCore.DemoApp
         public App()
         {
             InitializeComponent();
-            Action<DepositoryOption> option = (opt)
-                => {
-                    opt.AutoNotifyDependencyChange = true;
-                    opt.CheckerOption = new DepositoryCheckerOption()
-                    {
-                        AutoConstructor = true,
-                        
-                    };
-                };
-            var container = DepositoryFactory.CreateNew(option);
-            // register wrapper so Chopin can be constructed
-            // container.AddSingleton<IPlayCoreWrapper, PlayCoreWrapper>();
-            //container.AddSingleton<PlayCoreBase, Chopin>();
-            container.AddSingleton<Class1>();
-            container.AddSingleton<MainWindow>();
-            Services = container;
+            var services = new ServiceCollection();
+            // register wrapper and notification hub as singletons but initialize them after construction
+            services.AddSingleton<IPlayCoreWrapper, PlayCoreWrapper>();
+            services.AddSingleton<INotificationHub, HyPlayer.PlayCore.Wrapper.NotificationHub>();
+
+            services.AddSingleton<PlayCoreBase, Chopin>();
+            services.AddSingleton<Class1>();
+            services.AddSingleton<MainWindow>();
+
+            Services = services.BuildServiceProvider();
+
+            // Resolve the wrapper and notification hub instances and initialize them to avoid circular constructor dependency
+            try
+            {
+                var wrapper = Services.GetService<IPlayCoreWrapper>() as PlayCoreWrapper;
+                var hub = Services.GetService<INotificationHub>() as HyPlayer.PlayCore.Wrapper.NotificationHub;
+                if (wrapper != null && hub != null)
+                {
+                    // link them after both instances are created
+                    wrapper.Initialize(hub);
+                    hub.Initialize(wrapper);
+                }
+            }
+            catch
+            {
+                // If resolution fails here, leave as-is; the container will resolve lazily later.
+            }
         }
 
         /// <summary>
@@ -82,14 +96,14 @@ namespace HyPlayer.PlayCore.DemoApp
         /// <param name="args">Details about the launch request and process.</param>
         protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            /*
+            
             var playCore = (Chopin) GetService<PlayCoreBase>();
             if (playCore != null)
             {
-                await playCore.RegisterAudioServiceAsync(typeof(AudioGraphService));
+                await playCore.RegisterAudioServiceAsync(typeof(AudioGraphService), typeof(AudioGraphServiceSettings));
                 await playCore.RegisterPlayControllerAsync(typeof(OrderedRollPlayController));
             }
-            */
+            
             _window = (Window) GetService<MainWindow>();
             _window.Activate();
         }

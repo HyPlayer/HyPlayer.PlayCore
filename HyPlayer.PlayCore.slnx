@@ -25,6 +25,9 @@
       <Deploy />
     </Project>
   </Folder>
+  <Folder Name="/src/Freud/">
+    <Project Path="HyPlayer.PlayCore.Freud/HyPlayer.PlayCore.Freud.csproj" Id="c551ee4b-559d-40e3-8502-8a1967c2d2ee" />
+  </Folder>
   <Folder Name="/src/PlayCore/">
     <Project Path="src/HyPlayer.PlayCore.Abstraction/HyPlayer.PlayCore.Abstraction.csproj" />
     <Project Path="src/HyPlayer.PlayCore.Implementation.AudioGraph/HyPlayer.PlayCore.Implementation.AudioGraphService.csproj" />

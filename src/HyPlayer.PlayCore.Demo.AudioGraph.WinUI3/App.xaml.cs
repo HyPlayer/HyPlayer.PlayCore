@@ -1,7 +1,8 @@
-﻿using Depository.Abstraction.Interfaces;
-using Depository.Abstraction.Interfaces.NotificationHub;
-using Depository.Core;
-using Depository.Extensions;
+﻿using System;
+using Microsoft.Extensions.DependencyInjection;
+using HyPlayer.PlayCore.Abstraction.Interfaces.NotificationHub;
+using HyPlayer.PlayCore.Wrapper;
+using Microsoft.UI.Dispatching;
 using HyPlayer.PlayCore.Abstraction.Models;
 using HyPlayer.PlayCore.Abstraction.Models.Notifications;
 using HyPlayer.PlayCore.Implementation.AudioGraphService;
@@ -26,16 +27,18 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
         public App()
         {
             this.InitializeComponent();
-            var container = DepositoryFactory.CreateNew();
+            var services = new ServiceCollection();
             var settings = new AudioGraphServiceSettings();
-            container.AddSingleton<AudioServiceSettingsBase, AudioGraphServiceSettings>(settings);
-            container.AddSingleton<AudioGraphService>();
-            container.AddSingleton<INotificationHub, NotificationHub>();
-            container.AddSingleton<INotificationSubscriber<PlaybackPositionChangedNotification>, PositionNotificationSubscriber>();
-            container.AddSingleton<INotificationSubscriber<MasterTicketChangedNotification>, MasterTicketNotificationSubscriber>();
-            container.AddSingleton<INotificationSubscriber<AudioTicketReachesEndNotification>, OnTicketReachesEndNotificationSubscriber>();
-            container.AddSingleton<MainWindow>();
-            Services = container;
+            services.AddSingleton<AudioServiceSettingsBase>(settings);
+            services.AddSingleton<AudioGraphService>();
+            services.AddSingleton<INotificationHub, NotificationHub>();
+            services.AddSingleton<INotificationSubscriber<PlaybackPositionChangedNotification>, PositionNotificationSubscriber>();
+            services.AddSingleton<INotificationSubscriber<MasterTicketChangedNotification>, MasterTicketNotificationSubscriber>();
+            services.AddSingleton<INotificationSubscriber<AudioTicketReachesEndNotification>, OnTicketReachesEndNotificationSubscriber>();
+            services.AddSingleton<MainWindow>();
+            // register DispatcherQueue factory so it can be resolved by consumers
+            services.AddSingleton<DispatcherQueue>(_ => DispatcherQueue.GetForCurrentThread());
+            Services = services.BuildServiceProvider();
         }
 
         /// <summary>
@@ -44,12 +47,12 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            var window = Services.Resolve<MainWindow>();
+            var window = Services.GetRequiredService<MainWindow>();
             Window = window;
             Window.Activate();
             window.Navigate();
         }
         public static Window Window;
-        public static IDepository Services { get; private set; }
+        public static IServiceProvider Services { get; private set; }
     }
 }

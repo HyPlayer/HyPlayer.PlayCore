@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Depository.Abstraction.Interfaces;
-using Depository.Abstraction.Interfaces.NotificationHub;
-using Depository.Extensions;
+using System;
+using Microsoft.Extensions.DependencyInjection;
+using HyPlayer.PlayCore.Abstraction.Interfaces.NotificationHub;
 using HyPlayer.PlayCore.Abstraction.Models.Notifications;
 using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions;
 using HyPlayer.PlayCore.Implementation.AudioGraphService.Abstractions.Notifications;
@@ -13,24 +13,21 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
 {
     public partial class PositionNotificationSubscriber : ObservableObject, INotificationSubscriber<PlaybackPositionChangedNotification>
     {
-        private DispatcherQueue _dispatcherQueue;
-        private IDepository _depository;
+        private DispatcherQueue? _dispatcherQueue;
+        private readonly IServiceProvider _services;
         public Task HandleNotificationAsync(PlaybackPositionChangedNotification notification, CancellationToken ctk = default)
         {
             if (Sliding) return Task.CompletedTask;
-            if (_dispatcherQueue == null)
-            {
-                _dispatcherQueue = _depository.Resolve<DispatcherQueue>();
-            }
+            _dispatcherQueue ??= _services.GetService<DispatcherQueue>() ?? App.Window?.DispatcherQueue;
             _dispatcherQueue?.TryEnqueue(() =>
             {
                 Position = notification.CurrentPlaybackPosition;
             });
             return Task.CompletedTask;
         }
-        public PositionNotificationSubscriber(IDepository depository)
+        public PositionNotificationSubscriber(IServiceProvider services)
         {
-            _depository = depository;
+            _services = services;
         }
         [ObservableProperty]
         private double _position;
@@ -38,46 +35,40 @@ namespace HyPlayer.PlayCore.Demo.AudioGraph.WinUI3
     }
     public partial class MasterTicketNotificationSubscriber : ObservableObject, INotificationSubscriber<MasterTicketChangedNotification>
     {
-        private DispatcherQueue _dispatcherQueue;
-        private IDepository _depository;
+        private DispatcherQueue? _dispatcherQueue;
+        private readonly IServiceProvider _services;
         public Task HandleNotificationAsync(MasterTicketChangedNotification notification, CancellationToken ctk = default)
         {
-            if (_dispatcherQueue == null)
-            {
-                _dispatcherQueue = _depository.Resolve<DispatcherQueue>();
-            }
+            _dispatcherQueue ??= _services.GetService<DispatcherQueue>() ?? App.Window?.DispatcherQueue;
             _dispatcherQueue?.TryEnqueue(() =>
             {
                 AudioGraphTicket = notification.MasterTicket as AudioGraphTicket;
             });
             return Task.CompletedTask;
         }
-        public MasterTicketNotificationSubscriber(IDepository depository)
+        public MasterTicketNotificationSubscriber(IServiceProvider services)
         {
-            _depository = depository;
+            _services = services;
         }
         [ObservableProperty]
         private AudioGraphTicket _audioGraphTicket;
     }
     public partial class OnTicketReachesEndNotificationSubscriber : ObservableObject, INotificationSubscriber<AudioTicketReachesEndNotification>
     {
-        private DispatcherQueue _dispatcherQueue;
-        private IDepository _depository;
+        private DispatcherQueue? _dispatcherQueue;
+        private readonly IServiceProvider _services;
         public Task HandleNotificationAsync(AudioTicketReachesEndNotification notification, CancellationToken ctk = default)
         {
-            if (_dispatcherQueue == null)
-            {
-                _dispatcherQueue = _depository.Resolve<DispatcherQueue>();
-            }
+            _dispatcherQueue ??= _services.GetService<DispatcherQueue>() ?? App.Window?.DispatcherQueue;
             _dispatcherQueue?.TryEnqueue(() =>
             {
                 AudioGraphTicketReachesEndName = $"{notification.AudioGraphTicket.MusicResource.ResourceName} Reaches End.";
             });
             return Task.CompletedTask;
         }
-        public OnTicketReachesEndNotificationSubscriber(IDepository depository)
+        public OnTicketReachesEndNotificationSubscriber(IServiceProvider services)
         {
-            _depository = depository;
+            _services = services;
         }
         [ObservableProperty]
         private string _audioGraphTicketReachesEndName = string.Empty;

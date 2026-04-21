@@ -1,4 +1,5 @@
 ﻿using HyPlayer.PlayCore.Abstraction.Interfaces.NotificationHub;
+using HyPlayer.PlayCore.Abstraction.Interfaces.Wrapper;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,18 +8,22 @@ namespace HyPlayer.PlayCore.Wrapper
 {
     public class NotificationHub : INotificationHub
     {
-        private readonly PlayCoreWrapper _wrapper;
+        private IPlayCoreWrapper? _wrapper;
 
-        public NotificationHub(PlayCoreWrapper wrapper)
+        public NotificationHub()
+        {
+        }
+
+        public void Initialize(IPlayCoreWrapper wrapper)
         {
             _wrapper = wrapper ?? throw new ArgumentNullException(nameof(wrapper));
         }
 
         public async Task PublishNotificationAsync<TNotification>(TNotification notification, CancellationToken ctk = default)
         {
-            var subscribers = _wrapper.NotificationSubscribers
+            var subscribers = _wrapper?.NotificationSubscribers
                 .OfType<INotificationSubscriber<TNotification>>()
-                .ToList();
+                .ToList() ?? new List<INotificationSubscriber<TNotification>>();
 
             var tasks = subscribers
                 .Select(handler => handler.HandleNotificationAsync(notification, ctk))
@@ -32,9 +37,9 @@ namespace HyPlayer.PlayCore.Wrapper
 
         public async Task<List<TResult>> PublishNotificationWithResultAsync<TNotification, TResult>(TNotification notification, CancellationToken ctk = default)
         {
-            var subscribers = _wrapper.NotificationSubscribers
+            var subscribers = _wrapper?.NotificationSubscribers
                 .OfType<INotificationSubscriber<TNotification, TResult>>()
-                .ToList();
+                .ToList() ?? new List<INotificationSubscriber<TNotification, TResult>>();
             var results = new List<TResult>();
             foreach (var subscriber in subscribers)
             {
