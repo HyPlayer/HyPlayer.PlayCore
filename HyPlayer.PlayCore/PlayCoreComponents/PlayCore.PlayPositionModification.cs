@@ -14,12 +14,12 @@ public sealed partial class Chopin
     public override async Task MoveNextAsync(CancellationToken ctk = new())
     {
         if (CurrentPlayListController is { } controller)
-            await controller.MoveNextAsync(ctk);
+            CurrentSong = await controller.MoveNextAsync(ctk).ConfigureAwait(false);
     }
 
     public override async Task MovePreviousAsync(CancellationToken ctk = new())
     {
         if (CurrentPlayListController is { } controller)
-            await controller.MovePreviousAsync(ctk);
+            CurrentSong = await controller.MovePreviousAsync(ctk).ConfigureAwait(false);
     }
 }

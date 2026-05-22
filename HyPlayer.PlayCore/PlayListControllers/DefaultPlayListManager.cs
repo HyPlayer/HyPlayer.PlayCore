@@ -54,6 +54,7 @@ public class DefaultPlayListManager : PlayListManagerBase
                 var resultList = progressiveList.OfType<SingleSongBase>().ToList();
                 list.AddRange(resultList);
                 _list.AddRange(resultList);
+                start += progressiveLoadingContainer.MaxProgressiveCount;
                 await _notificationHub.PublishNotificationAsync(new InnerPlayListProgressiveAddedNotification
                 {
                     AddedSongs = resultList

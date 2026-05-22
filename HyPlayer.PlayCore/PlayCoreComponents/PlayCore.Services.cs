@@ -10,7 +10,8 @@ public sealed partial class Chopin :
     INotifyDependencyChanged<IEnumerable<ProviderBase>>,
     INotifyDependencyChanged<IEnumerable<PlayControllerBase>>,
     INotifyDependencyChanged<AudioServiceBase>,
-    INotifyDependencyChanged<PlayControllerBase>
+    INotifyDependencyChanged<PlayControllerBase>,
+    INotifyDependencyChanged<PlayListManagerBase>
 {
     public override List<AudioServiceBase>? AudioServices { get; protected set; }
 
@@ -95,7 +96,7 @@ public sealed partial class Chopin :
     public override Task UnregisterPlayListControllerAsync(Type serviceType, CancellationToken ctk = new())
     {
         _depository.DeleteRelation(
-            _providerDescription,
+            _playListControllerDescription,
             new(serviceType));
         var depDesc = _depository.GetDependency(serviceType);
         if (depDesc is null) return Task.CompletedTask;
@@ -107,6 +108,7 @@ public sealed partial class Chopin :
     public override Task FocusAudioServiceAsync(Type serviceType, CancellationToken ctk = new())
     {
         _depository.ChangeFocusingRelation(_audioServiceDescription, new(serviceType));
+        CurrentAudioService = ResolveOptional<AudioServiceBase>(typeof(AudioServiceBase));
         return Task.CompletedTask;
     }
 
@@ -114,6 +116,7 @@ public sealed partial class Chopin :
     {
         _depository.ChangeFocusingRelation(_playListControllerDescription,
                                            new(serviceType));
+        CurrentPlayListController = ResolveOptional<PlayControllerBase>(typeof(PlayControllerBase));
         return Task.CompletedTask;
     }
 
@@ -144,12 +147,29 @@ public sealed partial class Chopin :
     public void OnDependencyChanged(AudioServiceBase? marker)
     {
         CurrentAudioService
-            = (AudioServiceBase)_depository.ResolveDependency(typeof(AudioServiceBase));
+            = ResolveOptional<AudioServiceBase>(typeof(AudioServiceBase));
     }
 
     public void OnDependencyChanged(PlayControllerBase? marker)
     {
         CurrentPlayListController
-            = (PlayControllerBase)_depository.ResolveDependency(typeof(PlayControllerBase));
+            = ResolveOptional<PlayControllerBase>(typeof(PlayControllerBase));
+    }
+
+    public void OnDependencyChanged(PlayListManagerBase? marker)
+    {
+        CurrentPlayList = ResolveOptional<PlayListManagerBase>(typeof(PlayListManagerBase));
+    }
+
+    private T? ResolveOptional<T>(Type serviceType) where T : class
+    {
+        try
+        {
+            return _depository.ResolveDependency(serviceType) as T;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }

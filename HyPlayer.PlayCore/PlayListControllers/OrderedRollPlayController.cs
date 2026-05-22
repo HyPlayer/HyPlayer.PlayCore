@@ -56,7 +56,7 @@ public class OrderedRollPlayController : PlayControllerBase,
 
     public override Task<SingleSongBase?> MoveToIndexAsync(int index, CancellationToken ctk = new())
     {
-        if (_list.Count >= index || index < 0) return Task.FromResult<SingleSongBase?>(null);
+        if (index < 0 || index >= _list.Count) return Task.FromResult<SingleSongBase?>(null);
         _index = index;
         var curSong = _list[index];
         _notificationHub.PublishNotificationAsync(new CurrentSongChangedNotification() { CurrentPlayingSong = curSong },
@@ -74,6 +74,7 @@ public class OrderedRollPlayController : PlayControllerBase,
 
     public Task NavigateSongToAsync(SingleSongBase song, CancellationToken ctk = new())
     {
+        if (_list.Count == 0) return Task.CompletedTask;
         var indexOfSong = _list.IndexOf(song);
         if (indexOfSong >= 0)
             _index = indexOfSong;
@@ -89,7 +90,7 @@ public class OrderedRollPlayController : PlayControllerBase,
 
     public Task<SingleSongBase?> GetSongAtAsync(int index, CancellationToken ctk = new())
     {
-        if (_list.Count >= index || index < 0) return Task.FromResult<SingleSongBase?>(null);
+        if (index < 0 || index >= _list.Count) return Task.FromResult<SingleSongBase?>(null);
         return Task.FromResult<SingleSongBase?>(_list[index]);
     }
 

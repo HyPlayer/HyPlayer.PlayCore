@@ -47,13 +47,15 @@ public sealed partial class Chopin
 
     public override async Task SetRandomAsync(bool isRandom, CancellationToken ctk = new())
     {
-        if (CurrentSongContainer is IRandomizablePlayListController randomizablePlayListController)
-            await randomizablePlayListController.RandomizeAsync(isRandom ? -1 : DateTime.Now.Millisecond, ctk);
+        IsRandom = isRandom;
+        if (CurrentPlayListController is IRandomizablePlayListController randomizablePlayListController)
+            await randomizablePlayListController.RandomizeAsync(isRandom ? DateTime.Now.Millisecond : -1, ctk)
+                .ConfigureAwait(false);
     }
 
     public override async Task ReRandomAsync(CancellationToken ctk = new())
     {
         if (CurrentPlayListController is IRandomizablePlayListController randomizablePlayListController)
-            await randomizablePlayListController.RandomizeAsync(DateTime.Now.Millisecond, ctk);
+            await randomizablePlayListController.RandomizeAsync(DateTime.Now.Millisecond, ctk).ConfigureAwait(false);
     }
 }
