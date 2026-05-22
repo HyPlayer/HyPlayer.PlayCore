@@ -80,13 +80,16 @@ public class ChopinTests
     {
         var song = new OtherProviderSong { Name = "Song", ActualId = "1" };
         var audioService = new TestAudioService();
-        var core = new Chopin([audioService], [new TestProvider(new TestMusicResource())], [new TestPlayController(song)], new TestDepository());
+        var notificationHub = new NoopNotificationHub();
+        var core = new Chopin([audioService], [new TestProvider(new TestMusicResource())], [new TestPlayController(song)], new TestDepository(notificationHub));
 
         await core.MoveNextAsync();
         await core.PlayAsync();
 
         TestAssert.Ensure(core.CurrentPlayingTicket is null, "No ticket should be created without a matching provider.");
         TestAssert.Ensure(audioService.CreatedTicketCount == 0, "AudioService should not be invoked when provider resolution fails.");
+        TestAssert.Ensure(notificationHub.PublishedNotifications.OfType<PlaybackRequestFailedNotification>().Single().Song == song,
+            "Provider resolution failure should publish PlaybackRequestFailedNotification for the requested song.");
     }
 
     [Test]
@@ -94,13 +97,16 @@ public class ChopinTests
     {
         var song = new TestSong { Name = "Song", ActualId = "1" };
         var audioService = new TestAudioService();
-        var core = new Chopin([audioService], [new TestProvider(null)], [new TestPlayController(song)], new TestDepository());
+        var notificationHub = new NoopNotificationHub();
+        var core = new Chopin([audioService], [new TestProvider(null)], [new TestPlayController(song)], new TestDepository(notificationHub));
 
         await core.MoveNextAsync();
         await core.PlayAsync();
 
         TestAssert.Ensure(core.CurrentPlayingTicket is null, "No ticket should be created when resource resolution returns null.");
         TestAssert.Ensure(audioService.CreatedTicketCount == 0, "AudioService should not receive a null music resource.");
+        TestAssert.Ensure(notificationHub.PublishedNotifications.OfType<PlaybackRequestFailedNotification>().Any(),
+            "Null resource resolution should publish a playback failure notification.");
     }
 
     [Test]

@@ -1,7 +1,9 @@
-﻿using HyPlayer.PlayCore.Abstraction.Interfaces.AudioServices;
+﻿using Depository.Abstraction.Interfaces;
+using HyPlayer.PlayCore.Abstraction.Interfaces.AudioServices;
 using HyPlayer.PlayCore.Abstraction.Interfaces.Provider;
 using HyPlayer.PlayCore.Abstraction;
 using HyPlayer.PlayCore.Abstraction.Models.AudioServiceComponents;
+using HyPlayer.PlayCore.Abstraction.Models.Notifications;
 using HyPlayer.PlayCore.Abstraction.Models.Resources;
 using HyPlayer.PlayCore.Abstraction.Models.SingleItems;
 
@@ -13,8 +15,17 @@ public sealed partial class Chopin
 
     private async Task<AudioTicketBase?> EnsureCurrentPlayingTicketAsync(CancellationToken ctk)
     {
-        if (CurrentSong is null || CurrentAudioService is null)
+        if (CurrentSong is null)
+        {
+            await PublishPlaybackFailureAsync(null, "No current song is selected.", null, ctk).ConfigureAwait(false);
             return CurrentPlayingTicket;
+        }
+
+        if (CurrentAudioService is null)
+        {
+            await PublishPlaybackFailureAsync(CurrentSong, "No current audio service is selected.", null, ctk).ConfigureAwait(false);
+            return CurrentPlayingTicket;
+        }
 
         if (CurrentPlayingTicket?.AudioServiceId == CurrentAudioService.Id
             && ReferenceEquals(LastRequestedPlaybackSong, CurrentSong))
@@ -22,7 +33,10 @@ public sealed partial class Chopin
 
         var resource = await ResolveMusicResourceAsync(CurrentSong, ctk).ConfigureAwait(false);
         if (resource is null)
+        {
+            await PublishPlaybackFailureAsync(CurrentSong, "No matching music resource provider returned a resource.", null, ctk).ConfigureAwait(false);
             return CurrentPlayingTicket;
+        }
 
         if (CurrentPlayingTicket is { } oldTicket
             && oldTicket.AudioServiceId == CurrentAudioService.Id)
@@ -36,14 +50,26 @@ public sealed partial class Chopin
     private async Task<MusicResourceBase?> ResolveMusicResourceAsync(SingleSongBase song, CancellationToken ctk)
     {
         var provider = MusicProviders?
-            .OfType<ProviderBase>()
             .OfType<IMusicResourceProvidable>()
-            .FirstOrDefault(p => p is ProviderBase providerBase && providerBase.Id == song.ProviderId);
+            .FirstOrDefault(p => p.Id == song.ProviderId);
 
         if (provider is null)
             return null;
 
-        return await provider.GetMusicResourceAsync(song, null!, ctk).ConfigureAwait(false);
+        return await provider.GetMusicResourceAsync(song, null, ctk).ConfigureAwait(false);
+    }
+
+    private Task PublishPlaybackFailureAsync(SingleSongBase? song, string reason, Exception? exception, CancellationToken ctk)
+    {
+        if (ResolveOptional<INotificationHub>(typeof(INotificationHub)) is not { } notificationHub)
+            return Task.CompletedTask;
+
+        return notificationHub.PublishNotificationAsync(new PlaybackRequestFailedNotification
+        {
+            Song = song,
+            Reason = reason,
+            Exception = exception
+        }, ctk);
     }
 
     public override async Task SeekAsync(long position, CancellationToken ctk = new())

@@ -9,4 +9,9 @@ public abstract class ProviderBase : IProvider
 
 public record ProvidableTypeId(string Id, string Name, bool Observable);
 
-public interface IProvider { }
+public interface IProvider
+{
+    public string Name { get; }
+    public string Id { get; }
+    public List<ProvidableTypeId> ProvidableTypeIds { get; }
+}

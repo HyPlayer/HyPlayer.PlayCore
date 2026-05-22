@@ -91,7 +91,7 @@ internal sealed class TestProvider(MusicResourceBase? resource = null) : Provide
     public override string Id => "provider.test";
     public override List<ProvidableTypeId> ProvidableTypeIds => [];
 
-    public Task<MusicResourceBase?> GetMusicResourceAsync(SingleSongBase song, ResourceQualityTag qualityTag, CancellationToken ctk = new())
+    public Task<MusicResourceBase?> GetMusicResourceAsync(SingleSongBase song, ResourceQualityTag? qualityTag = null, CancellationToken ctk = new())
         => Task.FromResult(resource);
 }
 
@@ -250,7 +250,14 @@ internal sealed class TestAudioTicket : AudioTicketBase;
 
 internal sealed class NoopNotificationHub : INotificationHub
 {
-    public Task PublishNotificationAsync<TNotification>(TNotification notification, CancellationToken ctk = new()) => Task.CompletedTask;
+    public List<object?> PublishedNotifications { get; } = [];
+
+    public Task PublishNotificationAsync<TNotification>(TNotification notification, CancellationToken ctk = new())
+    {
+        PublishedNotifications.Add(notification);
+        return Task.CompletedTask;
+    }
+
     public Task<List<TResult>> PublishNotificationWithResultAsync<TNotification, TResult>(TNotification notification, CancellationToken ctk = new()) => Task.FromResult(new List<TResult>());
 }
 
