@@ -84,6 +84,23 @@ public class DefaultPlayListManagerTests
     }
 
     [Test]
+    public async Task ReturnedLists_AreCopiesAndCannotMutateManagerState()
+    {
+        var song = new TestSong { Name = "Song", ActualId = "1" };
+        var container = new TestLinerContainer([song]) { Name = "Container", ActualId = "container" };
+        var manager = CreateManager();
+
+        await manager.AddSongContainerAsync(container);
+        var playlistSnapshot = await manager.GetPlayListAsync();
+        var containerSnapshot = await manager.GetAllSongContainersAsync();
+        playlistSnapshot.Clear();
+        containerSnapshot.Clear();
+
+        TestAssert.Ensure((await manager.GetPlayListAsync()).Single() == song, "Mutating a returned playlist snapshot should not mutate manager state.");
+        TestAssert.Ensure((await manager.GetAllSongContainersAsync()).Single() == container, "Mutating a returned container snapshot should not mutate manager state.");
+    }
+
+    [Test]
     public async Task RemoveSongContainer_RemovesContainerSongsAndKeepsOtherContainerSongs()
     {
         var first = new TestSong { Name = "First", ActualId = "1" };

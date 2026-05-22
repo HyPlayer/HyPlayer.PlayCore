@@ -119,12 +119,12 @@ public class DefaultPlayListManager : PlayListManagerBase
 
     public override Task<List<ContainerBase>> GetAllSongContainersAsync(CancellationToken ctk = new())
     {
-        return Task.FromResult(_currentSongListContainers);
+        return Task.FromResult(_currentSongListContainers.ToList());
     }
 
     public override Task<List<SingleSongBase>> GetPlayListAsync(CancellationToken ctk = new())
     {
-        return Task.FromResult(_list);
+        return Task.FromResult(_list.ToList());
     }
 
     public override async Task AddSongAsync(SingleSongBase song, int index = -1, CancellationToken ctk = new())

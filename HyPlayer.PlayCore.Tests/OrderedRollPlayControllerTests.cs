@@ -41,12 +41,12 @@ public class OrderedRollPlayControllerTests
         var firstNext = await controller.MoveNextAsync();
         var secondNext = await controller.MoveNextAsync();
         var wrappedNext = await controller.MoveNextAsync();
-        var previousFromSecond = await controller.MovePreviousAsync();
+        var previousFromFirst = await controller.MovePreviousAsync();
 
-        TestAssert.Ensure(ReferenceEquals(firstNext, second), "Initial index 0 means the first next operation selects index 1.");
-        TestAssert.Ensure(ReferenceEquals(secondNext, first), "Next should wrap from the last song to the first song.");
-        TestAssert.Ensure(ReferenceEquals(wrappedNext, second), "Next should continue correctly after wrapping.");
-        TestAssert.Ensure(ReferenceEquals(previousFromSecond, first), "Previous should move from index 1 back to index 0.");
+        TestAssert.Ensure(ReferenceEquals(firstNext, first), "Initial index -1 means the first next operation selects index 0.");
+        TestAssert.Ensure(ReferenceEquals(secondNext, second), "The second next operation should select index 1.");
+        TestAssert.Ensure(ReferenceEquals(wrappedNext, first), "Next should wrap from the last song to the first song.");
+        TestAssert.Ensure(ReferenceEquals(previousFromFirst, second), "Previous should wrap from the first song to the last song.");
     }
 
     [Test]
@@ -77,6 +77,23 @@ public class OrderedRollPlayControllerTests
 
         TestAssert.Ensure(ordered.SequenceEqual([third, second, first]), "Reverse should reverse the playlist order.");
         TestAssert.Ensure(await controller.GetCurrentIndexAsync() == 1, "The middle song should remain selected after reversing a three-item playlist.");
+    }
+
+    [Test]
+    public async Task RandomizeAndRestore_UsesDeterministicShuffleAndOriginalOrder()
+    {
+        var first = new TestSong { Name = "First", ActualId = "1" };
+        var second = new TestSong { Name = "Second", ActualId = "2" };
+        var third = new TestSong { Name = "Third", ActualId = "3" };
+        var controller = CreateController(new TestPlayListManager([first, second, third]));
+
+        await controller.RandomizeAsync(42);
+        var randomized = await controller.GetOrderedPlayListAsync();
+        await controller.RandomizeAsync(-1);
+        var restored = await controller.GetOrderedPlayListAsync();
+
+        TestAssert.Ensure(randomized.Count == 3 && randomized.ToHashSet().SetEquals([first, second, third]), "RandomizeAsync should keep the same songs.");
+        TestAssert.Ensure(restored.SequenceEqual([first, second, third]), "RandomizeAsync(-1) should restore the original order.");
     }
 
     [Test]
