@@ -1,5 +1,5 @@
 <Project>
     <PropertyGroup>
-        <PlayCoreVersion>0.1.4</PlayCoreVersion>
+        <PlayCoreVersion>0.1.5</PlayCoreVersion>
     </PropertyGroup>
 </Project>
