@@ -58,6 +58,8 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
 
         private readonly List<AudioGraphTicket> _createdAudioTickets = [];
 
+        private readonly object _ticketSyncRoot = new();
+
         private Dictionary<AudioGraphTicket, Task> _currentSeekingSessions = new();
 
         private Dictionary<AudioGraphTicket, double> _nextSeekingValues = new();
@@ -79,30 +81,23 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
 
         public override Task DisposeAudioTicketAsync(AudioTicketBase audioTicket, CancellationToken ctk = default)
         {
+            ThrowExceptionIfDisposed();
             ctk.ThrowIfCancellationRequested();
-            try
-            {
-                if (audioTicket is AudioGraphTicket ticket)
-                {
-                    ticket.OnAudioGraphTicketReachesEnd -= OnAudioGraphTicketReachesEnd;
-                    ticket.Dispose();
-                    if (ticket == MasterTicket)
-                    {
-                        MasterTicket = null;
-                    }
-                }
+            if (audioTicket is not AudioGraphTicket ticket)
                 return Task.CompletedTask;
-            }
-            finally
+
+            lock (_ticketSyncRoot)
             {
-                if (audioTicket is AudioGraphTicket ticket)
+                ticket.OnAudioGraphTicketReachesEnd -= OnAudioGraphTicketReachesEnd;
+                ticket.Dispose();
+                if (ticket == MasterTicket)
                 {
-                    if (_createdAudioTickets.Contains(ticket))
-                    {
-                        _createdAudioTickets.Remove(ticket);
-                    }
+                    MasterTicket = null;
                 }
+                _createdAudioTickets.Remove(ticket);
             }
+
+            return Task.CompletedTask;
         }
 
         public override async Task<AudioTicketBase> GetAudioTicketAsync(MusicResourceBase musicResource, CancellationToken ctk = default)
@@ -111,20 +106,27 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             ctk.ThrowIfCancellationRequested();
             var result = await AudioGraphTicket.CreateAudioGraphTicket(musicResource, PlaybackAudioGraph);
             result.OnAudioGraphTicketReachesEnd += OnAudioGraphTicketReachesEnd;
-            _createdAudioTickets.Add(result);
+            lock (_ticketSyncRoot)
+            {
+                _createdAudioTickets.Add(result);
+            }
             return result;
         }
 
         private void OnAudioGraphTicketReachesEnd(AudioGraphTicket audioGraphTicket)
         {
-            _notificationHub?.PublishNotificationAsync(new AudioGraphTicketReachesEndNotification(audioGraphTicket));
+            FireAndForget(_notificationHub?.PublishNotificationAsync(new AudioGraphTicketReachesEndNotification(audioGraphTicket)));
         }
 
         public override Task<List<AudioTicketBase>> GetCreatedAudioTicketsAsync(CancellationToken ctk = default)
         {
             ThrowExceptionIfDisposed();
             ctk.ThrowIfCancellationRequested();
-            var result = _createdAudioTickets.Select(t => t as AudioTicketBase).ToList();
+            List<AudioTicketBase> result;
+            lock (_ticketSyncRoot)
+            {
+                result = _createdAudioTickets.Select(t => t as AudioTicketBase).ToList();
+            }
             return Task.FromResult(result);
         }
 
@@ -193,7 +195,7 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             if (audioTicket is AudioGraphTicket ticket)
             {
                 ticket.Stop();
-                await DisposeAudioTicketAsync(ticket);
+                ticket.PlaybackMediaSourceInputNode.Seek(TimeSpan.Zero);
             }
         }
 
@@ -270,14 +272,17 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             }
             var newAudioGraph = newAudioGraphResult.Graph;
             var oldAudioGraphCopy = PlaybackAudioGraph;
-            foreach (var ticket in _createdAudioTickets)
+            List<AudioGraphTicket> tickets;
+            lock (_ticketSyncRoot)
             {
-                if (ticket is AudioGraphTicket audioGraphTicket)
-                {
-                    audioGraphTicket.Stop();
-                    audioGraphTicket.RemoveAllOutputConnections();
-                    await audioGraphTicket.ReplaceAudioGraph(newAudioGraph);
-                }
+                tickets = _createdAudioTickets.ToList();
+            }
+
+            foreach (var ticket in tickets)
+            {
+                ticket.Stop();
+                ticket.RemoveAllOutputConnections();
+                await ticket.ReplaceAudioGraph(newAudioGraph);
             }
             Stop();
             var creationResult = await newAudioGraph.CreateDeviceOutputNodeAsync();
@@ -290,7 +295,8 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             oldAudioGraphCopy.Dispose();
             await ConnectAllTicketToOutputNodeAsync(_deviceOutputNode);
             Start();
-            await PlayAudioTicketAsync(MasterTicket);
+            if (MasterTicket is not null)
+                await PlayAudioTicketAsync(MasterTicket);
         }
 
         public Task ChangeVolumeAsync(AudioTicketBase ticket, double volume, CancellationToken ctk = default)
@@ -307,7 +313,13 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
         private async Task ConnectAllTicketToOutputNodeAsync(AudioDeviceOutputNode outputNode)
         {
             ThrowExceptionIfDisposed();
-            foreach (var ticket in _createdAudioTickets)
+            List<AudioGraphTicket> tickets;
+            lock (_ticketSyncRoot)
+            {
+                tickets = _createdAudioTickets.ToList();
+            }
+
+            foreach (var ticket in tickets)
             {
                 await ConnectTicketToOutputNodeAsync(ticket, outputNode);
             }
@@ -325,18 +337,43 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             {
                 return;
             }
-            var value = MasterTicket.PlaybackMediaSourceInputNode.Position.TotalMilliseconds;
+            AudioGraphTicket masterTicket;
+            lock (_ticketSyncRoot)
+            {
+                if (MasterTicket == null) return;
+                masterTicket = MasterTicket;
+            }
+            var value = masterTicket.PlaybackMediaSourceInputNode.Position.TotalMilliseconds;
             var notification = new AudioGraphPlaybackPositionChangedNotification(value);
-            _notificationHub.PublishNotificationAsync(notification as PlaybackPositionChangedNotification);
+            FireAndForget(_notificationHub.PublishNotificationAsync(notification as PlaybackPositionChangedNotification));
         }
 
         public Task SetMasterTicketAsync(AudioGraphTicket graphTicket)
         {
             ThrowExceptionIfDisposed();
-            MasterTicket = graphTicket;
+            lock (_ticketSyncRoot)
+            {
+                MasterTicket = graphTicket;
+            }
             var notification = new AudioGraphMasterTicketChangedNotification(graphTicket);
-            _notificationHub.PublishNotificationAsync(notification as MasterTicketChangedNotification);
+            FireAndForget(_notificationHub.PublishNotificationAsync(notification as MasterTicketChangedNotification));
             return Task.CompletedTask;
+        }
+
+        private static void FireAndForget(Task task)
+        {
+            _ = ObserveTaskAsync(task);
+        }
+
+        private static async Task ObserveTaskAsync(Task task)
+        {
+            try
+            {
+                await task.ConfigureAwait(false);
+            }
+            catch
+            {
+            }
         }
 
         public void Start()
@@ -345,7 +382,13 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
             if (!IsPlaybackAudioGraphStarted)
             {
                 PlaybackAudioGraph.Start();
-                foreach (var ticket in _createdAudioTickets)
+                List<AudioGraphTicket> tickets;
+                lock (_ticketSyncRoot)
+                {
+                    tickets = _createdAudioTickets.ToList();
+                }
+
+                foreach (var ticket in tickets)
                 {
                     ticket.Stop();
                 }
@@ -407,7 +450,15 @@ namespace HyPlayer.PlayCore.Implementation.AudioGraphService
                 if (disposing)
                 {
                     Stop();
-                    foreach (var ticket in _createdAudioTickets)
+                    List<AudioGraphTicket> tickets;
+                    lock (_ticketSyncRoot)
+                    {
+                        tickets = _createdAudioTickets.ToList();
+                        _createdAudioTickets.Clear();
+                        MasterTicket = null;
+                    }
+
+                    foreach (var ticket in tickets)
                     {
                         ticket?.Dispose();
                     }
