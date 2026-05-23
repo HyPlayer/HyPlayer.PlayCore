@@ -31,17 +31,4 @@ public interface IContainerManagementProvidable : IProvider
     /// <param name="ctk">The cancellation token for the operation.</param>
     public Task SetContainerPrivacyAsync(string containerId, bool isPrivate, CancellationToken ctk = new());
 
-    /// <summary>
-    /// Subscribes the current provider session to a container owned by the provider.
-    /// </summary>
-    /// <param name="containerId">The provider-scoped container id.</param>
-    /// <param name="ctk">The cancellation token for the operation.</param>
-    public Task SubscribeContainerAsync(string containerId, CancellationToken ctk = new());
-
-    /// <summary>
-    /// Unsubscribes the current provider session from a container owned by the provider.
-    /// </summary>
-    /// <param name="containerId">The provider-scoped container id.</param>
-    /// <param name="ctk">The cancellation token for the operation.</param>
-    public Task UnsubscribeContainerAsync(string containerId, CancellationToken ctk = new());
 }

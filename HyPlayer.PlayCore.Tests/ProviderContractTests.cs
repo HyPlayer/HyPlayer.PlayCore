@@ -52,47 +52,40 @@ public class ProviderContractTests
         var page = await provider.GetContainerItemsPageAsync("playlist-1", 0, 10);
         var comments = await provider.GetCommentsAsync("song-1", "song", 0, 20);
         var suggestions = await provider.GetSearchSuggestionsAsync("hy");
-        var categories = await provider.GetContainerCategoriesAsync("playlist");
 
         TestAssert.Ensure(container is TestLinerContainer, "Container management should return ContainerBase instances.");
         TestAssert.Ensure(page.Items.Single().ActualId == "song-1" && page.HasMore == false, "Container paging should return provider-neutral providable items.");
         TestAssert.Ensure(comments.Items.Single().Content == "comment", "Comment operations should return CommentBase items.");
         TestAssert.Ensure(suggestions is TestLinerContainer, "Search suggestions should be grouped in a ContainerBase.");
-        TestAssert.Ensure(categories.Single().Id == "playlist", "Container categories should use provider-neutral category models.");
     }
 
     [Test]
-    public async Task LibraryFmRichMediaAndListenTogetherContracts_ReturnProviderNeutralModels()
+    public async Task UploadRichMediaListenTogetherAndRecommendationContracts_ReturnProviderNeutralModels()
     {
         var provider = new ContractProvider();
 
-        var fmQueue = await provider.GetPersonalFmQueueAsync();
-        var cloudItems = await provider.GetCloudLibraryItemsAsync(0, 20);
         var uploaded = await provider.UploadCloudLibraryItemAsync(new ContractResource(), new Dictionary<string, string> { ["title"] = "Song" });
         var richMedia = await provider.GetRichMediaAsync("video-1", "video");
         var resource = await provider.GetRichMediaResourceAsync("video-1", "video");
         var feed = await provider.GetRichMediaFeedAsync("video", 0, 10);
-        var roomId = await provider.CreateListenTogetherRoomAsync(fmQueue);
+        var recommendations = await provider.GetContextRecommendationAsync("song-1", "song", 10);
+        var roomId = await provider.CreateListenTogetherRoomAsync([new TestSong { Name = "Song", ActualId = "song-1" }]);
 
-        TestAssert.Ensure(fmQueue.Single().ActualId == "song-1", "Personal FM should return song models.");
-        TestAssert.Ensure(cloudItems.Items.Single().ActualId == "cloud-1" && uploaded.ActualId == "cloud-uploaded", "Cloud operations should return cloud library models.");
+        TestAssert.Ensure(uploaded.ActualId == "cloud-uploaded", "Cloud upload should return cloud library models.");
         TestAssert.Ensure(richMedia?.ActualId == "video-1" && resource is ContractResource && feed.Items.Single().ActualId == "video-1", "Rich media operations should return neutral rich media and resource models.");
+        TestAssert.Ensure(recommendations is TestLinerContainer, "Context recommendation should return a provider-neutral container.");
         TestAssert.Ensure(roomId == "room" && await provider.CanJoinListenTogetherRoomAsync(roomId), "Listen-together operations should use neutral room ids and queues.");
     }
 
     private sealed class ContractProvider : ProviderBase,
                                            IAuthenticationProvidable,
                                            IQrAuthenticationProvidable,
-                                           IContainerManagementProvidable,
-                                           IContainerCategoryProvidable,
-                                           IContainerPageProvidable,
-                                           ICommentProvidable,
-                                           ISearchSuggestionProvidable,
-                                           IProvidableItemDynamicMetadataProvidable,
-                                           IScopedItemRangeProvidable,
-                                           IPersonalFmProvidable,
-                                           IUserLibraryProvidable,
-                                           ICloudUploadProvidable,
+                                            IContainerManagementProvidable,
+                                            IContainerPageProvidable,
+                                            ICommentProvidable,
+                                            ISearchSuggestionProvidable,
+                                            IProvidableItemDynamicMetadataProvidable,
+                                            ICloudUploadProvidable,
                                            IRichMediaProvidable,
                                            IListenTogetherProvidable,
                                            IContextRecommendationProvidable,
@@ -131,13 +124,6 @@ public class ProviderContractTests
 
         public Task SetContainerPrivacyAsync(string containerId, bool isPrivate, CancellationToken ctk = new()) => Task.CompletedTask;
 
-        public Task SubscribeContainerAsync(string containerId, CancellationToken ctk = new()) => Task.CompletedTask;
-
-        public Task UnsubscribeContainerAsync(string containerId, CancellationToken ctk = new()) => Task.CompletedTask;
-
-        public Task<List<ProviderCategory>> GetContainerCategoriesAsync(string? typeId = null, CancellationToken ctk = new())
-            => Task.FromResult(new List<ProviderCategory> { new() { Id = typeId ?? "default", Name = "Category" } });
-
         public Task<ProviderPageResult<ProvidableItemBase>> GetContainerItemsPageAsync(string containerId, int offset, int count, CancellationToken ctk = new())
             => Task.FromResult(new ProviderPageResult<ProvidableItemBase> { Items = [CreateSong()], HasMore = false });
 
@@ -160,34 +146,6 @@ public class ProviderContractTests
 
         public Task<ProvidableItemDynamicMetadata> GetDynamicMetadataAsync(string itemId, string typeId, CancellationToken ctk = new())
             => Task.FromResult(new ProvidableItemDynamicMetadata { CommentCount = 1, IsLiked = true });
-
-        public Task<ProviderPageResult<ProvidableItemBase>> GetScopedItemsPageAsync(string parentId, string parentTypeId, string itemTypeId, int offset, int count, CancellationToken ctk = new())
-            => Task.FromResult(new ProviderPageResult<ProvidableItemBase> { Items = [CreateSong()], HasMore = false });
-
-        public Task<List<SingleSongBase>> GetPersonalFmQueueAsync(CancellationToken ctk = new())
-            => Task.FromResult(new List<SingleSongBase> { CreateSong() });
-
-        public Task TrashPersonalFmSongAsync(string songId, CancellationToken ctk = new()) => Task.CompletedTask;
-
-        public Task<ContainerBase> GetPersonalFmContextAsync(string songId, CancellationToken ctk = new())
-            => Task.FromResult<ContainerBase>(new TestLinerContainer([CreateSong()]) { Name = "FM", ActualId = "fm" });
-
-        public Task<ProvidableItemBase?> GetUserAsync(string? userId = null, CancellationToken ctk = new())
-            => Task.FromResult<ProvidableItemBase?>(new ContractUser { Name = userId ?? "Current", ActualId = userId ?? "current" });
-
-        public Task<ProviderPageResult<ContainerBase>> GetUserContainersAsync(string? userId, int offset, int count, CancellationToken ctk = new())
-            => Task.FromResult(new ProviderPageResult<ContainerBase> { Items = [new TestLinerContainer([]) { Name = "Playlist", ActualId = "playlist-1" }], HasMore = false });
-
-        public Task<ProviderPageResult<ProvidableItemBase>> GetUserLibraryItemsAsync(string typeId, int offset, int count, CancellationToken ctk = new())
-            => Task.FromResult(new ProviderPageResult<ProvidableItemBase> { Items = [CreateSong()], HasMore = false });
-
-        public Task<List<ProvidableItemBase>> GetUserListeningHistoryAsync(string userId, string rangeId, CancellationToken ctk = new())
-            => Task.FromResult(new List<ProvidableItemBase> { CreateSong() });
-
-        public Task<ProviderPageResult<CloudLibraryItemBase>> GetCloudLibraryItemsAsync(int offset, int count, CancellationToken ctk = new())
-            => Task.FromResult(new ProviderPageResult<CloudLibraryItemBase> { Items = [new ContractCloudItem { Name = "Cloud", ActualId = "cloud-1" }], HasMore = false });
-
-        public Task DeleteCloudLibraryItemAsync(string itemId, CancellationToken ctk = new()) => Task.CompletedTask;
 
         public Task<CloudLibraryItemBase> UploadCloudLibraryItemAsync(ResourceBase resource, IReadOnlyDictionary<string, string> metadata, CancellationToken ctk = new())
             => Task.FromResult<CloudLibraryItemBase>(new ContractCloudItem { Name = metadata["title"], ActualId = "cloud-uploaded" });
