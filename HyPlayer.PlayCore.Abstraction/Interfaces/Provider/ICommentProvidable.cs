@@ -38,6 +38,18 @@ public interface ICommentProvidable : IProvider
     public Task<CommentBase?> PostCommentAsync(string itemId, string typeId, string content, string? replyToCommentId = null, CancellationToken ctk = new());
 
     /// <summary>
+    /// Gets a page of replies threaded under a provider comment.
+    /// </summary>
+    /// <param name="itemId">The provider-scoped item id that owns the comment.</param>
+    /// <param name="typeId">The provider-neutral type id of the commented item.</param>
+    /// <param name="commentId">The provider-scoped parent comment id.</param>
+    /// <param name="offset">The zero-based reply offset to request.</param>
+    /// <param name="count">The maximum number of replies to request.</param>
+    /// <param name="ctk">The cancellation token for the operation.</param>
+    /// <returns>A provider-neutral reply page.</returns>
+    public Task<ProviderPageResult<CommentBase>> GetThreadedCommentsAsync(string itemId, string typeId, string commentId, int offset, int count, CancellationToken ctk = new());
+
+    /// <summary>
     /// Likes or unlikes a provider comment for the current session.
     /// </summary>
     /// <param name="itemId">The provider-scoped item id that owns the comment.</param>
