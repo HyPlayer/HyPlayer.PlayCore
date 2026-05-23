@@ -207,12 +207,12 @@ public class ProviderContractTests
         public Task<bool> CanJoinListenTogetherRoomAsync(string roomId, CancellationToken ctk = new())
             => Task.FromResult(true);
 
-        public Task SendListenTogetherPlaybackCommandAsync(string roomId, string commandId, TimeSpan position, CancellationToken ctk = new()) => Task.CompletedTask;
+        public Task SendListenTogetherPlaybackCommandAsync(string roomId, ProviderListenTogetherPlaybackCommand command, CancellationToken ctk = new()) => Task.CompletedTask;
 
-        public Task ReportListenTogetherQueueAsync(string roomId, List<SingleSongBase> queue, CancellationToken ctk = new()) => Task.CompletedTask;
+        public Task ReportListenTogetherQueueAsync(string roomId, ProviderListenTogetherQueueReport report, CancellationToken ctk = new()) => Task.CompletedTask;
 
-        public Task<ProvidableItemBase?> GetListenTogetherStatusAsync(string roomId, CancellationToken ctk = new())
-            => Task.FromResult<ProvidableItemBase?>(new ContractUser { Name = "Room", ActualId = roomId });
+        public Task<ProviderListenTogetherStatus?> GetListenTogetherStatusAsync(string roomId, CancellationToken ctk = new())
+            => Task.FromResult<ProviderListenTogetherStatus?>(new ProviderListenTogetherStatus { IsInRoom = true, RoomId = roomId });
 
         public Task<ContainerBase> GetContextRecommendationAsync(string itemId, string typeId, int count, CancellationToken ctk = new())
             => Task.FromResult<ContainerBase>(new TestLinerContainer([CreateSong()]) { Name = "Recommendations", ActualId = "recommendations" });

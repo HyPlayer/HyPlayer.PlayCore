@@ -28,24 +28,23 @@ public interface IListenTogetherProvidable : IProvider
     /// Sends a provider-neutral playback command to a listen-together room.
     /// </summary>
     /// <param name="roomId">The provider-scoped room id.</param>
-    /// <param name="commandId">The provider-neutral command id.</param>
-    /// <param name="position">The playback position associated with the command.</param>
+    /// <param name="command">The provider-neutral playback command.</param>
     /// <param name="ctk">The cancellation token for the operation.</param>
-    public Task SendListenTogetherPlaybackCommandAsync(string roomId, string commandId, TimeSpan position, CancellationToken ctk = new());
+    public Task SendListenTogetherPlaybackCommandAsync(string roomId, ProviderListenTogetherPlaybackCommand command, CancellationToken ctk = new());
 
     /// <summary>
     /// Reports the current shared queue to a listen-together room.
     /// </summary>
     /// <param name="roomId">The provider-scoped room id.</param>
-    /// <param name="queue">The current room queue.</param>
+    /// <param name="report">The current room queue report.</param>
     /// <param name="ctk">The cancellation token for the operation.</param>
-    public Task ReportListenTogetherQueueAsync(string roomId, List<SingleSongBase> queue, CancellationToken ctk = new());
+    public Task ReportListenTogetherQueueAsync(string roomId, ProviderListenTogetherQueueReport report, CancellationToken ctk = new());
 
     /// <summary>
     /// Gets the provider-neutral status for a listen-together room.
     /// </summary>
     /// <param name="roomId">The provider-scoped room id.</param>
     /// <param name="ctk">The cancellation token for the operation.</param>
-    /// <returns>The room status as a providable item when the provider returns structured status.</returns>
-    public Task<ProvidableItemBase?> GetListenTogetherStatusAsync(string roomId, CancellationToken ctk = new());
+    /// <returns>The provider-neutral room status.</returns>
+    public Task<ProviderListenTogetherStatus?> GetListenTogetherStatusAsync(string roomId, CancellationToken ctk = new());
 }
