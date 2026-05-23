@@ -9,6 +9,7 @@ public class ImageResourceQualityTag : ResourceQualityTag
     }
     public int PixelX { get; }
     public int PixelY { get; }
+    public override string StableKey => ToString();
     
     public override string ToString()
     {
