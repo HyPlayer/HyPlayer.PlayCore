@@ -195,7 +195,7 @@ public class ProviderContractTests
         public Task<RichMediaBase?> GetRichMediaAsync(string mediaId, string typeId, CancellationToken ctk = new())
             => Task.FromResult<RichMediaBase?>(new ContractRichMedia { Name = "Video", ActualId = mediaId });
 
-        public Task<ResourceBase?> GetRichMediaResourceAsync(string mediaId, string typeId, CancellationToken ctk = new())
+        public Task<ResourceBase?> GetRichMediaResourceAsync(string mediaId, string typeId, string? qualityId = null, CancellationToken ctk = new())
             => Task.FromResult<ResourceBase?>(new ContractResource { ResourceName = mediaId });
 
         public Task<ProviderPageResult<RichMediaBase>> GetRichMediaFeedAsync(string? typeId, int offset, int count, CancellationToken ctk = new())

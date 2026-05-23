@@ -24,7 +24,7 @@ public interface IRichMediaProvidable : IProvider
     /// <param name="typeId">The provider-neutral rich media type id.</param>
     /// <param name="ctk">The cancellation token for the operation.</param>
     /// <returns>The provider-neutral media resource.</returns>
-    public Task<ResourceBase?> GetRichMediaResourceAsync(string mediaId, string typeId, CancellationToken ctk = new());
+    public Task<ResourceBase?> GetRichMediaResourceAsync(string mediaId, string typeId, string? qualityId = null, CancellationToken ctk = new());
 
     /// <summary>
     /// Gets provider recommendations for rich media feeds.
