@@ -10,24 +10,6 @@ namespace HyPlayer.PlayCore.Tests;
 public class ProviderContractTests
 {
     [Test]
-    public async Task LikeContract_UsesNullTargetForHeartAndTargetIdForContainer()
-    {
-        var provider = new ContractProvider();
-
-        await provider.LikeProvidableItemAsync("song-1", null);
-        await provider.LikeProvidableItemAsync("song-1", "playlist-1");
-        await provider.UnlikeProvidableItemAsync("song-1", null);
-        await provider.UnlikeProvidableItemAsync("song-1", "playlist-1");
-
-        TestAssert.Ensure(provider.LikeCalls.SequenceEqual([
-            ("song-1", null, true),
-            ("song-1", "playlist-1", true),
-            ("song-1", null, false),
-            ("song-1", "playlist-1", false)
-        ]), "Null target id should represent heart/favorite semantics while a non-null target id should represent container add/remove semantics.");
-    }
-
-    [Test]
     public async Task AuthAndQrContracts_ExposeProviderOwnedSessionWithoutProviderSpecificTypes()
     {
         var provider = new ContractProvider();
@@ -60,7 +42,7 @@ public class ProviderContractTests
     }
 
     [Test]
-    public async Task UploadRichMediaListenTogetherAndRecommendationContracts_ReturnProviderNeutralModels()
+    public async Task UploadRichMediaAndListenTogetherContracts_ReturnProviderNeutralModels()
     {
         var provider = new ContractProvider();
 
@@ -68,12 +50,10 @@ public class ProviderContractTests
         var richMedia = await provider.GetRichMediaAsync("video-1", "video");
         var resource = await provider.GetRichMediaResourceAsync("video-1", "video");
         var feed = await provider.GetRichMediaFeedAsync("video", 0, 10);
-        var recommendations = await provider.GetContextRecommendationAsync("song-1", "song", 10);
         var roomId = await provider.CreateListenTogetherRoomAsync([new TestSong { Name = "Song", ActualId = "song-1" }]);
 
         TestAssert.Ensure(uploaded.ActualId == "cloud-uploaded", "Cloud upload should return cloud library models.");
         TestAssert.Ensure(richMedia?.ActualId == "video-1" && resource is ContractResource && feed.Items.Single().ActualId == "video-1", "Rich media operations should return neutral rich media and resource models.");
-        TestAssert.Ensure(recommendations is TestLinerContainer, "Context recommendation should return a provider-neutral container.");
         TestAssert.Ensure(roomId == "room" && await provider.CanJoinListenTogetherRoomAsync(roomId), "Listen-together operations should use neutral room ids and queues.");
     }
 
@@ -85,16 +65,13 @@ public class ProviderContractTests
                                             ICommentProvidable,
                                             ISearchSuggestionProvidable,
                                             IProvidableItemDynamicMetadataProvidable,
-                                            ICloudUploadProvidable,
-                                           IRichMediaProvidable,
-                                           IListenTogetherProvidable,
-                                           IContextRecommendationProvidable,
-                                           IProvableItemLikable
+                                             ICloudUploadProvidable,
+                                             IRichMediaProvidable,
+                                             IListenTogetherProvidable
     {
         public override string Name => "Contract Provider";
         public override string Id => "provider.contract";
         public override List<ProvidableTypeId> ProvidableTypeIds => [];
-        public List<(string ItemId, string? TargetId, bool Like)> LikeCalls { get; } = [];
 
         public Task<ProviderSessionInfo> LoginAsync(string accountId, string secret, CancellationToken ctk = new())
             => Task.FromResult(new ProviderSessionInfo { IsAuthenticated = true, UserId = accountId, DisplayName = accountId });
@@ -171,24 +148,6 @@ public class ProviderContractTests
 
         public Task<ProviderListenTogetherStatus?> GetListenTogetherStatusAsync(string roomId, CancellationToken ctk = new())
             => Task.FromResult<ProviderListenTogetherStatus?>(new ProviderListenTogetherStatus { IsInRoom = true, RoomId = roomId });
-
-        public Task<ContainerBase> GetContextRecommendationAsync(string itemId, string typeId, int count, CancellationToken ctk = new())
-            => Task.FromResult<ContainerBase>(new TestLinerContainer([CreateSong()]) { Name = "Recommendations", ActualId = "recommendations" });
-
-        public Task LikeProvidableItemAsync(string inProviderId, string? targetId, CancellationToken ctk = new())
-        {
-            LikeCalls.Add((inProviderId, targetId, true));
-            return Task.CompletedTask;
-        }
-
-        public Task UnlikeProvidableItemAsync(string inProviderId, string? targetId, CancellationToken ctk = new())
-        {
-            LikeCalls.Add((inProviderId, targetId, false));
-            return Task.CompletedTask;
-        }
-
-        public Task<List<string>> GetLikedProvidableIdsAsync(string typeId, CancellationToken ctk = new())
-            => Task.FromResult(new List<string> { "song-1" });
 
         private static TestSong CreateSong() => new() { Name = "Song", ActualId = "song-1" };
     }
