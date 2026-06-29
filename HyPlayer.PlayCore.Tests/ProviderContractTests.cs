@@ -107,11 +107,11 @@ public class ProviderContractTests
         public Task<ContainerBase?> GetCommentContainerAsync(CancellationToken ctk = new())
             => Task.FromResult<ContainerBase?>(new TestLinerContainer([]) { Name = "Comments", ActualId = "comments" });
 
-        public Task<ProviderPageResult<CommentBase>> GetCommentsAsync(string itemId, string typeId, int offset, int count, CancellationToken ctk = new())
+        public Task<ProviderPageResult<CommentBase>> GetCommentsAsync(string itemId, string typeId, int offset, int count, int sortType = 1, CancellationToken ctk = new())
             => Task.FromResult(new ProviderPageResult<CommentBase> { Items = [new ContractComment { Name = "Comment", ActualId = "comment-1", Content = "comment" }], HasMore = false });
 
         public Task<ProviderPageResult<CommentBase>> GetThreadedCommentsAsync(string itemId, string typeId, string commentId, int offset, int count, CancellationToken ctk = new())
-            => GetCommentsAsync(itemId, typeId, offset, count, ctk);
+            => GetCommentsAsync(itemId, typeId, offset, count, ctk: ctk);
 
         public Task<CommentBase?> PostCommentAsync(string itemId, string typeId, string content, string? replyToCommentId = null, CancellationToken ctk = new())
             => Task.FromResult<CommentBase?>(new ContractComment { Name = "Created", ActualId = "comment-created", Content = content });

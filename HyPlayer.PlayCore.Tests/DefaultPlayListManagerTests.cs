@@ -51,6 +51,22 @@ public class DefaultPlayListManagerTests
     }
 
     [Test]
+    public async Task AddSongAndRange_WithOutOfRangeIndexes_DoNothingInsteadOfThrowing()
+    {
+        var first = new TestSong { Name = "First", ActualId = "1" };
+        var second = new TestSong { Name = "Second", ActualId = "2" };
+        var third = new TestSong { Name = "Third", ActualId = "3" };
+        var manager = CreateManager();
+
+        await manager.AddSongAsync(first);
+        await manager.AddSongAsync(second, 2);
+        await manager.AddSongRangeAsync([third], -2);
+        var playlist = await manager.GetPlayListAsync();
+
+        TestAssert.Ensure(playlist.SequenceEqual([first]), "Out-of-range insert indexes should be ignored instead of throwing or mutating the playlist.");
+    }
+
+    [Test]
     public async Task RemoveSongAndRange_RemoveOnlyRequestedSongs()
     {
         var first = new TestSong { Name = "First", ActualId = "1" };

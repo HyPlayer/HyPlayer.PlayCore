@@ -3,7 +3,7 @@ namespace HyPlayer.PlayCore.Abstraction.Models.Containers;
 /// <summary>
 /// Represents a provider-neutral uploaded or cloud-library item.
 /// </summary>
-public abstract class CloudLibraryItemBase : ProvidableItemBase
+public abstract class CloudLibraryItemBase : SingleItems.SingleSongBase
 {
     /// <summary>
     /// Gets or sets the uploaded file size in bytes when the provider exposes one.

@@ -76,6 +76,27 @@ public class ChopinTests
     }
 
     [Test]
+    public async Task PlayAsync_WhenNewSongResourceResolutionFails_DisposesOldTicketAndDoesNotReplayOldTicket()
+    {
+        var first = new TestSong { Name = "First", ActualId = "1" };
+        var second = new TestSong { Name = "Second", ActualId = "2" };
+        var controller = new SequencePlayController([first, second]);
+        var audioService = new TestAudioService();
+        var core = new Chopin([audioService], [new SequenceProvider([new TestMusicResource(), null])], [controller], new TestDepository(new NoopNotificationHub()));
+
+        await core.MoveNextAsync();
+        await core.PlayAsync();
+        var firstTicket = core.CurrentPlayingTicket;
+        await core.MoveNextAsync();
+        await core.PlayAsync();
+
+        TestAssert.Ensure(firstTicket is not null && audioService.DisposedTickets.Contains(firstTicket), "Changing song should dispose the previous ticket before resolving the new ticket.");
+        TestAssert.Ensure(core.CurrentPlayingTicket is null, "A resource failure for the new song must not leave the old ticket active.");
+        TestAssert.Ensure(audioService.CreatedTicketCount == 1, "No replacement ticket should be created when the new resource cannot be resolved.");
+        TestAssert.Ensure(ReferenceEquals(audioService.PlayedTicket, firstTicket), "PlayAsync should not replay the old ticket after the new song fails.");
+    }
+
+    [Test]
     public async Task PlayAsync_WhenProviderDoesNotMatchSong_DoesNotCreateTicket()
     {
         var song = new OtherProviderSong { Name = "Song", ActualId = "1" };
@@ -126,6 +147,7 @@ public class ChopinTests
         TestAssert.Ensure(audioService.LastSeekPosition == 1234, "SeekAsync should forward the requested position.");
         TestAssert.Ensure(ReferenceEquals(audioService.PausedTicket, activeTicket), "PauseAsync should forward CurrentPlayingTicket.");
         TestAssert.Ensure(ReferenceEquals(audioService.StoppedTicket, activeTicket), "StopAsync should forward the active ticket before clearing it.");
+        TestAssert.Ensure(activeTicket is not null && audioService.DisposedTickets.Contains(activeTicket), "StopAsync should dispose the active ticket after stopping it.");
         TestAssert.Ensure(core.CurrentPlayingTicket is null, "StopAsync should clear CurrentPlayingTicket after the audio service stops/disposes it.");
     }
 
@@ -176,6 +198,27 @@ public class ChopinTests
         TestAssert.Ensure(secondAudioService.CreatedTicketCount == 1, "Switching CurrentAudioService should create a replacement ticket for the new service.");
         TestAssert.Ensure(ReferenceEquals(secondAudioService.PlayedTicket, core.CurrentPlayingTicket), "The replacement ticket should be played by the new current service.");
         TestAssert.Ensure(core.CurrentPlayingTicket?.AudioServiceId == secondAudioService.Id, "CurrentPlayingTicket should belong to the new current service.");
+    }
+
+    [Test]
+    public async Task StopAsync_AfterCurrentAudioServiceChanges_StopsAndDisposesTicketOnOwningService()
+    {
+        var song = new TestSong { Name = "Song", ActualId = "1" };
+        var firstAudioService = new TestAudioService("audio.first");
+        var secondAudioService = new TestAudioService("audio.second");
+        var depository = new TestDepository(firstAudioService);
+        var core = new Chopin([firstAudioService, secondAudioService], [new TestProvider(new TestMusicResource())], [new TestPlayController(song)], depository);
+
+        await core.MoveNextAsync();
+        await core.PlayAsync();
+        var ticket = core.CurrentPlayingTicket;
+        depository.ChangeResolveTarget(typeof(AudioServiceBase), secondAudioService);
+        core.OnDependencyChanged((AudioServiceBase?)null);
+        await core.StopAsync();
+
+        TestAssert.Ensure(ticket is not null && ReferenceEquals(firstAudioService.StoppedTicket, ticket), "StopAsync should stop the ticket with the audio service that created it.");
+        TestAssert.Ensure(ticket is not null && firstAudioService.DisposedTickets.Contains(ticket), "StopAsync should dispose the ticket with its owning audio service.");
+        TestAssert.Ensure(core.CurrentPlayingTicket is null, "StopAsync should clear CurrentPlayingTicket even when CurrentAudioService changed.");
     }
 
     [Test]
@@ -316,5 +359,6 @@ public class ChopinTests
         await core.MovePointerToAsync(song);
 
         TestAssert.Ensure(ReferenceEquals(controller.NavigatedSong, song), "MovePointerToAsync should call NavigateSongToAsync on navigable controllers.");
+        TestAssert.Ensure(ReferenceEquals(core.CurrentSong, song), "MovePointerToAsync should update CurrentSong with the controller result.");
     }
 }

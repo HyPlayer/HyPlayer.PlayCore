@@ -1,3 +1,5 @@
+using HyPlayer.PlayCore.Abstraction.Models.Notifications;
+using HyPlayer.PlayCore.Abstraction.Models.SingleItems;
 using HyPlayer.PlayCore.PlayListControllers;
 
 namespace HyPlayer.PlayCore.Tests;
@@ -56,11 +58,30 @@ public class OrderedRollPlayControllerTests
         var second = new TestSong { Name = "Second", ActualId = "2" };
         var controller = CreateController(new TestPlayListManager([first, second]));
 
-        await controller.NavigateSongToAsync(second);
+        var selected = await controller.NavigateSongToAsync(second);
         var ordered = await controller.GetOrderedPlayListAsync();
 
+        TestAssert.Ensure(ReferenceEquals(selected, second), "NavigateSongToAsync should return the requested song when it exists.");
         TestAssert.Ensure(await controller.GetCurrentIndexAsync() == 1, "NavigateSongToAsync should move the index to the requested song.");
         TestAssert.Ensure(ordered.SequenceEqual([first, second]), "NavigateSongToAsync should not reorder the playlist.");
+    }
+
+    [Test]
+    public async Task NavigateSongTo_WhenSongMissing_DoesNotChangeIndexOrPublishInvalidSong()
+    {
+        var first = new TestSong { Name = "First", ActualId = "1" };
+        var second = new TestSong { Name = "Second", ActualId = "2" };
+        var missing = new TestSong { Name = "Missing", ActualId = "missing" };
+        var notificationHub = new NoopNotificationHub();
+        var controller = CreateController(new TestPlayListManager([first, second]), notificationHub);
+
+        await controller.MoveToIndexAsync(0);
+        notificationHub.PublishedNotifications.Clear();
+        var selected = await controller.NavigateSongToAsync(missing);
+
+        TestAssert.Ensure(selected is null, "NavigateSongToAsync should return null for missing songs.");
+        TestAssert.Ensure(await controller.GetCurrentIndexAsync() == 0, "Missing navigation should keep the previous index.");
+        TestAssert.Ensure(notificationHub.PublishedNotifications.Count == 0, "Missing navigation should not publish a fake current-song notification.");
     }
 
     [Test]
@@ -97,6 +118,29 @@ public class OrderedRollPlayControllerTests
     }
 
     [Test]
+    public async Task Randomize_WhenPlaylistChanges_KeepsRandomModeAndCurrentSong()
+    {
+        var first = new TestSong { Name = "First", ActualId = "1" };
+        var second = new TestSong { Name = "Second", ActualId = "2" };
+        var third = new TestSong { Name = "Third", ActualId = "3" };
+        var fourth = new TestSong { Name = "Fourth", ActualId = "4" };
+        var songs = new List<SingleSongBase> { first, second, third };
+        var notificationHub = new NoopNotificationHub();
+        var controller = CreateController(new TestPlayListManager(songs), notificationHub);
+
+        await controller.MoveToIndexAsync(1);
+        await controller.RandomizeAsync(42);
+        notificationHub.PublishedNotifications.Clear();
+        songs.Add(fourth);
+        await controller.HandleNotificationAsync(new());
+        var ordered = await controller.GetOrderedPlayListAsync();
+
+        TestAssert.Ensure(ordered.ToHashSet().SetEquals([first, second, third, fourth]), "Playlist refresh should include the updated original playlist while random mode is enabled.");
+        TestAssert.Ensure(ReferenceEquals(ordered[await controller.GetCurrentIndexAsync()], second), "Playlist refresh should keep the current song selected when it still exists.");
+        TestAssert.Ensure(notificationHub.PublishedNotifications.OfType<OrderedPlaylistChangedNotification>().Single().IsRandom, "Playlist refresh should preserve random mode instead of publishing a sequential playlist.");
+    }
+
+    [Test]
     public async Task EmptyPlaylist_NavigationMethodsReturnNullAndNavigationDoesNotThrow()
     {
         var controller = CreateController(new TestPlayListManager([]));
@@ -122,9 +166,9 @@ public class OrderedRollPlayControllerTests
         TestAssert.Ensure(ordered.SequenceEqual([first]), "InnerPlayListChangedNotification should reload the ordered playlist from PlayListManager.");
     }
 
-    private static OrderedRollPlayController CreateController(TestPlayListManager playlist)
+    private static OrderedRollPlayController CreateController(TestPlayListManager playlist, NoopNotificationHub? notificationHub = null)
     {
-        var controller = new OrderedRollPlayController(new TestDepository(playlist), playlist, new NoopNotificationHub());
+        var controller = new OrderedRollPlayController(new TestDepository(playlist), playlist, notificationHub ?? new NoopNotificationHub());
         controller.OnDependencyChanged(playlist);
         return controller;
     }

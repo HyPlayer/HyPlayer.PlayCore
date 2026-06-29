@@ -1,4 +1,3 @@
-﻿using AsyncAwaitBestPractices;
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Interfaces.NotificationHub;
 using HyPlayer.PlayCore.Abstraction;
@@ -23,6 +22,8 @@ public class OrderedRollPlayController : PlayControllerBase,
     private PlayListManagerBase? _playListManager;
     private List<SingleSongBase> _list = new();
     private List<SingleSongBase> _originalList = new();
+    private bool _isRandom;
+    private int _randomSeed = -1;
 
     public OrderedRollPlayController(IDepository depository, PlayListManagerBase? playListManager, INotificationHub notificationHub)
     {
@@ -31,59 +32,63 @@ public class OrderedRollPlayController : PlayControllerBase,
         _notificationHub = notificationHub;
     }
 
-
-    public override Task<SingleSongBase?> MoveNextAsync(CancellationToken ctk = new())
+    public override async Task<SingleSongBase?> MoveNextAsync(CancellationToken ctk = new())
     {
-        if (_list.Count == 0) return Task.FromResult<SingleSongBase?>(null);
+        if (_list.Count == 0) return null;
         if (_list.Count <= _index + 1)
             _index = -1;
+
         _index++;
         var curSong = _list[_index];
-        _notificationHub.PublishNotificationAsync(new CurrentSongChangedNotification() { CurrentPlayingSong = curSong },
-                                                  ctk).SafeFireAndForget();
-        return Task.FromResult<SingleSongBase?>(curSong);
+        await PublishCurrentSongChangedAsync(curSong, ctk).ConfigureAwait(false);
+        return curSong;
     }
 
-    public override Task<SingleSongBase?> MovePreviousAsync(CancellationToken ctk = new())
+    public override async Task<SingleSongBase?> MovePreviousAsync(CancellationToken ctk = new())
     {
-        if (_list.Count == 0) return Task.FromResult<SingleSongBase?>(null);
+        if (_list.Count == 0) return null;
         if (_index <= 0)
             _index = _list.Count;
+
         _index--;
         var curSong = _list[_index];
-        _notificationHub.PublishNotificationAsync(new CurrentSongChangedNotification() { CurrentPlayingSong = curSong },
-                                                  ctk).SafeFireAndForget();
-        return Task.FromResult<SingleSongBase?>(curSong);
+        await PublishCurrentSongChangedAsync(curSong, ctk).ConfigureAwait(false);
+        return curSong;
     }
 
-    public override Task<SingleSongBase?> MoveToIndexAsync(int index, CancellationToken ctk = new())
+    public override async Task<SingleSongBase?> MoveToIndexAsync(int index, CancellationToken ctk = new())
     {
-        if (index < 0 || index >= _list.Count) return Task.FromResult<SingleSongBase?>(null);
+        if (index < 0 || index >= _list.Count) return null;
+
         _index = index;
         var curSong = _list[index];
-        _notificationHub.PublishNotificationAsync(new CurrentSongChangedNotification() { CurrentPlayingSong = curSong },
-                                                  ctk).SafeFireAndForget();
-        return Task.FromResult<SingleSongBase?>(_list[index]);
+        await PublishCurrentSongChangedAsync(curSong, ctk).ConfigureAwait(false);
+        return curSong;
     }
 
-    public Task Reverse(CancellationToken ctk = new())
+    public async Task Reverse(CancellationToken ctk = new())
     {
-        if (_list.Count == 0) return Task.CompletedTask;
+        if (_list.Count == 0) return;
+
+        var currentSong = GetCurrentSong();
         _list.Reverse();
-        _index = _list.Count - _index - 1;
-        _notificationHub.PublishNotificationAsync(new OrderedPlaylistChangedNotification() { IsRandom = false, OrderedList = _list }, ctk).SafeFireAndForget();
-        return Task.CompletedTask;
+        _isRandom = false;
+        _randomSeed = -1;
+        _index = currentSong is null ? -1 : _list.IndexOf(currentSong);
+        await PublishOrderedPlaylistChangedAsync(ctk).ConfigureAwait(false);
     }
 
-    public Task NavigateSongToAsync(SingleSongBase song, CancellationToken ctk = new())
+    public async Task<SingleSongBase?> NavigateSongToAsync(SingleSongBase song, CancellationToken ctk = new())
     {
-        if (_list.Count == 0) return Task.CompletedTask;
-        var indexOfSong = _list.IndexOf(song);
-        if (indexOfSong >= 0)
-            _index = indexOfSong;
-        _notificationHub.PublishNotificationAsync(new CurrentSongChangedNotification() { CurrentPlayingSong = _list[_index] },
-                                                  ctk).SafeFireAndForget();
-        return Task.CompletedTask;
+        if (_list.Count == 0) return null;
+
+        var indexOfSong = IndexOfSong(_list, song);
+        if (indexOfSong < 0)
+            return null;
+
+        _index = indexOfSong;
+        await PublishCurrentSongChangedAsync(_list[_index], ctk).ConfigureAwait(false);
+        return _list[_index];
     }
 
     public Task<int> GetCurrentIndexAsync(CancellationToken ctk = new())
@@ -102,22 +107,13 @@ public class OrderedRollPlayController : PlayControllerBase,
         return Task.FromResult(_list.ToList());
     }
 
-    public Task RandomizeAsync(int seed = -1, CancellationToken ctk = new())
+    public async Task RandomizeAsync(int seed = -1, CancellationToken ctk = new())
     {
-        if (seed == -1)
-        {
-            _list = _originalList.ToList();
-        }
-        else
-        {
-            var currentSong = _index >= 0 && _index < _list.Count ? _list[_index] : null;
-            var random = new Random(seed);
-            _list = _originalList.OrderBy(_ => random.Next()).ToList();
-            _index = currentSong is null ? -1 : _list.IndexOf(currentSong);
-        }
-
-        _notificationHub.PublishNotificationAsync(new OrderedPlaylistChangedNotification() { IsRandom = seed != -1, OrderedList = _list }, ctk).SafeFireAndForget();
-        return Task.CompletedTask;
+        var currentSong = GetCurrentSong();
+        _isRandom = seed != -1;
+        _randomSeed = seed;
+        RebuildOrderedList(currentSong);
+        await PublishOrderedPlaylistChangedAsync(ctk).ConfigureAwait(false);
     }
 
     public Task<List<SingleSongBase>> GetOriginalListAsync(CancellationToken ctk = new())
@@ -127,20 +123,76 @@ public class OrderedRollPlayController : PlayControllerBase,
 
     public async void OnDependencyChanged(PlayListManagerBase? alwaysNullMarker)
     {
+        var currentSong = GetCurrentSong();
         _playListManager = _depository.ResolveDependency(typeof(PlayListManagerBase)) as PlayListManagerBase;
         _originalList = await (_playListManager?.GetPlayListAsync() ?? Task.FromResult(new List<SingleSongBase>()));
-        _list = _originalList.ToList();
-        _index = _list.Count == 0 ? -1 : Math.Min(_index, _list.Count - 1);
-        _notificationHub.PublishNotificationAsync(new OrderedPlaylistChangedNotification() { IsRandom = false, OrderedList = _list }).SafeFireAndForget();
+        RebuildOrderedList(currentSong);
+        await PublishOrderedPlaylistChangedAsync().ConfigureAwait(false);
     }
 
     public async Task HandleNotificationAsync(
         InnerPlayListChangedNotification notification,
         CancellationToken ctk = new())
     {
+        var currentSong = GetCurrentSong();
         _originalList = await (_playListManager?.GetPlayListAsync(ctk) ?? Task.FromResult(new List<SingleSongBase>()));
-        _list = _originalList.ToList();
-        _index = _list.Count == 0 ? -1 : Math.Min(_index, _list.Count - 1);
-        _notificationHub.PublishNotificationAsync(new OrderedPlaylistChangedNotification() { IsRandom = false, OrderedList = _list }, ctk).SafeFireAndForget();
+        RebuildOrderedList(currentSong);
+        await PublishOrderedPlaylistChangedAsync(ctk).ConfigureAwait(false);
+    }
+
+    private SingleSongBase? GetCurrentSong()
+    {
+        return _index >= 0 && _index < _list.Count ? _list[_index] : null;
+    }
+
+    private void RebuildOrderedList(SingleSongBase? currentSong)
+    {
+        _list = _isRandom
+            ? ShuffleOriginalList(_randomSeed)
+            : _originalList.ToList();
+
+        if (_list.Count == 0)
+        {
+            _index = -1;
+            return;
+        }
+
+        var currentIndex = currentSong is null ? -1 : IndexOfSong(_list, currentSong);
+        _index = currentIndex >= 0 ? currentIndex : Math.Min(Math.Max(_index, -1), _list.Count - 1);
+    }
+
+    private static int IndexOfSong(IReadOnlyList<SingleSongBase> list, SingleSongBase song)
+    {
+        for (var i = 0; i < list.Count; i++)
+        {
+            var item = list[i];
+            if (ReferenceEquals(item, song) ||
+                item.ProviderId == song.ProviderId &&
+                item.TypeId == song.TypeId &&
+                item.ActualId == song.ActualId)
+                return i;
+        }
+
+        return -1;
+    }
+
+    private List<SingleSongBase> ShuffleOriginalList(int seed)
+    {
+        var random = new Random(seed);
+        return _originalList.OrderBy(_ => random.Next()).ToList();
+    }
+
+    private Task PublishCurrentSongChangedAsync(SingleSongBase currentSong, CancellationToken ctk)
+    {
+        return _notificationHub.PublishNotificationAsync(
+            new CurrentSongChangedNotification { CurrentPlayingSong = currentSong },
+            ctk);
+    }
+
+    private Task PublishOrderedPlaylistChangedAsync(CancellationToken ctk = new())
+    {
+        return _notificationHub.PublishNotificationAsync(
+            new OrderedPlaylistChangedNotification { IsRandom = _isRandom, OrderedList = _list.ToList() },
+            ctk);
     }
 }

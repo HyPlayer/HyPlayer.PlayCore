@@ -8,7 +8,13 @@ public sealed partial class Chopin
     public override async Task MovePointerToAsync(SingleSongBase song, CancellationToken ctk = new())
     {
         if (CurrentPlayListController is INavigateSongPlayListController controller)
-            await controller.NavigateSongToAsync(song, ctk);
+            CurrentSong = await controller.NavigateSongToAsync(song, ctk).ConfigureAwait(false) ?? CurrentSong;
+    }
+
+    public override async Task MovePointerToIndexAsync(int index, CancellationToken ctk = new())
+    {
+        if (CurrentPlayListController is IIndexedPlayListController indexedController)
+            CurrentSong = await indexedController.MoveToIndexAsync(index, ctk).ConfigureAwait(false) ?? CurrentSong;
     }
 
     public override async Task MoveNextAsync(CancellationToken ctk = new())

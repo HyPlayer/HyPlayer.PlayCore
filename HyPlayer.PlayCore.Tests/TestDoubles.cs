@@ -95,6 +95,22 @@ internal sealed class TestProvider(MusicResourceBase? resource = null) : Provide
         => Task.FromResult(resource);
 }
 
+internal sealed class SequenceProvider(IEnumerable<MusicResourceBase?> resources) : ProviderBase, IMusicResourceProvidable
+{
+    private readonly Queue<MusicResourceBase?> _resources = new(resources);
+    public override string Name => "Sequence Provider";
+    public override string Id => "provider.test";
+    public override List<ProvidableTypeId> ProvidableTypeIds => [];
+
+    public Task<MusicResourceBase?> GetMusicResourceAsync(
+        SingleSongBase song,
+        ResourceQualityTag? qualityTag = null,
+        CancellationToken ctk = new())
+    {
+        return Task.FromResult(_resources.Count == 0 ? null : _resources.Dequeue());
+    }
+}
+
 internal sealed class TestPlayController(SingleSongBase? nextSong) : PlayControllerBase
 {
     public override Task<SingleSongBase?> MoveNextAsync(CancellationToken ctk = new()) => Task.FromResult(nextSong);
@@ -119,14 +135,15 @@ internal sealed class SequencePlayController(List<SingleSongBase> songs) : PlayC
 internal sealed class NavigablePlayController : PlayControllerBase, INavigateSongPlayListController
 {
     public SingleSongBase? NavigatedSong { get; private set; }
+    public SingleSongBase? NavigationResult { get; init; }
     public override Task<SingleSongBase?> MoveNextAsync(CancellationToken ctk = new()) => Task.FromResult<SingleSongBase?>(null);
     public override Task<SingleSongBase?> MovePreviousAsync(CancellationToken ctk = new()) => Task.FromResult<SingleSongBase?>(null);
     public override Task<SingleSongBase?> MoveToIndexAsync(int index, CancellationToken ctk = new()) => Task.FromResult<SingleSongBase?>(null);
 
-    public Task NavigateSongToAsync(SingleSongBase song, CancellationToken ctk = new())
+    public Task<SingleSongBase?> NavigateSongToAsync(SingleSongBase song, CancellationToken ctk = new())
     {
         NavigatedSong = song;
-        return Task.CompletedTask;
+        return Task.FromResult<SingleSongBase?>(NavigationResult ?? song);
     }
 }
 

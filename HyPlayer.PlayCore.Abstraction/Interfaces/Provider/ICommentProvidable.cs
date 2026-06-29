@@ -22,9 +22,10 @@ public interface ICommentProvidable : IProvider
     /// <param name="typeId">The provider-neutral type id of the commented item.</param>
     /// <param name="offset">The zero-based comment offset to request.</param>
     /// <param name="count">The maximum number of comments to request.</param>
+    /// <param name="sortType">Provider-neutral comment sort type. 1=recommended, 2=hot, 3=time.</param>
     /// <param name="ctk">The cancellation token for the operation.</param>
     /// <returns>A provider-neutral comment page.</returns>
-    public Task<ProviderPageResult<CommentBase>> GetCommentsAsync(string itemId, string typeId, int offset, int count, CancellationToken ctk = new());
+    public Task<ProviderPageResult<CommentBase>> GetCommentsAsync(string itemId, string typeId, int offset, int count, int sortType = 1, CancellationToken ctk = new());
 
     /// <summary>
     /// Posts a comment to a providable item.

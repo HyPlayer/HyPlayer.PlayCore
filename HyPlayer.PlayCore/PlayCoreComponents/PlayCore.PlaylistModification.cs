@@ -8,6 +8,8 @@ namespace HyPlayer.PlayCore;
 public sealed partial class Chopin
 {
     public override bool IsRandom { get; protected set; }
+    public override string ActivePlayModeId { get; protected set; } = "seq";
+    public override string ActiveTransitionId { get; protected set; } = "dir";
 
     public override ContainerBase? CurrentSongContainer { get; protected set; }
 
@@ -57,5 +59,57 @@ public sealed partial class Chopin
     {
         if (CurrentPlayListController is IRandomizablePlayListController randomizablePlayListController)
             await randomizablePlayListController.RandomizeAsync(DateTime.Now.Millisecond, ctk).ConfigureAwait(false);
+    }
+
+    public override async Task SetPlayModeAsync(string playModeId, CancellationToken ctk = new())
+    {
+        if (playModeId is not ("seq" or "sgl" or "shn" or "pfm" or "ltg"))
+            return;
+
+        ActivePlayModeId = playModeId;
+        await SetRandomAsync(playModeId == "shn", ctk).ConfigureAwait(false);
+    }
+
+    public override Task SetTransitionAsync(string transitionId, CancellationToken ctk = new())
+    {
+        if (transitionId is "dir" or "xfd" or "gap")
+            ActiveTransitionId = transitionId;
+
+        return Task.CompletedTask;
+    }
+
+    public override Task<List<SingleSongBase>> GetPlaylistAsync(CancellationToken ctk = new())
+    {
+        return CurrentPlayList?.GetPlayListAsync(ctk) ?? Task.FromResult(new List<SingleSongBase>());
+    }
+
+    public override Task<List<SingleSongBase>> GetOrderedPlaylistAsync(CancellationToken ctk = new())
+    {
+        if (CurrentPlayListController is IPlayListGettablePlaylistController gettable)
+            return gettable.GetOrderedPlayListAsync(ctk);
+
+        return GetPlaylistAsync(ctk);
+    }
+
+    public override Task<int> GetCurrentIndexAsync(CancellationToken ctk = new())
+    {
+        if (CurrentPlayListController is IIndexedPlayListController indexed)
+            return indexed.GetCurrentIndexAsync(ctk);
+
+        return Task.FromResult(-1);
+    }
+
+    public override Task<SingleSongBase?> GetSongAtAsync(int index, CancellationToken ctk = new())
+    {
+        if (CurrentPlayListController is IIndexedPlayListController indexed)
+            return indexed.GetSongAtAsync(index, ctk);
+
+        return Task.FromResult<SingleSongBase?>(null);
+    }
+
+    public override async Task ReversePlaylistAsync(CancellationToken ctk = new())
+    {
+        if (CurrentPlayListController is IReversiblePlayListController reversible)
+            await reversible.Reverse(ctk).ConfigureAwait(false);
     }
 }

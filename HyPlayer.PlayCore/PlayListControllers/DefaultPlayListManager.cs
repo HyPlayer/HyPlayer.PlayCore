@@ -129,6 +129,9 @@ public class DefaultPlayListManager : PlayListManagerBase
 
     public override async Task AddSongAsync(SingleSongBase song, int index = -1, CancellationToken ctk = new())
     {
+        if (index < -1 || index > _list.Count)
+            return;
+
         if (index != -1)
             _list.Insert(index, song);
         else
@@ -141,6 +144,9 @@ public class DefaultPlayListManager : PlayListManagerBase
         int index = -1,
         CancellationToken ctk = new())
     {
+        if (index < -1 || index > _list.Count)
+            return;
+
         if (index != -1)
             _list.InsertRange(index, songs);
         else
