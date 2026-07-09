@@ -162,6 +162,7 @@ public class ProviderContractTests
     {
         public override string ProviderId => "provider.contract";
         public override string TypeId => "cloud";
+        public override Task<List<PersonBase>?> GetCreatorsAsync(CancellationToken ctk = new()) => Task.FromResult<List<PersonBase>?>(null);
     }
 
     private sealed class ContractRichMedia : RichMediaBase
@@ -183,4 +184,3 @@ public class ProviderContractTests
             => Task.FromResult<ResourceResultBase>(new TestResourceResult { ResourceStatus = ResourceStatus.Success, ExternalException = null });
     }
 }
-
