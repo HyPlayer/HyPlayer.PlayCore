@@ -6,4 +6,10 @@ public interface IPlayCorePlayerModification : IPlayCore
     public Task PlayAsync(CancellationToken ctk = new());
     public Task PauseAsync(CancellationToken ctk = new());
     public Task StopAsync(CancellationToken ctk = new());
+    public Task<Models.AudioServiceComponents.PreparedPlaybackTicket?> PreparePlaybackAsync(
+        Models.SingleItems.SingleSongBase song,
+        CancellationToken ctk = new());
+    public Task<Models.AudioServiceComponents.PreparedPlaybackPromotion?> PromotePreparedPlaybackAsync(
+        Models.AudioServiceComponents.PreparedPlaybackTicket preparedTicket,
+        CancellationToken ctk = new());
 }

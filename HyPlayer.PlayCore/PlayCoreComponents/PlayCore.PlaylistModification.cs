@@ -9,7 +9,6 @@ public sealed partial class Chopin
 {
     public override bool IsRandom { get; protected set; }
     public override string ActivePlayModeId { get; protected set; } = "seq";
-    public override string ActiveTransitionId { get; protected set; } = "dir";
 
     public override ContainerBase? CurrentSongContainer { get; protected set; }
 
@@ -68,14 +67,6 @@ public sealed partial class Chopin
 
         ActivePlayModeId = playModeId;
         await SetRandomAsync(playModeId == "shn", ctk).ConfigureAwait(false);
-    }
-
-    public override Task SetTransitionAsync(string transitionId, CancellationToken ctk = new())
-    {
-        if (transitionId is "dir" or "xfd" or "gap")
-            ActiveTransitionId = transitionId;
-
-        return Task.CompletedTask;
     }
 
     public override Task<List<SingleSongBase>> GetPlaylistAsync(CancellationToken ctk = new())

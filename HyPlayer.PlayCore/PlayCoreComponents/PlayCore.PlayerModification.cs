@@ -115,6 +115,181 @@ public sealed partial class Chopin
         }, ctk);
     }
 
+    public override async Task<PreparedPlaybackTicket?> PreparePlaybackAsync(
+        SingleSongBase song,
+        CancellationToken ctk = new())
+    {
+        if (song is null)
+            throw new ArgumentNullException(nameof(song));
+        ctk.ThrowIfCancellationRequested();
+
+        var audioService = CurrentAudioService;
+        if (audioService is not IPreparedAudioTicketService preparedAudioService)
+            return null;
+
+        var resource = await ResolveMusicResourceAsync(song, ctk).ConfigureAwait(false);
+        if (resource is null)
+            return null;
+
+        var ticket = await preparedAudioService
+            .GetPreparedAudioTicketAsync(resource, ctk)
+            .ConfigureAwait(false);
+        return new ChopinPreparedPlaybackTicket(this, song, audioService, ticket);
+    }
+
+    public override async Task<PreparedPlaybackPromotion?> PromotePreparedPlaybackAsync(
+        PreparedPlaybackTicket preparedTicket,
+        CancellationToken ctk = new())
+    {
+        if (preparedTicket is not ChopinPreparedPlaybackTicket incoming
+            || !ReferenceEquals(incoming.Owner, this)
+            || incoming.IsReleased
+            || !SameSong(CurrentSong, incoming.Song)
+            || incoming.AudioService is not IPreparedAudioTicketService primaryService)
+            return null;
+
+        var oldTicket = CurrentPlayingTicket;
+        var oldSong = LastRequestedPlaybackSong;
+        CurrentPlayingTicket = incoming.Ticket;
+        LastRequestedPlaybackSong = incoming.Song;
+
+        try
+        {
+            await primaryService
+                .SetPrimaryAudioTicketAsync(incoming.Ticket, ctk)
+                .ConfigureAwait(false);
+            incoming.MarkPromoted();
+        }
+        catch
+        {
+            CurrentPlayingTicket = oldTicket;
+            LastRequestedPlaybackSong = oldSong;
+            throw;
+        }
+
+        return new PreparedPlaybackPromotion
+        {
+            Incoming = incoming,
+            Outgoing = oldTicket is null || oldSong is null
+                ? null
+                : new ChopinPreparedPlaybackTicket(this, oldSong, FindAudioServiceForTicket(oldTicket), oldTicket)
+        };
+    }
+
+    private static bool SameSong(SingleSongBase? left, SingleSongBase? right)
+    {
+        return ReferenceEquals(left, right)
+               || (left is not null
+                   && right is not null
+                   && left.ProviderId == right.ProviderId
+                   && left.TypeId == right.TypeId
+                   && left.ActualId == right.ActualId);
+    }
+
+    private async Task ReleasePreparedTicketAsync(ChopinPreparedPlaybackTicket lease)
+    {
+        if (!lease.TryBeginRelease())
+            return;
+
+        if (ReferenceEquals(CurrentPlayingTicket, lease.Ticket))
+        {
+            lease.CancelRelease();
+            return;
+        }
+
+        try
+        {
+            if (lease.AudioService is { } audioService)
+                await audioService.DisposeAudioTicketAsync(lease.Ticket).ConfigureAwait(false);
+        }
+        finally
+        {
+            lease.CompleteRelease();
+        }
+    }
+
+    private sealed class ChopinPreparedPlaybackTicket : PreparedPlaybackTicket
+    {
+        private int _releaseState;
+        private readonly double _targetVolume;
+
+        public ChopinPreparedPlaybackTicket(
+            Chopin owner,
+            SingleSongBase song,
+            AudioServiceBase? audioService,
+            AudioTicketBase ticket)
+        {
+            Owner = owner;
+            Song = song;
+            AudioService = audioService;
+            Ticket = ticket;
+            _targetVolume = ticket is IAudioTicketVolumeState volumeState
+                ? volumeState.Volume
+                : 1d;
+        }
+
+        internal Chopin Owner { get; }
+        internal AudioServiceBase? AudioService { get; }
+        internal AudioTicketBase Ticket { get; }
+        internal bool IsReleased => Volatile.Read(ref _releaseState) == 2;
+
+        public override SingleSongBase Song { get; }
+
+        public override double TargetVolume => _targetVolume;
+
+        public override Task PlayAsync(CancellationToken ctk = default)
+        {
+            ThrowIfReleased();
+            return AudioService is IPlayAudioTicketService service
+                ? service.PlayAudioTicketAsync(Ticket, ctk)
+                : Task.CompletedTask;
+        }
+
+        public override Task PauseAsync(CancellationToken ctk = default)
+        {
+            ThrowIfReleased();
+            return AudioService is IPauseAudioTicketService service
+                ? service.PauseAudioTicketAsync(Ticket, ctk)
+                : Task.CompletedTask;
+        }
+
+        public override Task SetVolumeAsync(double volume, CancellationToken ctk = default)
+        {
+            ThrowIfReleased();
+            return AudioService is IAudioTicketVolumeChangeable service
+                ? service.ChangeVolumeAsync(Ticket, volume, ctk)
+                : Task.CompletedTask;
+        }
+
+        public override Task SetPlaybackRateAsync(double playbackRate, CancellationToken ctk = default)
+        {
+            ThrowIfReleased();
+            return AudioService is IPlaybackSpeedChangeable.IPlaybackRateChangeableService service
+                ? service.ChangePlaybackSpeedAsync(Ticket, playbackRate, ctk)
+                : Task.CompletedTask;
+        }
+
+        public override Task DisposeAsync() => Owner.ReleasePreparedTicketAsync(this);
+
+        internal void MarkPromoted()
+        {
+            ThrowIfReleased();
+        }
+
+        internal bool TryBeginRelease() =>
+            Interlocked.CompareExchange(ref _releaseState, 1, 0) == 0;
+
+        internal void CancelRelease() => Volatile.Write(ref _releaseState, 0);
+
+        internal void CompleteRelease() => Volatile.Write(ref _releaseState, 2);
+
+        private void ThrowIfReleased()
+        {
+            if (IsReleased)
+                throw new ObjectDisposedException(nameof(PreparedPlaybackTicket));
+        }
+    }
+
     public override async Task SeekAsync(long position, CancellationToken ctk = new())
     {
         await EnsureCurrentPlayingTicketAsync(ctk).ConfigureAwait(false);

@@ -23,7 +23,6 @@ public abstract class PlayCoreBase : IPlayCoreService,
     public virtual AudioTicketBase? CurrentPlayingTicket { get; protected set; }
     public virtual bool IsRandom { get; protected set; }
     public virtual string ActivePlayModeId { get; protected set; } = "seq";
-    public virtual string ActiveTransitionId { get; protected set; } = "dir";
     public virtual string PlaySourceId { get; set; } = string.Empty;
 
     public abstract Task RegisterAudioServiceAsync(Type serviceType, CancellationToken ctk = new());
@@ -43,7 +42,6 @@ public abstract class PlayCoreBase : IPlayCoreService,
     public abstract Task SetRandomAsync(bool isRandom, CancellationToken ctk = new());
     public abstract Task ReRandomAsync(CancellationToken ctk = new());
     public abstract Task SetPlayModeAsync(string playModeId, CancellationToken ctk = new());
-    public abstract Task SetTransitionAsync(string transitionId, CancellationToken ctk = new());
     public abstract Task<List<SingleSongBase>> GetPlaylistAsync(CancellationToken ctk = new());
     public abstract Task<List<SingleSongBase>> GetOrderedPlaylistAsync(CancellationToken ctk = new());
     public abstract Task<int> GetCurrentIndexAsync(CancellationToken ctk = new());
@@ -53,6 +51,12 @@ public abstract class PlayCoreBase : IPlayCoreService,
     public abstract Task PlayAsync(CancellationToken ctk = new());
     public abstract Task PauseAsync(CancellationToken ctk = new());
     public abstract Task StopAsync(CancellationToken ctk = new());
+    public abstract Task<PreparedPlaybackTicket?> PreparePlaybackAsync(
+        SingleSongBase song,
+        CancellationToken ctk = new());
+    public abstract Task<PreparedPlaybackPromotion?> PromotePreparedPlaybackAsync(
+        PreparedPlaybackTicket preparedTicket,
+        CancellationToken ctk = new());
     public abstract Task MovePointerToAsync(SingleSongBase song, CancellationToken ctk = new());
     public abstract Task MovePointerToIndexAsync(int index, CancellationToken ctk = new());
     public abstract Task MoveNextAsync(CancellationToken ctk = new());
