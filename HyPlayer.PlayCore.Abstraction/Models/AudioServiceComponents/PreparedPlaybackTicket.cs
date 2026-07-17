@@ -16,6 +16,58 @@ public abstract class PreparedPlaybackTicket
 
 public sealed class PreparedPlaybackPromotion
 {
-    public required PreparedPlaybackTicket Incoming { get; init; }
-    public PreparedPlaybackTicket? Outgoing { get; init; }
+    private readonly SemaphoreSlim _settlementGate = new(1, 1);
+    private PreparedPlaybackTicket? _outgoing;
+
+    public PreparedPlaybackPromotion(
+        PreparedPlaybackTicket incoming,
+        PreparedPlaybackTicket? outgoing)
+    {
+        Incoming = incoming ?? throw new ArgumentNullException(nameof(incoming));
+        _outgoing = outgoing;
+    }
+
+    public PreparedPlaybackTicket Incoming { get; }
+
+    public PreparedPlaybackTicket? Outgoing => Volatile.Read(ref _outgoing);
+
+    /// <summary>
+    /// Permanently settles the outgoing ticket. Once settlement starts it is deliberately
+    /// non-cancellable so a cancelled playback request cannot leave an audible orphan.
+    /// </summary>
+    public async Task SettleOutgoingAsync()
+    {
+        await _settlementGate.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            var outgoing = _outgoing;
+            if (outgoing is null)
+                return;
+
+            try
+            {
+                await outgoing.SetVolumeAsync(0, CancellationToken.None).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Disposal below is the authoritative silence/detach boundary.
+            }
+
+            try
+            {
+                await outgoing.PauseAsync(CancellationToken.None).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Disposal below is the authoritative silence/detach boundary.
+            }
+
+            await outgoing.DisposeAsync().ConfigureAwait(false);
+            Interlocked.CompareExchange(ref _outgoing, null, outgoing);
+        }
+        finally
+        {
+            _settlementGate.Release();
+        }
+    }
 }

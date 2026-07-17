@@ -37,23 +37,43 @@ internal sealed class TestAudioService(string id = "audio.test") : AudioServiceB
     public AudioTicketBase? PausedTicket { get; private set; }
     public AudioTicketBase? StoppedTicket { get; private set; }
     public double? LastSeekPosition { get; private set; }
+    public AudioTicketBase? LastCreatedTicket { get; private set; }
+    public CancellationToken LastDisposeToken { get; private set; }
+    public int DisposeFailuresRemaining { get; set; }
+    public TaskCompletionSource? TicketCreated { get; set; }
+    public TaskCompletionSource? AllowTicketReturn { get; set; }
+    public TaskCompletionSource? DisposeStarted { get; set; }
+    public TaskCompletionSource? AllowDispose { get; set; }
     public List<AudioTicketBase> DisposedTickets { get; } = [];
 
-    public override Task<AudioTicketBase> GetAudioTicketAsync(MusicResourceBase musicResource, CancellationToken ctk = new())
+    public override async Task<AudioTicketBase> GetAudioTicketAsync(MusicResourceBase musicResource, CancellationToken ctk = new())
     {
         CreatedTicketCount++;
-        return Task.FromResult<AudioTicketBase>(new TestAudioTicket
+        LastCreatedTicket = new TestAudioTicket
         {
             AudioServiceId = Id,
             MusicResource = musicResource,
             Status = AudioTicketStatus.None
-        });
+        };
+        TicketCreated?.TrySetResult();
+        if (AllowTicketReturn is not null)
+            await AllowTicketReturn.Task.ConfigureAwait(false);
+        return LastCreatedTicket;
     }
 
-    public override Task DisposeAudioTicketAsync(AudioTicketBase audioTicket, CancellationToken ctk = new())
+    public override async Task DisposeAudioTicketAsync(AudioTicketBase audioTicket, CancellationToken ctk = new())
     {
+        LastDisposeToken = ctk;
+        DisposeStarted?.TrySetResult();
+        if (AllowDispose is not null)
+            await AllowDispose.Task.ConfigureAwait(false);
+        if (DisposeFailuresRemaining > 0)
+        {
+            DisposeFailuresRemaining--;
+            throw new InvalidOperationException("Injected dispose failure.");
+        }
+
         DisposedTickets.Add(audioTicket);
-        return Task.CompletedTask;
     }
 
     public override Task<List<AudioTicketBase>> GetCreatedAudioTicketsAsync(CancellationToken ctk = new())

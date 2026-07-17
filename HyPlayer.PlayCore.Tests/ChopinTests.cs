@@ -222,6 +222,140 @@ public class ChopinTests
     }
 
     [Test]
+    public async Task PlayAsync_WhenCancellationArrivesDuringOldTicketDisposal_FinishesCleanupWithoutCreatingReplacement()
+    {
+        var first = new TestSong { Name = "First", ActualId = "1" };
+        var second = new TestSong { Name = "Second", ActualId = "2" };
+        var audioService = new TestAudioService();
+        var core = new Chopin(
+            [audioService],
+            [new TestProvider(new TestMusicResource())],
+            [new SequencePlayController([first, second])],
+            new TestDepository());
+
+        await core.MoveNextAsync();
+        await core.PlayAsync();
+        var oldTicket = core.CurrentPlayingTicket;
+        await core.MoveNextAsync();
+
+        audioService.DisposeStarted = NewSignal();
+        audioService.AllowDispose = NewSignal();
+        using var cancellation = new CancellationTokenSource();
+        var replacementTask = core.PlayAsync(cancellation.Token);
+        await audioService.DisposeStarted.Task;
+        cancellation.Cancel();
+        audioService.AllowDispose.TrySetResult();
+        await ExpectCanceledAsync(replacementTask);
+
+        TestAssert.Ensure(oldTicket is not null && audioService.DisposedTickets.Contains(oldTicket),
+            "Cancellation after cleanup starts must not interrupt old-ticket disposal.");
+        TestAssert.Ensure(core.CurrentPlayingTicket is null,
+            "The successfully disposed old ticket must be cleared before cancellation is rethrown.");
+        TestAssert.Ensure(audioService.CreatedTicketCount == 1,
+            "Cancellation after cleanup must prevent creation of the replacement ticket.");
+        TestAssert.Ensure(!audioService.LastDisposeToken.CanBeCanceled,
+            "Old-ticket disposal must receive a non-cancellable token.");
+    }
+
+    [Test]
+    public async Task PlayAsync_WhenOldTicketDisposalFails_RetainsOwnershipUntilRetrySucceeds()
+    {
+        var first = new TestSong { Name = "First", ActualId = "1" };
+        var second = new TestSong { Name = "Second", ActualId = "2" };
+        var audioService = new TestAudioService();
+        var core = new Chopin(
+            [audioService],
+            [new TestProvider(new TestMusicResource())],
+            [new SequencePlayController([first, second])],
+            new TestDepository());
+
+        await core.MoveNextAsync();
+        await core.PlayAsync();
+        var oldTicket = core.CurrentPlayingTicket;
+        await core.MoveNextAsync();
+        audioService.DisposeFailuresRemaining = 1;
+
+        await ExpectFailureAsync(() => core.PlayAsync());
+
+        TestAssert.Ensure(ReferenceEquals(core.CurrentPlayingTicket, oldTicket),
+            "A failed adapter disposal must leave the old ticket owned for retry.");
+        TestAssert.Ensure(audioService.CreatedTicketCount == 1,
+            "A failed old-ticket disposal must prevent creation of a second main ticket.");
+
+        await core.PlayAsync();
+
+        TestAssert.Ensure(oldTicket is not null && audioService.DisposedTickets.Contains(oldTicket),
+            "The next playback request must retry and release the old ticket.");
+        TestAssert.Ensure(core.CurrentPlayingTicket is not null && !ReferenceEquals(core.CurrentPlayingTicket, oldTicket),
+            "Only after disposal succeeds may the replacement ticket become current.");
+        TestAssert.Ensure(audioService.CreatedTicketCount == 2,
+            "Exactly one replacement ticket should be created after cleanup succeeds.");
+    }
+
+    [Test]
+    public async Task PlayAsync_WhenCancellationArrivesAfterTicketCreation_ReleasesUnadoptedTicketNonCancellably()
+    {
+        var song = new TestSong { Name = "Song", ActualId = "1" };
+        var audioService = new TestAudioService
+        {
+            TicketCreated = NewSignal(),
+            AllowTicketReturn = NewSignal()
+        };
+        var core = new Chopin(
+            [audioService],
+            [new TestProvider(new TestMusicResource())],
+            [new TestPlayController(song)],
+            new TestDepository());
+
+        await core.MoveNextAsync();
+        using var cancellation = new CancellationTokenSource();
+        var playTask = core.PlayAsync(cancellation.Token);
+        await audioService.TicketCreated.Task;
+        cancellation.Cancel();
+        audioService.AllowTicketReturn.TrySetResult();
+        await ExpectCanceledAsync(playTask);
+
+        TestAssert.Ensure(core.CurrentPlayingTicket is null,
+            "A ticket created by a stale request must never become current.");
+        TestAssert.Ensure(audioService.LastCreatedTicket is not null
+                          && audioService.DisposedTickets.Contains(audioService.LastCreatedTicket),
+            "A created but unadopted ticket must be released.");
+        TestAssert.Ensure(!audioService.LastDisposeToken.CanBeCanceled,
+            "Unadopted-ticket disposal must not inherit the cancelled request token.");
+    }
+
+    private static TaskCompletionSource NewSignal() =>
+        new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    private static async Task ExpectCanceledAsync(Task task)
+    {
+        try
+        {
+            await task;
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException("The operation was expected to be cancelled.");
+    }
+
+    private static async Task ExpectFailureAsync(Func<Task> action)
+    {
+        try
+        {
+            await action();
+        }
+        catch
+        {
+            return;
+        }
+
+        throw new InvalidOperationException("The operation was expected to fail.");
+    }
+
+    [Test]
     public async Task PlaylistModification_WithCurrentPlaylist_DelegatesEveryMutation()
     {
         var first = new TestSong { Name = "First", ActualId = "1" };

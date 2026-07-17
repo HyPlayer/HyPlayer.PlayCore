@@ -36,6 +36,7 @@ public sealed partial class Chopin
             return CurrentPlayingTicket;
 
         await DisposeCurrentPlayingTicketAsync(false, ctk).ConfigureAwait(false);
+        ctk.ThrowIfCancellationRequested();
 
         var resource = await ResolveMusicResourceAsync(requestedSong, ctk).ConfigureAwait(false);
         if (resource is null)
@@ -48,9 +49,12 @@ public sealed partial class Chopin
             return null;
 
         var ticket = await audioService.GetAudioTicketAsync(resource, ctk).ConfigureAwait(false);
-        if (!ReferenceEquals(CurrentSong, requestedSong) || !ReferenceEquals(CurrentAudioService, audioService))
+        if (ctk.IsCancellationRequested
+            || !ReferenceEquals(CurrentSong, requestedSong)
+            || !ReferenceEquals(CurrentAudioService, audioService))
         {
-            await audioService.DisposeAudioTicketAsync(ticket, ctk).ConfigureAwait(false);
+            await audioService.DisposeAudioTicketAsync(ticket, CancellationToken.None).ConfigureAwait(false);
+            ctk.ThrowIfCancellationRequested();
             return null;
         }
 
@@ -69,25 +73,34 @@ public sealed partial class Chopin
 
     private async Task DisposeCurrentPlayingTicketAsync(bool stopTicket, CancellationToken ctk)
     {
+        ctk.ThrowIfCancellationRequested();
         if (CurrentPlayingTicket is not { } ticket)
             return;
 
-        try
-        {
-            var audioService = FindAudioServiceForTicket(ticket);
-            if (audioService is null)
-                return;
+        var audioService = FindAudioServiceForTicket(ticket)
+            ?? throw new InvalidOperationException($"The audio service for ticket '{ticket.AudioServiceId}' is unavailable.");
 
-            if (stopTicket && audioService is IStopAudioTicketService stopService)
-                await stopService.StopTicketAsync(ticket, ctk).ConfigureAwait(false);
-
-            await audioService.DisposeAudioTicketAsync(ticket, ctk).ConfigureAwait(false);
-        }
-        finally
+        Exception? stopException = null;
+        if (stopTicket && audioService is IStopAudioTicketService stopService)
         {
-            if (ReferenceEquals(CurrentPlayingTicket, ticket))
-                ClearCurrentPlayingTicket();
+            try
+            {
+                await stopService.StopTicketAsync(ticket, CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                stopException = ex;
+            }
         }
+
+        await audioService.DisposeAudioTicketAsync(ticket, CancellationToken.None).ConfigureAwait(false);
+        if (ReferenceEquals(CurrentPlayingTicket, ticket))
+            ClearCurrentPlayingTicket();
+
+        if (stopException is not null)
+            throw stopException;
+
+        ctk.ThrowIfCancellationRequested();
     }
 
     private async Task<MusicResourceBase?> ResolveMusicResourceAsync(SingleSongBase song, CancellationToken ctk)
@@ -134,6 +147,11 @@ public sealed partial class Chopin
         var ticket = await preparedAudioService
             .GetPreparedAudioTicketAsync(resource, ctk)
             .ConfigureAwait(false);
+        if (ctk.IsCancellationRequested)
+        {
+            await audioService.DisposeAudioTicketAsync(ticket, CancellationToken.None).ConfigureAwait(false);
+            ctk.ThrowIfCancellationRequested();
+        }
         return new ChopinPreparedPlaybackTicket(this, song, audioService, ticket);
     }
 
@@ -167,13 +185,11 @@ public sealed partial class Chopin
             throw;
         }
 
-        return new PreparedPlaybackPromotion
-        {
-            Incoming = incoming,
-            Outgoing = oldTicket is null || oldSong is null
+        return new PreparedPlaybackPromotion(
+            incoming,
+            oldTicket is null || oldSong is null
                 ? null
-                : new ChopinPreparedPlaybackTicket(this, oldSong, FindAudioServiceForTicket(oldTicket), oldTicket)
-        };
+                : new ChopinPreparedPlaybackTicket(this, oldSong, FindAudioServiceForTicket(oldTicket), oldTicket));
     }
 
     private static bool SameSong(SingleSongBase? left, SingleSongBase? right)
@@ -199,12 +215,15 @@ public sealed partial class Chopin
 
         try
         {
-            if (lease.AudioService is { } audioService)
-                await audioService.DisposeAudioTicketAsync(lease.Ticket).ConfigureAwait(false);
-        }
-        finally
-        {
+            var audioService = lease.AudioService
+                ?? throw new InvalidOperationException($"The audio service for ticket '{lease.Ticket.AudioServiceId}' is unavailable.");
+            await audioService.DisposeAudioTicketAsync(lease.Ticket, CancellationToken.None).ConfigureAwait(false);
             lease.CompleteRelease();
+        }
+        catch
+        {
+            lease.CancelRelease();
+            throw;
         }
     }
 
@@ -315,6 +334,7 @@ public sealed partial class Chopin
 
     public override async Task StopAsync(CancellationToken ctk = new())
     {
+        ctk.ThrowIfCancellationRequested();
         await DisposeCurrentPlayingTicketAsync(true, ctk).ConfigureAwait(false);
     }
 }
