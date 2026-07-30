@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
@@ -11,6 +11,8 @@
         <Description>PlayCore of HyPlayer</Description>
         <AssemblyVersion>$(PlayCoreVersion)</AssemblyVersion>
         <FileVersion>$(PlayCoreVersion)</FileVersion>
+		<Platforms>ARM64;x64</Platforms>
+		<Configurations>Debug;Release</Configurations>
     </PropertyGroup>
 
     <ItemGroup>
@@ -18,7 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="AsyncAwaitBestPractices" Version="9.0.0" />
+        <PackageReference Include="AsyncAwaitBestPractices" Version="10.0.0" />
         <PackageReference Include="Depository.Abstraction" Version="4.0.1" />
     </ItemGroup>
 
