@@ -2,7 +2,6 @@
 using Depository.Abstraction.Interfaces;
 using HyPlayer.PlayCore.Abstraction;
 using HyPlayer.PlayCore.Abstraction.Models.SingleItems;
-using System.Collections.ObjectModel;
 
 namespace HyPlayer.PlayCore;
 
@@ -16,15 +15,9 @@ public sealed partial class Chopin : PlayCoreBase
     {
         SafeFireAndForgetExtensions.Initialize(false);
         _depository = depository;
-        AudioServices =
-            new(
-                new ObservableCollection<AudioServiceBase>(audioServices.ToList()));
-        MusicProviders =
-            new(
-                new ObservableCollection<ProviderBase>(providers.ToList()));
-        PlayListControllers =
-            new(
-                new ObservableCollection<PlayControllerBase>(playListControllers.ToList()));
+        AudioServices = new List<AudioServiceBase>(audioServices);
+        MusicProviders = new List<ProviderBase>(providers);
+        PlayListControllers = new List<PlayControllerBase>(playListControllers);
 
         CurrentAudioService = AudioServices.FirstOrDefault();
         CurrentPlayListController = PlayListControllers.FirstOrDefault();
