@@ -2,6 +2,7 @@
 using Depository.Abstraction.Interfaces;
 using Depository.Abstraction.Models;
 using HyPlayer.PlayCore.Abstraction;
+using System.Diagnostics.CodeAnalysis;
 
 namespace HyPlayer.PlayCore;
 
@@ -161,7 +162,11 @@ public sealed partial class Chopin :
         CurrentPlayList = ResolveOptional<PlayListManagerBase>(typeof(PlayListManagerBase));
     }
 
-    private T? ResolveOptional<T>(Type serviceType) where T : class
+    private T? ResolveOptional<T>(
+        [DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicConstructors |
+            DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+        Type serviceType) where T : class
     {
         try
         {
