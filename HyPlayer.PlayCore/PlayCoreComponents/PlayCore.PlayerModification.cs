@@ -1,5 +1,6 @@
 ﻿using Depository.Abstraction.Interfaces;
 using HyPlayer.PlayCore.Abstraction.Interfaces.AudioServices;
+using HyPlayer.PlayCore.Abstraction.Interfaces.Playback;
 using HyPlayer.PlayCore.Abstraction.Interfaces.Provider;
 using HyPlayer.PlayCore.Abstraction;
 using HyPlayer.PlayCore.Abstraction.Models.AudioServiceComponents;
@@ -112,7 +113,12 @@ public sealed partial class Chopin
         if (provider is null)
             return null;
 
-        return await provider.GetMusicResourceAsync(song, null, ctk).ConfigureAwait(false);
+        var qualityTag = ResolveOptional<IPlaybackQualitySelector>(typeof(IPlaybackQualitySelector))
+            ?.GetPlaybackQualityTag(song);
+        if (ResolveOptional<IPlaybackResourceResolver>(typeof(IPlaybackResourceResolver)) is { } resolver)
+            return await resolver.ResolvePlaybackResourceAsync(song, provider, qualityTag, ctk).ConfigureAwait(false);
+
+        return await provider.GetMusicResourceAsync(song, qualityTag, ctk).ConfigureAwait(false);
     }
 
     private Task PublishPlaybackFailureAsync(SingleSongBase? song, string reason, Exception? exception, CancellationToken ctk)
