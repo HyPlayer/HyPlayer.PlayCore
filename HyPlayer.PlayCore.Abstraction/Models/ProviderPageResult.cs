@@ -21,6 +21,8 @@ public sealed class ProviderPageResult<TItem>
     /// </summary>
     public int? NextOffset { get; set; }
 
+    public string? NextPageToken { get; set; }
+
     /// <summary>
     /// Gets or sets the total item count when the provider exposes one.
     /// </summary>
