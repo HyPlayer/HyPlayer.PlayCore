@@ -4,6 +4,9 @@ public sealed class ProviderListenTogetherStatus
 {
     public bool IsInRoom { get; init; }
     public string? RoomId { get; init; }
+
+    public string? CreatorId { get; init; }
+    public bool IsMultiRoom { get; init; }
     public List<ProviderListenTogetherUser> Users { get; init; } = [];
 }
 
