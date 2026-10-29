@@ -5,6 +5,8 @@ namespace HyPlayer.PlayCore.Abstraction.Models;
 public sealed class ProviderListenTogetherQueueReport
 {
     public required List<SingleSongBase> Queue { get; init; }
+
+    public List<SingleSongBase>? RandomQueue { get; init; }
     public string? UserId { get; init; }
     public string PlayModeId { get; init; } = "seq";
     public int ClientSeq { get; init; }
