@@ -12,7 +12,7 @@ public class OrderedRollPlayController : PlayControllerBase,
                                          INavigateSongPlayListController,
                                          IIndexedPlayListController,
                                          IPlayListGettablePlaylistController,
-                                         IRandomizablePlayListController,
+                                         IOrderedRandomPlayListController,
                                          INotifyDependencyChanged<PlayListManagerBase>,
                                          INotificationSubscriber<InnerPlayListChangedNotification>
 {
@@ -24,6 +24,7 @@ public class OrderedRollPlayController : PlayControllerBase,
     private List<SingleSongBase> _originalList = new();
     private bool _isRandom;
     private int _randomSeed = -1;
+    private List<string>? _randomOrderKeys;
 
     public OrderedRollPlayController(IDepository depository, PlayListManagerBase? playListManager, INotificationHub notificationHub)
     {
@@ -74,6 +75,7 @@ public class OrderedRollPlayController : PlayControllerBase,
         _list.Reverse();
         _isRandom = false;
         _randomSeed = -1;
+        _randomOrderKeys = null;
         _index = currentSong is null ? -1 : _list.IndexOf(currentSong);
         await PublishOrderedPlaylistChangedAsync(ctk).ConfigureAwait(false);
     }
@@ -112,6 +114,16 @@ public class OrderedRollPlayController : PlayControllerBase,
         var currentSong = GetCurrentSong();
         _isRandom = seed != -1;
         _randomSeed = seed;
+        _randomOrderKeys = null;
+        RebuildOrderedList(currentSong);
+        await PublishOrderedPlaylistChangedAsync(ctk).ConfigureAwait(false);
+    }
+
+    public async Task ApplyRandomOrderAsync(IReadOnlyList<SingleSongBase> order, CancellationToken ctk = new())
+    {
+        var currentSong = GetCurrentSong();
+        _isRandom = true;
+        _randomOrderKeys = order.Select(SongKey).ToList();
         RebuildOrderedList(currentSong);
         await PublishOrderedPlaylistChangedAsync(ctk).ConfigureAwait(false);
     }
@@ -147,9 +159,11 @@ public class OrderedRollPlayController : PlayControllerBase,
 
     private void RebuildOrderedList(SingleSongBase? currentSong)
     {
-        _list = _isRandom
-            ? ShuffleOriginalList(_randomSeed)
-            : _originalList.ToList();
+        _list = !_isRandom
+            ? _originalList.ToList()
+            : _randomOrderKeys is { } keys
+                ? ArrangeOriginalList(keys)
+                : ShuffleOriginalList(_randomSeed);
 
         if (_list.Count == 0)
         {
@@ -174,6 +188,27 @@ public class OrderedRollPlayController : PlayControllerBase,
         }
 
         return -1;
+    }
+
+    private List<SingleSongBase> ArrangeOriginalList(IReadOnlyList<string> keys)
+    {
+        var remaining = _originalList.ToList();
+        var arranged = new List<SingleSongBase>(remaining.Count);
+        foreach (var key in keys)
+        {
+            var index = remaining.FindIndex(song => SongKey(song) == key);
+            if (index < 0) continue;
+            arranged.Add(remaining[index]);
+            remaining.RemoveAt(index);
+        }
+
+        arranged.AddRange(remaining);
+        return arranged;
+    }
+
+    private static string SongKey(SingleSongBase song)
+    {
+        return $"{song.ProviderId}|{song.TypeId}|{song.ActualId}";
     }
 
     private List<SingleSongBase> ShuffleOriginalList(int seed)
