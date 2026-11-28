@@ -41,6 +41,12 @@ public abstract class PlayCoreBase : IPlayCoreService,
     public abstract Task RemoveAllSongAsync(CancellationToken ctk = new());
     public abstract Task SetRandomAsync(bool isRandom, CancellationToken ctk = new());
     public abstract Task ReRandomAsync(CancellationToken ctk = new());
+
+    public virtual Task ApplyRandomOrderAsync(IReadOnlyList<SingleSongBase> order, CancellationToken ctk = new())
+    {
+        return Task.CompletedTask;
+    }
+
     public abstract Task SetPlayModeAsync(string playModeId, CancellationToken ctk = new());
     public abstract Task<List<SingleSongBase>> GetPlaylistAsync(CancellationToken ctk = new());
     public abstract Task<List<SingleSongBase>> GetOrderedPlaylistAsync(CancellationToken ctk = new());

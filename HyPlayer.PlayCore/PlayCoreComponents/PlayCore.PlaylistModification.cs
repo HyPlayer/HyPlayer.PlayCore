@@ -60,6 +60,14 @@ public sealed partial class Chopin
             await randomizablePlayListController.RandomizeAsync(DateTime.Now.Millisecond, ctk).ConfigureAwait(false);
     }
 
+    public override async Task ApplyRandomOrderAsync(IReadOnlyList<SingleSongBase> order, CancellationToken ctk = new())
+    {
+        if (CurrentPlayListController is not IOrderedRandomPlayListController ordered) return;
+        IsRandom = true;
+        ActivePlayModeId = "shn";
+        await ordered.ApplyRandomOrderAsync(order, ctk).ConfigureAwait(false);
+    }
+
     public override async Task SetPlayModeAsync(string playModeId, CancellationToken ctk = new())
     {
         if (playModeId is not ("seq" or "sgl" or "shn" or "pfm" or "ltg"))
