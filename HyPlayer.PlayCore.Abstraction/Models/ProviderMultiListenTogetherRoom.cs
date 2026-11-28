@@ -19,6 +19,8 @@ public sealed class ProviderMultiListenTogetherPlayback
     public TimeSpan Duration { get; init; }
     public long Version { get; init; }
     public List<string> NextItemIds { get; init; } = [];
+    /// <summary>The next recommendation occurrence, including when it repeats the current song.</summary>
+    public string? NextEntryId { get; init; }
 }
 
 public sealed class ProviderMultiListenTogetherHeartbeat
